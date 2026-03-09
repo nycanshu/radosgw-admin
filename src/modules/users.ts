@@ -1,5 +1,6 @@
 import type { BaseClient } from '../client.js';
 import { RGWValidationError } from '../errors.js';
+import { validateUid, validateUidNoColon } from '../validators.js';
 import type {
   CreateUserInput,
   ModifyUserInput,
@@ -8,17 +9,6 @@ import type {
   RGWUser,
   RGWUserStats,
 } from '../types/user.types.js';
-
-/**
- * Validates that a uid is a non-empty string with no leading/trailing whitespace.
- */
-function validateUid(uid: string): void {
-  if (!uid || typeof uid !== 'string' || uid.trim() !== uid || uid.trim().length === 0) {
-    throw new RGWValidationError(
-      'uid is required and must be a non-empty string without leading/trailing whitespace',
-    );
-  }
-}
 
 /**
  * User management module — create, get, modify, delete, list, suspend, enable, and get stats.
@@ -54,7 +44,7 @@ export class UsersModule {
    * ```
    */
   async create(input: CreateUserInput): Promise<RGWUser> {
-    validateUid(input.uid);
+    validateUidNoColon(input.uid);
     if (
       !input.displayName ||
       typeof input.displayName !== 'string' ||

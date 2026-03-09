@@ -94,6 +94,18 @@ describe('UsersModule', () => {
       );
     });
 
+    it('throws RGWValidationError when uid contains a colon', async () => {
+      await expect(users.create({ uid: 'alice:subuser', displayName: 'Test' })).rejects.toThrow(
+        RGWValidationError,
+      );
+    });
+
+    it('throws RGWValidationError when uid contains a colon (message)', async () => {
+      await expect(users.create({ uid: 'alice:swift', displayName: 'Test' })).rejects.toThrow(
+        /colon/,
+      );
+    });
+
     it('throws RGWValidationError when displayName is empty', async () => {
       await expect(users.create({ uid: 'alice', displayName: '' })).rejects.toThrow(
         RGWValidationError,

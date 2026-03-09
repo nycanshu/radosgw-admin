@@ -1,5 +1,7 @@
 import { BaseClient } from './client.js';
 import { UsersModule } from './modules/users.js';
+import { KeysModule } from './modules/keys.js';
+import { SubusersModule } from './modules/subusers.js';
 import type { ClientConfig } from './types/common.types.js';
 
 /**
@@ -29,9 +31,17 @@ export class RadosGWAdminClient {
   /** User management operations. */
   readonly users: UsersModule;
 
+  /** S3/Swift key management operations. */
+  readonly keys: KeysModule;
+
+  /** Subuser management operations. */
+  readonly subusers: SubusersModule;
+
   constructor(config: ClientConfig) {
     this._client = new BaseClient(config);
     this.users = new UsersModule(this._client);
+    this.keys = new KeysModule(this._client);
+    this.subusers = new SubusersModule(this._client);
   }
 }
 
@@ -50,6 +60,13 @@ export type {
   RGWCap,
   RGWQuota,
 } from './types/user.types.js';
+export type {
+  CreateKeyInput,
+  DeleteKeyInput,
+  CreateSubuserInput,
+  ModifySubuserInput,
+  DeleteSubuserInput,
+} from './types/key.types.js';
 
 // Re-export errors
 export {
