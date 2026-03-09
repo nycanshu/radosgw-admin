@@ -1,0 +1,61 @@
+name: Feature Request
+description: Suggest a new feature or API improvement
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Feature requests help shape the roadmap. Please describe the use case — not just the solution.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What are you trying to do that the current API doesn't support?
+      placeholder: "I need to rotate S3 keys for a user without downtime, but the current API only supports create/delete..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed API Design
+      description: How should this look from a consumer's perspective?
+      render: typescript
+      placeholder: |
+        // Example of the API you'd like to see
+        const newKey = await client.keys.rotate({
+          uid: 'alice',
+          gracePeriod: 3600,
+        });
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Other approaches you've thought about or workarounds you're currently using.
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Which module does this affect?
+      options:
+        - Users
+        - Keys / Subusers
+        - Buckets
+        - Quotas / Rate Limits
+        - Usage / Analytics
+        - Client / Core
+        - New module
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I'm willing to submit a PR for this feature

@@ -1,0 +1,98 @@
+name: Bug Report
+description: Something isn't working as expected
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this. Please fill out the sections below so we can reproduce and fix the issue.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear, concise description of the bug.
+      placeholder: "When I call client.users.get('alice'), it throws an unexpected RGWError instead of RGWNotFoundError..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal Reproduction
+      description: Code that reliably reproduces the issue.
+      render: typescript
+      placeholder: |
+        import { RadosGWAdminClient } from 'radosgw-admin';
+
+        const client = new RadosGWAdminClient({
+          host: 'http://localhost:8080',
+          accessKey: '...',
+          secretKey: '...',
+        });
+
+        // This should throw RGWNotFoundError but throws RGWError
+        await client.users.get('nonexistent');
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened. Include full error output if applicable.
+      render: shell
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: radosgw-admin version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: node-version
+    attributes:
+      label: Node.js version
+      placeholder: "20.11.0"
+    validations:
+      required: true
+
+  - type: input
+    id: ceph-version
+    attributes:
+      label: Ceph / RGW version
+      placeholder: "18.2.0 (Reef)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      options:
+        - Linux
+        - macOS
+        - Windows (WSL)
+        - Container / Kubernetes
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Anything else — logs, screenshots, RGW config, related issues.
