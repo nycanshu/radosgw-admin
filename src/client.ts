@@ -28,14 +28,15 @@ function validateConfig(config: ClientConfig): void {
 }
 
 /**
- * Transforms snake_case or kebab-case keys to camelCase recursively.
+ * Transforms snake_case, kebab-case, or dot-separated keys to camelCase recursively.
+ * e.g. "display-name" → "displayName", "rgw.main" → "rgwMain"
  */
 export function toCamelCase(obj: unknown): unknown {
   if (Array.isArray(obj)) return obj.map(toCamelCase);
   if (obj !== null && typeof obj === 'object') {
     return Object.fromEntries(
       Object.entries(obj as Record<string, unknown>).map(([k, v]) => [
-        k.replace(/[-_]([a-z])/g, (_, c: string) => c.toUpperCase()),
+        k.replace(/[-_.]([a-z])/g, (_, c: string) => c.toUpperCase()),
         toCamelCase(v),
       ]),
     );

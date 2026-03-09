@@ -38,6 +38,21 @@ describe('toCamelCase', () => {
     const input = { 'display-name': 'Alice', 'max-buckets': 100 };
     expect(toCamelCase(input)).toEqual({ displayName: 'Alice', maxBuckets: 100 });
   });
+
+  it('converts dot-separated keys to camelCase', () => {
+    const input = {
+      usage: {
+        'rgw.main': { size: 1024, num_objects: 5 },
+        'rgw.multimeta': { size: 0, num_objects: 0 },
+      },
+    };
+    expect(toCamelCase(input)).toEqual({
+      usage: {
+        rgwMain: { size: 1024, numObjects: 5 },
+        rgwMultimeta: { size: 0, numObjects: 0 },
+      },
+    });
+  });
 });
 
 describe('RadosGWAdminClient constructor', () => {
