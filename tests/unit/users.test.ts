@@ -249,12 +249,8 @@ describe('UsersModule', () => {
 
       await users.delete({ uid: 'alice', purgeData: true });
 
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('purgeData=true'),
-      );
-      expect(warnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('"alice"'),
-      );
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('purgeData=true'));
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('"alice"'));
       warnSpy.mockRestore();
     });
 
