@@ -85,9 +85,7 @@ export function signRequest(request: SignRequest, date?: Date): SignedHeaders {
 
   // Build canonical headers (sorted, lowercase)
   const sortedHeaderKeys = Object.keys(headers).sort((a, b) => a.localeCompare(b));
-  const canonicalHeaders = sortedHeaderKeys
-    .map((k) => `${k}:${headers[k]!.trim()}`)
-    .join('\n');
+  const canonicalHeaders = sortedHeaderKeys.map((k) => `${k}:${headers[k]!.trim()}`).join('\n');
   const signedHeaders = sortedHeaderKeys.join(';');
 
   // Build canonical request

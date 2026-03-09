@@ -14,7 +14,9 @@ import type {
  */
 function validateUid(uid: string): void {
   if (!uid || typeof uid !== 'string' || uid.trim() !== uid || uid.trim().length === 0) {
-    throw new RGWValidationError('uid is required and must be a non-empty string without leading/trailing whitespace');
+    throw new RGWValidationError(
+      'uid is required and must be a non-empty string without leading/trailing whitespace',
+    );
   }
 }
 
@@ -53,7 +55,11 @@ export class UsersModule {
    */
   async create(input: CreateUserInput): Promise<RGWUser> {
     validateUid(input.uid);
-    if (!input.displayName || typeof input.displayName !== 'string' || input.displayName.trim().length === 0) {
+    if (
+      !input.displayName ||
+      typeof input.displayName !== 'string' ||
+      input.displayName.trim().length === 0
+    ) {
       throw new RGWValidationError('displayName is required and must be a non-empty string');
     }
 
