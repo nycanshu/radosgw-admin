@@ -83,6 +83,10 @@ export class BaseClient {
   private readonly adminPath: string;
   private readonly timeout: number;
   private readonly region: string;
+  private readonly debug: boolean;
+  private readonly maxRetries: number;
+  private readonly retryDelay: number;
+  private readonly insecure: boolean;
 
   constructor(config: ClientConfig) {
     validateConfig(config);
@@ -98,23 +102,98 @@ export class BaseClient {
     this.adminPath = config.adminPath ?? DEFAULT_ADMIN_PATH;
     this.timeout = config.timeout ?? DEFAULT_TIMEOUT;
     this.region = config.region ?? DEFAULT_REGION;
+    this.debug = config.debug ?? false;
+    this.maxRetries = config.maxRetries ?? 0;
+    this.retryDelay = config.retryDelay ?? 200;
+    this.insecure = config.insecure ?? false;
+
+    if (this.insecure) {
+      this.log('WARNING: TLS certificate verification is disabled');
+    }
   }
 
   /**
-   * Makes a signed HTTP request to the RGW Admin API.
+   * Logs a debug message with optional structured data.
+   */
+  private log(message: string, data?: Record<string, unknown>): void {
+    if (!this.debug) return;
+    const prefix = '[radosgw-admin]';
+    if (data) {
+      console.debug(prefix, message, JSON.stringify(data, null, 2));
+    } else {
+      console.debug(prefix, message);
+    }
+  }
+
+  /**
+   * Determines whether an error is retryable (5xx, timeouts, network errors).
+   */
+  private isRetryable(error: unknown): boolean {
+    if (error instanceof RGWError && error.statusCode !== undefined) {
+      return error.statusCode >= 500;
+    }
+    if (error instanceof Error) {
+      return (
+        error.name === 'AbortError' ||
+        error.message.includes('ECONNRESET') ||
+        error.message.includes('ECONNREFUSED') ||
+        error.message.includes('ETIMEDOUT')
+      );
+    }
+    return false;
+  }
+
+  /**
+   * Returns a promise that resolves after the given number of milliseconds.
+   */
+  private async delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Makes a signed HTTP request to the RGW Admin API with retry support.
    *
    * @param options - Request method, path, query params, and optional body
    * @returns Parsed and camelCase-transformed JSON response, or void for empty responses
    */
   async request<T>(options: RequestOptions): Promise<T> {
-    const { method, path, query, body } = options;
+    let lastError: Error | undefined;
 
-    // Build URL
+    for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
+      if (attempt > 0) {
+        const backoff = this.retryDelay * Math.pow(2, attempt - 1);
+        this.log(`retry ${attempt}/${this.maxRetries} after ${backoff}ms`);
+        await this.delay(backoff);
+      }
+
+      try {
+        return await this.executeRequest<T>(options);
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        this.log('error', { error: lastError.message });
+
+        if (attempt < this.maxRetries && this.isRetryable(error)) {
+          this.log('retryable error', { error: lastError.message, attempt });
+          continue;
+        }
+        throw error;
+      }
+    }
+
+    throw lastError ?? new RGWError('Request failed after retries', undefined, 'RetryExhausted');
+  }
+
+  /**
+   * Builds the full request URL with query parameters.
+   */
+  private buildUrl(
+    path: string,
+    query?: Record<string, string | number | boolean | undefined>,
+  ): URL {
     const baseUrl = this.port ? `${this.host}:${this.port}` : this.host;
     const fullPath = `${this.adminPath}${path}`;
     const url = new URL(fullPath, baseUrl);
 
-    // Add query parameters (convert camelCase to kebab-case)
     if (query) {
       for (const [key, value] of Object.entries(query)) {
         if (value !== undefined) {
@@ -123,10 +202,65 @@ export class BaseClient {
       }
     }
 
-    // Always request JSON
     url.searchParams.set('format', 'json');
+    return url;
+  }
 
-    // Sign the request
+  /**
+   * Temporarily disables TLS certificate verification for insecure mode.
+   * Returns the previous value so it can be restored.
+   */
+  private disableTlsVerification(): string | undefined {
+    const prev = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+    return prev;
+  }
+
+  /**
+   * Restores the TLS verification setting to its previous value.
+   */
+  private restoreTlsVerification(prev: string | undefined): void {
+    if (prev === undefined) {
+      delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+    } else {
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = prev;
+    }
+  }
+
+  /**
+   * Parses an error response body to extract the RGW error code.
+   */
+  private parseErrorCode(text: string): string | undefined {
+    try {
+      const errorBody = JSON.parse(text) as Record<string, unknown>;
+      return (errorBody.Code as string) ?? undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  /**
+   * Wraps a non-RGW error into the appropriate RGW error type.
+   */
+  private wrapFetchError(error: unknown): RGWError {
+    if (error instanceof RGWError) return error;
+    if (error instanceof Error && error.name === 'AbortError') {
+      return new RGWError(`Request timed out after ${this.timeout}ms`, undefined, 'Timeout');
+    }
+    return new RGWError(
+      error instanceof Error ? error.message : 'Unknown error occurred',
+      undefined,
+      'NetworkError',
+    );
+  }
+
+  /**
+   * Executes a single signed HTTP request to the RGW Admin API.
+   */
+  private async executeRequest<T>(options: RequestOptions): Promise<T> {
+    const { method, path, query, body } = options;
+    const url = this.buildUrl(path, query);
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
@@ -140,9 +274,9 @@ export class BaseClient {
       region: this.region,
     });
 
-    // Execute request
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+    const prevTls = this.insecure ? this.disableTlsVerification() : undefined;
 
     try {
       const fetchOptions: RequestInit = {
@@ -153,21 +287,16 @@ export class BaseClient {
       if (body) {
         fetchOptions.body = JSON.stringify(body);
       }
-      const response = await fetch(url.toString(), fetchOptions);
 
-      // Handle empty responses (DELETE, PUT that return no body)
+      this.log('request', { method, url: url.toString() });
+      const response = await fetch(url.toString(), fetchOptions);
       const text = await response.text();
 
       if (!response.ok) {
-        let errorCode: string | undefined;
-        try {
-          const errorBody = JSON.parse(text) as Record<string, unknown>;
-          errorCode = (errorBody.Code as string) ?? undefined;
-        } catch {
-          // Response is not JSON
-        }
-        throw mapHttpError(response.status, text, errorCode);
+        throw mapHttpError(response.status, text, this.parseErrorCode(text));
       }
+
+      this.log('response', { status: response.status, body: text.slice(0, 500) });
 
       if (!text) {
         return undefined as T;
@@ -176,17 +305,12 @@ export class BaseClient {
       const parsed: unknown = JSON.parse(text);
       return toCamelCase(parsed) as T;
     } catch (error) {
-      if (error instanceof RGWError) throw error;
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new RGWError(`Request timed out after ${this.timeout}ms`, undefined, 'Timeout');
-      }
-      throw new RGWError(
-        error instanceof Error ? error.message : 'Unknown error occurred',
-        undefined,
-        'NetworkError',
-      );
+      throw this.wrapFetchError(error);
     } finally {
       clearTimeout(timeoutId);
+      if (this.insecure) {
+        this.restoreTlsVerification(prevTls);
+      }
     }
   }
 }

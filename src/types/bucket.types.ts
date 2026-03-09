@@ -27,6 +27,7 @@ export interface RGWBucket {
   usage: {
     rgwMain: RGWBucketUsage;
     rgwMultimeta?: RGWBucketUsage;
+    [storageClass: string]: RGWBucketUsage | undefined;
   };
   bucketQuota: RGWQuota;
 }

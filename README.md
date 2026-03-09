@@ -14,7 +14,7 @@
 The only existing npm package for RGW Admin Ops (`rgw-admin-client`) was last published **7 years ago** — no TypeScript, no ESM, no maintenance. Meanwhile, Ceph adoption in Kubernetes (Rook-Ceph, OpenShift Data Foundation) keeps growing. This package fills that gap.
 
 **What you get:**
-- Full [RGW Admin Ops API](https://docs.ceph.com/en/latest/radosgw/adminops/) coverage — users, keys, subusers, buckets, quotas, rate limits, usage
+- [RGW Admin Ops API](https://docs.ceph.com/en/latest/radosgw/adminops/) coverage — users, keys, subusers, buckets
 - Strict TypeScript with zero `any` — every request and response is fully typed
 - Zero runtime dependencies — AWS SigV4 signing uses only `node:crypto`
 - Dual ESM + CJS build — works in every Node.js environment
@@ -74,6 +74,10 @@ const rgw = new RadosGWAdminClient({
   adminPath: '/admin',                     // Optional — API prefix (default: "/admin")
   timeout: 15000,                          // Optional — request timeout in ms (default: 10000)
   region: 'us-east-1',                     // Optional — SigV4 region (default: "us-east-1")
+  insecure: false,                         // Optional — skip TLS verification (default: false)
+  debug: false,                            // Optional — enable request/response logging (default: false)
+  maxRetries: 3,                           // Optional — retry transient errors (default: 0)
+  retryDelay: 200,                         // Optional — base delay for exponential backoff in ms (default: 200)
 });
 ```
 
@@ -99,32 +103,23 @@ rgw.keys.create(input)        // Generate or assign S3/Swift keys
 rgw.keys.delete(input)        // Remove a key pair
 ```
 
+### Subusers
+
+```typescript
+rgw.subusers.create(input)    // Create a subuser for an existing user
+rgw.subusers.modify(input)    // Modify subuser permissions
+rgw.subusers.delete(input)    // Delete a subuser
+```
+
 ### Buckets
 
 ```typescript
 rgw.buckets.list()            // List all buckets (optionally filter by user)
-rgw.buckets.get(bucket)       // Get bucket metadata and stats
+rgw.buckets.getInfo(bucket)   // Get bucket metadata and stats
 rgw.buckets.delete(input)     // Delete a bucket (optionally purge objects)
 rgw.buckets.link(input)       // Link a bucket to a different user
 rgw.buckets.unlink(input)     // Unlink a bucket from its owner
-rgw.buckets.check(input)      // Check and optionally repair bucket index
-rgw.buckets.getPolicy(input)  // Get bucket access policy
-```
-
-### Quotas
-
-```typescript
-rgw.quotas.getUserQuota(uid)       // Get user-level quota
-rgw.quotas.setUserQuota(input)     // Set user-level quota
-rgw.quotas.getBucketQuota(uid)     // Get bucket-level quota
-rgw.quotas.setBucketQuota(input)   // Set bucket-level quota
-```
-
-### Usage
-
-```typescript
-rgw.usage.get(input)          // Retrieve usage data for a time range
-rgw.usage.trim(input)         // Trim (delete) usage log entries
+rgw.buckets.checkIndex(input) // Check and optionally repair bucket index
 ```
 
 ## Error Handling
@@ -152,6 +147,15 @@ try {
 | `RGWConflictError` | 409 | Resource already exists |
 | `RGWAuthError` | 403 | Insufficient credentials or capabilities |
 | `RGWError` | 5xx | Server-side failure |
+
+## Compatibility
+
+Tested against Ceph **Quincy (v17)** and **Reef (v18)**. The Admin Ops API is available in all Ceph releases with RGW.
+
+**Prerequisites:**
+- The RGW admin user must have `users=*`, `buckets=*` capabilities
+- Admin Ops API must be accessible (default path: `/admin`)
+- For `insecure: true` — only use with self-signed certificates in dev/test environments
 
 ## Development
 

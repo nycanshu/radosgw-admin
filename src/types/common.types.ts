@@ -16,6 +16,12 @@ export interface ClientConfig {
   timeout?: number;
   /** Skip TLS certificate verification. Default: false */
   insecure?: boolean;
+  /** Enable debug logging of requests and responses. Default: false */
+  debug?: boolean;
+  /** Maximum number of retries for transient errors (5xx, timeouts, network errors). Default: 0 (no retries) */
+  maxRetries?: number;
+  /** Base delay in ms for exponential backoff between retries. Default: 200 */
+  retryDelay?: number;
   /** AWS region for SigV4 signing. Default: "us-east-1" */
   region?: string;
 }
