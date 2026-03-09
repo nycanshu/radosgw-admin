@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security Vulnerability
+    url: https://github.com/nycanshu/radosgw-admin/security/policy
+    about: Do not open public issues for security vulnerabilities. Follow the security policy instead.
+  - name: Ceph / RGW Documentation
+    url: https://docs.ceph.com/en/latest/radosgw/adminops/
+    about: For questions about the RGW Admin Ops API itself (not this client library).
