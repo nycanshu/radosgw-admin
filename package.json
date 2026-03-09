@@ -49,9 +49,23 @@
     "admin",
     "ceph-admin",
     "rgw-admin",
-    "rook-ceph"
+    "rook-ceph",
+    "rook",
+    "openshift-data-foundation",
+    "bucket-management",
+    "user-management",
+    "quota",
+    "ceph-object-storage",
+    "aws-sigv4",
+    "storage-admin",
+    "kubernetes-storage",
+    "typescript"
   ],
-  "author": "",
+  "author": "nycanshu <hkg43700@gmail.com> (https://github.com/nycanshu)",
+  "homepage": "https://github.com/nycanshu/radosgw-admin#readme",
+  "bugs": {
+    "url": "https://github.com/nycanshu/radosgw-admin/issues"
+  },
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0"
