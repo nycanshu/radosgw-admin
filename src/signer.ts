@@ -74,20 +74,18 @@ export function signRequest(request: SignRequest, date?: Date): SignedHeaders {
   const amzDate = getAmzDate(now);
   const { method, url, accessKey, secretKey, region } = request;
 
-  const headers: Record<string, string> = {
-    ...request.headers,
-    host: url.host,
-    'x-amz-date': amzDate,
-    'x-amz-content-sha256': UNSIGNED_PAYLOAD,
-  };
+  // Normalize all header keys to lowercase for consistent lookup
+  const headers: Record<string, string> = {};
+  for (const [k, v] of Object.entries(request.headers)) {
+    headers[k.toLowerCase()] = v;
+  }
+  headers['host'] = url.host;
+  headers['x-amz-date'] = amzDate;
+  headers['x-amz-content-sha256'] = UNSIGNED_PAYLOAD;
 
   // Build canonical headers (sorted, lowercase)
-  const sortedHeaderKeys = Object.keys(headers)
-    .map((k) => k.toLowerCase())
-    .sort();
-  const canonicalHeaders = sortedHeaderKeys
-    .map((k) => `${k}:${headers[k] ?? request.headers[k] ?? ''}`)
-    .join('\n');
+  const sortedHeaderKeys = Object.keys(headers).sort((a, b) => a.localeCompare(b));
+  const canonicalHeaders = sortedHeaderKeys.map((k) => `${k}:${headers[k]!.trim()}`).join('\n');
   const signedHeaders = sortedHeaderKeys.join(';');
 
   // Build canonical request

@@ -28,14 +28,14 @@ function validateConfig(config: ClientConfig): void {
 }
 
 /**
- * Transforms snake_case keys to camelCase recursively.
+ * Transforms snake_case or kebab-case keys to camelCase recursively.
  */
 export function toCamelCase(obj: unknown): unknown {
   if (Array.isArray(obj)) return obj.map(toCamelCase);
   if (obj !== null && typeof obj === 'object') {
     return Object.fromEntries(
       Object.entries(obj as Record<string, unknown>).map(([k, v]) => [
-        k.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase()),
+        k.replace(/[-_]([a-z])/g, (_, c: string) => c.toUpperCase()),
         toCamelCase(v),
       ]),
     );
@@ -44,10 +44,11 @@ export function toCamelCase(obj: unknown): unknown {
 }
 
 /**
- * Transforms camelCase keys to snake_case for outgoing query params.
+ * Transforms camelCase keys to kebab-case for outgoing query params.
+ * RGW Admin API uses hyphenated params (e.g. display-name, max-buckets).
  */
-function toSnakeCase(key: string): string {
-  return key.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`);
+function toKebabCase(key: string): string {
+  return key.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
 }
 
 /**
@@ -112,11 +113,11 @@ export class BaseClient {
     const fullPath = `${this.adminPath}${path}`;
     const url = new URL(fullPath, baseUrl);
 
-    // Add query parameters (convert camelCase to snake_case)
+    // Add query parameters (convert camelCase to kebab-case)
     if (query) {
       for (const [key, value] of Object.entries(query)) {
         if (value !== undefined) {
-          url.searchParams.set(toSnakeCase(key), String(value));
+          url.searchParams.set(toKebabCase(key), String(value));
         }
       }
     }
