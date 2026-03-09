@@ -85,7 +85,11 @@ export class BaseClient {
   constructor(config: ClientConfig) {
     validateConfig(config);
 
-    this.host = config.host.replace(/\/+$/, '');
+    let host = config.host;
+    while (host.endsWith('/')) {
+      host = host.slice(0, -1);
+    }
+    this.host = host;
     this.port = config.port;
     this.accessKey = config.accessKey;
     this.secretKey = config.secretKey;

@@ -35,7 +35,12 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: npm
       - run: npm ci
-      - run: npm run test:coverage
+      - name: Run tests with coverage
+        if: matrix.node-version == 22
+        run: npm run test:coverage
+      - name: Run tests
+        if: matrix.node-version != 22
+        run: npm test
       - name: Upload coverage
         if: matrix.node-version == 22
         uses: codecov/codecov-action@v5
