@@ -33,6 +33,11 @@ describe('toCamelCase', () => {
     const input = { userId: 'alice' };
     expect(toCamelCase(input)).toEqual({ userId: 'alice' });
   });
+
+  it('converts kebab-case keys to camelCase', () => {
+    const input = { 'display-name': 'Alice', 'max-buckets': 100 };
+    expect(toCamelCase(input)).toEqual({ displayName: 'Alice', maxBuckets: 100 });
+  });
 });
 
 describe('RadosGWAdminClient constructor', () => {
