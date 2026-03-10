@@ -129,16 +129,32 @@ export class BaseClient {
    * Determines whether an error is retryable (5xx, timeouts, network errors).
    */
   private isRetryable(error: unknown): boolean {
-    if (error instanceof RGWError && error.statusCode !== undefined) {
-      return error.statusCode >= 500;
+    if (error instanceof RGWError) {
+      if (error.statusCode !== undefined) {
+        return error.statusCode >= 500;
+      }
+      // Network errors wrapped by wrapFetchError
+      if (error.code === 'NetworkError' || error.code === 'Timeout') {
+        return true;
+      }
     }
     if (error instanceof Error) {
-      return (
-        error.name === 'AbortError' ||
-        error.message.includes('ECONNRESET') ||
-        error.message.includes('ECONNREFUSED') ||
-        error.message.includes('ETIMEDOUT')
-      );
+      return error.name === 'AbortError' || this.hasNetworkErrorPattern(error);
+    }
+    return false;
+  }
+
+  /**
+   * Checks an error and its cause chain for network error patterns.
+   */
+  private hasNetworkErrorPattern(error: Error): boolean {
+    const patterns = ['ECONNRESET', 'ECONNREFUSED', 'ETIMEDOUT', 'fetch failed'];
+    let current: Error | undefined = error;
+    while (current) {
+      if (patterns.some((p) => current!.message.includes(p))) {
+        return true;
+      }
+      current = current.cause instanceof Error ? current.cause : undefined;
     }
     return false;
   }
