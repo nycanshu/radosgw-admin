@@ -39,7 +39,7 @@ async function run() {
 
   // 1. Create a new key (key rotation step 1)
   console.log('\n1. Creating new S3 key...');
-  const keysAfterCreate = await client.keys.create({ uid: TEST_UID });
+  const keysAfterCreate = await client.keys.generate({ uid: TEST_UID });
   console.log(`   User now has ${keysAfterCreate.length} keys`);
   const newKey = keysAfterCreate.find((k) => k.accessKey !== originalKey);
   if (!newKey) throw new Error('New key not found after creation');
@@ -47,7 +47,7 @@ async function run() {
 
   // 2. Delete the old key (key rotation step 2)
   console.log('\n2. Deleting old key (rotation)...');
-  await client.keys.delete({ accessKey: originalKey });
+  await client.keys.revoke({ accessKey: originalKey });
   console.log(`   Deleted key: ${originalKey}`);
 
   // 3. Verify only new key remains
@@ -92,7 +92,7 @@ async function run() {
 
   // 7. Delete subuser
   console.log('\n7. Deleting subuser...');
-  await client.subusers.delete({
+  await client.subusers.remove({
     uid: TEST_UID,
     subuser: `${TEST_UID}:swift`,
     purgeKeys: true,

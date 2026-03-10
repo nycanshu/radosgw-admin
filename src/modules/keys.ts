@@ -5,37 +5,37 @@ import type { RGWKey } from '../types/user.types.js';
 import type { CreateKeyInput, DeleteKeyInput } from '../types/key.types.js';
 
 /**
- * Key management module — create and delete S3/Swift access keys.
+ * Key management module — generate and revoke S3/Swift access keys.
  *
  * @example
  * ```typescript
  * // Generate a new key pair for a user
- * const keys = await client.keys.create({ uid: 'alice' });
+ * const keys = await client.keys.generate({ uid: 'alice' });
  * console.log(keys[0].accessKey, keys[0].secretKey);
  *
- * // Delete a specific key
- * await client.keys.delete({ accessKey: 'OLDKEY123' });
+ * // Revoke a specific key
+ * await client.keys.revoke({ accessKey: 'OLDKEY123' });
  * ```
  */
 export class KeysModule {
   constructor(private readonly client: BaseClient) {}
 
   /**
-   * Create a new S3 or Swift key for a user.
+   * Generate a new S3 or Swift key for a user.
    *
-   * @param input - Key creation parameters. `uid` is required.
-   * @returns Array of keys belonging to the user after creation.
+   * @param input - Key generation parameters. `uid` is required.
+   * @returns Array of keys belonging to the user after generation.
    * @throws {RGWValidationError} If `uid` is missing or invalid.
    * @throws {RGWNotFoundError} If the user does not exist.
    *
    * @example
    * ```typescript
    * // Auto-generate a new S3 key
-   * const keys = await client.keys.create({ uid: 'alice' });
+   * const keys = await client.keys.generate({ uid: 'alice' });
    * console.log('New key:', keys[0].accessKey);
    *
-   * // Create with specific credentials
-   * const keys = await client.keys.create({
+   * // Generate with specific credentials
+   * const keys = await client.keys.generate({
    *   uid: 'alice',
    *   accessKey: 'MY_ACCESS_KEY',
    *   secretKey: 'MY_SECRET_KEY',
@@ -43,7 +43,7 @@ export class KeysModule {
    * });
    * ```
    */
-  async create(input: CreateKeyInput): Promise<RGWKey[]> {
+  async generate(input: CreateKeyInput): Promise<RGWKey[]> {
     validateUid(input.uid);
 
     return this.client.request<RGWKey[]>({
@@ -61,7 +61,7 @@ export class KeysModule {
   }
 
   /**
-   * Delete an S3 or Swift key.
+   * Revoke an S3 or Swift key.
    *
    * @param input - `accessKey` is required. `uid` is required for Swift keys.
    * @throws {RGWValidationError} If `accessKey` is missing.
@@ -69,18 +69,18 @@ export class KeysModule {
    *
    * @example
    * ```typescript
-   * // Delete an S3 key by access key ID
-   * await client.keys.delete({ accessKey: 'OLDKEY123' });
+   * // Revoke an S3 key by access key ID
+   * await client.keys.revoke({ accessKey: 'OLDKEY123' });
    *
-   * // Delete a Swift key (uid required)
-   * await client.keys.delete({
+   * // Revoke a Swift key (uid required)
+   * await client.keys.revoke({
    *   accessKey: 'SWIFTKEY',
    *   uid: 'alice',
    *   keyType: 'swift',
    * });
    * ```
    */
-  async delete(input: DeleteKeyInput): Promise<void> {
+  async revoke(input: DeleteKeyInput): Promise<void> {
     if (
       !input.accessKey ||
       typeof input.accessKey !== 'string' ||

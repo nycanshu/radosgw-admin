@@ -18,7 +18,7 @@ function validateSubuser(subuser: string): void {
 }
 
 /**
- * Subuser management module — create, modify, and delete subusers with Swift keys.
+ * Subuser management module — create, modify, and remove subusers with Swift keys.
  *
  * @example
  * ```typescript
@@ -108,7 +108,7 @@ export class SubusersModule {
   }
 
   /**
-   * Delete a subuser. Optionally purge the subuser's keys.
+   * Remove a subuser from a user. Optionally purge the subuser's keys.
    *
    * @param input - `uid` and `subuser` are required. `purgeKeys` defaults to true.
    * @throws {RGWValidationError} If `uid` or `subuser` is missing or invalid.
@@ -116,21 +116,21 @@ export class SubusersModule {
    *
    * @example
    * ```typescript
-   * // Delete subuser and purge keys
-   * await client.subusers.delete({
+   * // Remove subuser and purge keys
+   * await client.subusers.remove({
    *   uid: 'alice',
    *   subuser: 'alice:swift',
    * });
    *
-   * // Delete subuser but keep keys
-   * await client.subusers.delete({
+   * // Remove subuser but keep keys
+   * await client.subusers.remove({
    *   uid: 'alice',
    *   subuser: 'alice:swift',
    *   purgeKeys: false,
    * });
    * ```
    */
-  async delete(input: DeleteSubuserInput): Promise<void> {
+  async remove(input: DeleteSubuserInput): Promise<void> {
     validateUid(input.uid);
     validateSubuser(input.subuser);
 

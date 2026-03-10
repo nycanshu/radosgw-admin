@@ -160,13 +160,13 @@ describe('SubusersModule', () => {
     });
   });
 
-  // ── delete ──────────────────────────────────────────────
+  // ── remove ──────────────────────────────────────────────
 
-  describe('delete', () => {
+  describe('remove', () => {
     it('sends DELETE /user with subuser param', async () => {
       client.request.mockResolvedValue(undefined);
 
-      await subusers.delete({ uid: 'alice', subuser: 'alice:swift' });
+      await subusers.remove({ uid: 'alice', subuser: 'alice:swift' });
 
       expect(client.request).toHaveBeenCalledWith({
         method: 'DELETE',
@@ -182,7 +182,7 @@ describe('SubusersModule', () => {
     it('sends purgeKeys when false', async () => {
       client.request.mockResolvedValue(undefined);
 
-      await subusers.delete({ uid: 'alice', subuser: 'alice:swift', purgeKeys: false });
+      await subusers.remove({ uid: 'alice', subuser: 'alice:swift', purgeKeys: false });
 
       expect(client.request).toHaveBeenCalledWith({
         method: 'DELETE',
@@ -198,7 +198,7 @@ describe('SubusersModule', () => {
     it('sends purgeKeys when true', async () => {
       client.request.mockResolvedValue(undefined);
 
-      await subusers.delete({ uid: 'alice', subuser: 'alice:swift', purgeKeys: true });
+      await subusers.remove({ uid: 'alice', subuser: 'alice:swift', purgeKeys: true });
 
       expect(client.request).toHaveBeenCalledWith({
         method: 'DELETE',
@@ -212,13 +212,13 @@ describe('SubusersModule', () => {
     });
 
     it('throws RGWValidationError when uid is empty', async () => {
-      await expect(subusers.delete({ uid: '', subuser: 'alice:swift' })).rejects.toThrow(
+      await expect(subusers.remove({ uid: '', subuser: 'alice:swift' })).rejects.toThrow(
         RGWValidationError,
       );
     });
 
     it('throws RGWValidationError when subuser is empty', async () => {
-      await expect(subusers.delete({ uid: 'alice', subuser: '' })).rejects.toThrow(
+      await expect(subusers.remove({ uid: 'alice', subuser: '' })).rejects.toThrow(
         RGWValidationError,
       );
     });

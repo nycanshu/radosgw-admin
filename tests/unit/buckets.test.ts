@@ -188,13 +188,17 @@ describe('BucketsModule', () => {
     });
   });
 
-  // ── link ──────────────────────────────────────────────
+  // ── transferOwnership ──────────────────────────────────
 
-  describe('link', () => {
+  describe('transferOwnership', () => {
     it('sends PUT /bucket with correct params', async () => {
       client.request.mockResolvedValue(undefined);
 
-      await buckets.link({ bucket: 'my-bucket', bucketId: 'bucket-id-123', uid: 'bob' });
+      await buckets.transferOwnership({
+        bucket: 'my-bucket',
+        bucketId: 'bucket-id-123',
+        uid: 'bob',
+      });
 
       expect(client.request).toHaveBeenCalledWith({
         method: 'PUT',
@@ -204,31 +208,31 @@ describe('BucketsModule', () => {
     });
 
     it('throws RGWValidationError when bucket is empty', async () => {
-      await expect(buckets.link({ bucket: '', bucketId: 'id', uid: 'bob' })).rejects.toThrow(
-        RGWValidationError,
-      );
+      await expect(
+        buckets.transferOwnership({ bucket: '', bucketId: 'id', uid: 'bob' }),
+      ).rejects.toThrow(RGWValidationError);
     });
 
     it('throws RGWValidationError when uid is empty', async () => {
-      await expect(buckets.link({ bucket: 'my-bucket', bucketId: 'id', uid: '' })).rejects.toThrow(
-        RGWValidationError,
-      );
+      await expect(
+        buckets.transferOwnership({ bucket: 'my-bucket', bucketId: 'id', uid: '' }),
+      ).rejects.toThrow(RGWValidationError);
     });
 
     it('throws RGWValidationError when bucketId is empty', async () => {
-      await expect(buckets.link({ bucket: 'my-bucket', bucketId: '', uid: 'bob' })).rejects.toThrow(
-        RGWValidationError,
-      );
+      await expect(
+        buckets.transferOwnership({ bucket: 'my-bucket', bucketId: '', uid: 'bob' }),
+      ).rejects.toThrow(RGWValidationError);
     });
   });
 
-  // ── unlink ────────────────────────────────────────────
+  // ── removeOwnership ────────────────────────────────────
 
-  describe('unlink', () => {
+  describe('removeOwnership', () => {
     it('sends POST /bucket with correct params', async () => {
       client.request.mockResolvedValue(undefined);
 
-      await buckets.unlink({ bucket: 'my-bucket', uid: 'alice' });
+      await buckets.removeOwnership({ bucket: 'my-bucket', uid: 'alice' });
 
       expect(client.request).toHaveBeenCalledWith({
         method: 'POST',
@@ -238,25 +242,25 @@ describe('BucketsModule', () => {
     });
 
     it('throws RGWValidationError when bucket is empty', async () => {
-      await expect(buckets.unlink({ bucket: '', uid: 'alice' })).rejects.toThrow(
+      await expect(buckets.removeOwnership({ bucket: '', uid: 'alice' })).rejects.toThrow(
         RGWValidationError,
       );
     });
 
     it('throws RGWValidationError when uid is empty', async () => {
-      await expect(buckets.unlink({ bucket: 'my-bucket', uid: '' })).rejects.toThrow(
+      await expect(buckets.removeOwnership({ bucket: 'my-bucket', uid: '' })).rejects.toThrow(
         RGWValidationError,
       );
     });
   });
 
-  // ── checkIndex ────────────────────────────────────────
+  // ── verifyIndex ────────────────────────────────────────
 
-  describe('checkIndex', () => {
+  describe('verifyIndex', () => {
     it('sends GET /bucket with index param', async () => {
       client.request.mockResolvedValue(mockCheckResult);
 
-      const result = await buckets.checkIndex({ bucket: 'my-bucket' });
+      const result = await buckets.verifyIndex({ bucket: 'my-bucket' });
 
       expect(client.request).toHaveBeenCalledWith({
         method: 'GET',
@@ -272,7 +276,7 @@ describe('BucketsModule', () => {
     it('sends checkObjects and fix when provided', async () => {
       client.request.mockResolvedValue(mockCheckResult);
 
-      await buckets.checkIndex({ bucket: 'my-bucket', checkObjects: true, fix: true });
+      await buckets.verifyIndex({ bucket: 'my-bucket', checkObjects: true, fix: true });
 
       expect(client.request).toHaveBeenCalledWith({
         method: 'GET',
@@ -289,7 +293,7 @@ describe('BucketsModule', () => {
     it('sends optional fields as undefined when not provided', async () => {
       client.request.mockResolvedValue(mockCheckResult);
 
-      await buckets.checkIndex({ bucket: 'my-bucket' });
+      await buckets.verifyIndex({ bucket: 'my-bucket' });
 
       const call = client.request.mock.calls[0]![0] as { query: Record<string, unknown> };
       expect(call.query.checkObjects).toBeUndefined();
@@ -297,7 +301,7 @@ describe('BucketsModule', () => {
     });
 
     it('throws RGWValidationError when bucket is empty', async () => {
-      await expect(buckets.checkIndex({ bucket: '' })).rejects.toThrow(RGWValidationError);
+      await expect(buckets.verifyIndex({ bucket: '' })).rejects.toThrow(RGWValidationError);
     });
   });
 });

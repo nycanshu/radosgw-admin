@@ -3,6 +3,8 @@ import { UsersModule } from './modules/users.js';
 import { KeysModule } from './modules/keys.js';
 import { SubusersModule } from './modules/subusers.js';
 import { BucketsModule } from './modules/buckets.js';
+import { QuotaModule } from './modules/quota.js';
+import { RateLimitModule } from './modules/ratelimit.js';
 import type { ClientConfig } from './types/common.types.js';
 
 /**
@@ -41,12 +43,20 @@ export class RadosGWAdminClient {
   /** Bucket management operations. */
   readonly buckets: BucketsModule;
 
+  /** Quota management operations (user-level and bucket-level). */
+  readonly quota: QuotaModule;
+
+  /** Rate limit management operations (user, bucket, and global). */
+  readonly rateLimit: RateLimitModule;
+
   constructor(config: ClientConfig) {
     this._client = new BaseClient(config);
     this.users = new UsersModule(this._client);
     this.keys = new KeysModule(this._client);
     this.subusers = new SubusersModule(this._client);
     this.buckets = new BucketsModule(this._client);
+    this.quota = new QuotaModule(this._client);
+    this.rateLimit = new RateLimitModule(this._client);
   }
 }
 
@@ -81,6 +91,15 @@ export type {
   CheckBucketIndexInput,
   CheckBucketIndexResult,
 } from './types/bucket.types.js';
+export type {
+  RGWRateLimit,
+  RGWGlobalRateLimit,
+  SetUserQuotaInput,
+  SetBucketQuotaInput,
+  SetUserRateLimitInput,
+  SetBucketRateLimitInput,
+  SetGlobalRateLimitInput,
+} from './types/quota.types.js';
 
 // Re-export errors
 export {

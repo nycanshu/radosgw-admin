@@ -51,7 +51,7 @@ async function main() {
 
   // Check bucket index (safe, read-only)
   try {
-    const result = await client.buckets.checkIndex({
+    const result = await client.buckets.verifyIndex({
       bucket: sampleBucket,
       checkObjects: true,
       fix: false, // dry run
@@ -66,7 +66,7 @@ async function main() {
   // Transfer ownership example (link/unlink)
   // NOTE: Uncomment below to test — requires two existing users
   //
-  // await client.buckets.link({
+  // await client.buckets.transferOwnership({
   //   bucket: 'my-bucket',
   //   bucketId: info.id,
   //   uid: 'new-owner',

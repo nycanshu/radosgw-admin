@@ -24,13 +24,13 @@ describe('KeysModule', () => {
     keys = new KeysModule(client);
   });
 
-  // ── create ──────────────────────────────────────────────
+  // ── generate ──────────────────────────────────────────────
 
-  describe('create', () => {
+  describe('generate', () => {
     it('sends PUT /user?key with uid', async () => {
       client.request.mockResolvedValue(mockKeys);
 
-      const result = await keys.create({ uid: 'alice' });
+      const result = await keys.generate({ uid: 'alice' });
 
       expect(client.request).toHaveBeenCalledWith({
         method: 'PUT',
@@ -47,7 +47,7 @@ describe('KeysModule', () => {
     it('passes all optional fields when provided', async () => {
       client.request.mockResolvedValue(mockKeys);
 
-      await keys.create({
+      await keys.generate({
         uid: 'alice',
         keyType: 's3',
         accessKey: 'MYKEY',
@@ -72,7 +72,7 @@ describe('KeysModule', () => {
     it('sends optional fields as undefined when not provided', async () => {
       client.request.mockResolvedValue(mockKeys);
 
-      await keys.create({ uid: 'alice' });
+      await keys.generate({ uid: 'alice' });
 
       const call = client.request.mock.calls[0]![0] as { query: Record<string, unknown> };
       expect(call.query.keyType).toBeUndefined();
@@ -82,25 +82,25 @@ describe('KeysModule', () => {
     });
 
     it('throws RGWValidationError when uid is empty', async () => {
-      await expect(keys.create({ uid: '' })).rejects.toThrow(RGWValidationError);
+      await expect(keys.generate({ uid: '' })).rejects.toThrow(RGWValidationError);
     });
 
     it('throws RGWValidationError when uid has leading whitespace', async () => {
-      await expect(keys.create({ uid: '  alice' })).rejects.toThrow(RGWValidationError);
+      await expect(keys.generate({ uid: '  alice' })).rejects.toThrow(RGWValidationError);
     });
 
     it('throws RGWValidationError when uid has trailing whitespace', async () => {
-      await expect(keys.create({ uid: 'alice  ' })).rejects.toThrow(RGWValidationError);
+      await expect(keys.generate({ uid: 'alice  ' })).rejects.toThrow(RGWValidationError);
     });
   });
 
-  // ── delete ──────────────────────────────────────────────
+  // ── revoke ──────────────────────────────────────────────
 
-  describe('delete', () => {
+  describe('revoke', () => {
     it('sends DELETE /user?key with accessKey', async () => {
       client.request.mockResolvedValue(undefined);
 
-      await keys.delete({ accessKey: 'KEY1' });
+      await keys.revoke({ accessKey: 'KEY1' });
 
       expect(client.request).toHaveBeenCalledWith({
         method: 'DELETE',
@@ -115,7 +115,7 @@ describe('KeysModule', () => {
     it('sends uid and keyType for Swift keys', async () => {
       client.request.mockResolvedValue(undefined);
 
-      await keys.delete({ accessKey: 'SWIFTKEY', uid: 'alice', keyType: 'swift' });
+      await keys.revoke({ accessKey: 'SWIFTKEY', uid: 'alice', keyType: 'swift' });
 
       expect(client.request).toHaveBeenCalledWith({
         method: 'DELETE',
@@ -130,11 +130,11 @@ describe('KeysModule', () => {
     });
 
     it('throws RGWValidationError when accessKey is empty', async () => {
-      await expect(keys.delete({ accessKey: '' })).rejects.toThrow(RGWValidationError);
+      await expect(keys.revoke({ accessKey: '' })).rejects.toThrow(RGWValidationError);
     });
 
     it('throws RGWValidationError when accessKey is whitespace-only', async () => {
-      await expect(keys.delete({ accessKey: '   ' })).rejects.toThrow(RGWValidationError);
+      await expect(keys.revoke({ accessKey: '   ' })).rejects.toThrow(RGWValidationError);
     });
   });
 });
