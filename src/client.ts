@@ -25,6 +25,27 @@ function validateConfig(config: ClientConfig): void {
   if (!config.secretKey || typeof config.secretKey !== 'string') {
     throw new RGWValidationError('secretKey is required and must be a non-empty string');
   }
+  if (
+    config.port !== undefined &&
+    (config.port < 1 || config.port > 65535 || !Number.isInteger(config.port))
+  ) {
+    throw new RGWValidationError('port must be an integer between 1 and 65535');
+  }
+  if (config.timeout !== undefined && (config.timeout < 0 || !Number.isFinite(config.timeout))) {
+    throw new RGWValidationError('timeout must be a non-negative finite number');
+  }
+  if (
+    config.maxRetries !== undefined &&
+    (config.maxRetries < 0 || !Number.isInteger(config.maxRetries))
+  ) {
+    throw new RGWValidationError('maxRetries must be a non-negative integer');
+  }
+  if (
+    config.retryDelay !== undefined &&
+    (config.retryDelay < 0 || !Number.isFinite(config.retryDelay))
+  ) {
+    throw new RGWValidationError('retryDelay must be a non-negative finite number');
+  }
 }
 
 /**
@@ -148,7 +169,16 @@ export class BaseClient {
    * Checks an error and its cause chain for network error patterns.
    */
   private hasNetworkErrorPattern(error: Error): boolean {
-    const patterns = ['ECONNRESET', 'ECONNREFUSED', 'ETIMEDOUT', 'fetch failed'];
+    const patterns = [
+      'ECONNRESET',
+      'ECONNREFUSED',
+      'ETIMEDOUT',
+      'ENOTFOUND',
+      'EHOSTUNREACH',
+      'ENETUNREACH',
+      'ECONNABORTED',
+      'fetch failed',
+    ];
     let current: Error | undefined = error;
     while (current) {
       if (patterns.some((p) => current!.message.includes(p))) {

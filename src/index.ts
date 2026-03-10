@@ -90,3 +90,8 @@ export {
   RGWAuthError,
   RGWConflictError,
 } from './errors.js';
+
+// Re-export internals for advanced use cases (extending the client, custom signing)
+export { BaseClient } from './client.js';
+export { signRequest } from './signer.js';
+export type { RequestOptions, HttpMethod } from './types/common.types.js';
