@@ -93,6 +93,46 @@ describe('RadosGWAdminClient constructor', () => {
     });
     expect(client).toBeInstanceOf(RadosGWAdminClient);
   });
+
+  it('throws RGWValidationError when port is out of range', () => {
+    expect(() => new RadosGWAdminClient({ ...validConfig, port: 0 })).toThrow(RGWValidationError);
+    expect(() => new RadosGWAdminClient({ ...validConfig, port: 70000 })).toThrow(
+      RGWValidationError,
+    );
+    expect(() => new RadosGWAdminClient({ ...validConfig, port: 3.5 })).toThrow(RGWValidationError);
+  });
+
+  it('throws RGWValidationError when timeout is negative', () => {
+    expect(() => new RadosGWAdminClient({ ...validConfig, timeout: -1 })).toThrow(
+      RGWValidationError,
+    );
+  });
+
+  it('throws RGWValidationError when maxRetries is invalid', () => {
+    expect(() => new RadosGWAdminClient({ ...validConfig, maxRetries: -1 })).toThrow(
+      RGWValidationError,
+    );
+    expect(() => new RadosGWAdminClient({ ...validConfig, maxRetries: 1.5 })).toThrow(
+      RGWValidationError,
+    );
+  });
+
+  it('throws RGWValidationError when retryDelay is negative', () => {
+    expect(() => new RadosGWAdminClient({ ...validConfig, retryDelay: -100 })).toThrow(
+      RGWValidationError,
+    );
+  });
+
+  it('accepts valid optional config values', () => {
+    const client = new RadosGWAdminClient({
+      ...validConfig,
+      port: 8080,
+      timeout: 0,
+      maxRetries: 0,
+      retryDelay: 0,
+    });
+    expect(client).toBeInstanceOf(RadosGWAdminClient);
+  });
 });
 
 describe('BaseClient retry logic', () => {
@@ -196,6 +236,25 @@ describe('BaseClient retry logic', () => {
   it('retries on network errors (ECONNREFUSED)', async () => {
     fetchSpy
       .mockRejectedValueOnce(new Error('connect ECONNREFUSED 127.0.0.1:8080'))
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: () => Promise.resolve('{"ok":true}'),
+      });
+
+    const client = new BaseClient(config);
+    const result = await client.request<{ ok: boolean }>({
+      method: 'GET',
+      path: '/user',
+    });
+
+    expect(result).toEqual({ ok: true });
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries on DNS resolution failure (ENOTFOUND)', async () => {
+    fetchSpy
+      .mockRejectedValueOnce(new Error('getaddrinfo ENOTFOUND example.invalid'))
       .mockResolvedValueOnce({
         ok: true,
         status: 200,

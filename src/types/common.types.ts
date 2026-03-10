@@ -4,7 +4,7 @@
 export interface ClientConfig {
   /** RGW endpoint, e.g. "http://192.168.1.10" or "https://ceph.example.com" */
   host: string;
-  /** Port number. Default: 80 for http, 443 for https */
+  /** Port number. Omit to use the default from the host URL. */
   port?: number;
   /** Admin access key for AWS SigV4 authentication */
   accessKey: string;

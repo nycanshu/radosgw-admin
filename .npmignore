@@ -1,0 +1,22 @@
+# Source & config
+src/
+tests/
+tsconfig.json
+tsup.config.ts
+vitest.config.ts
+eslint.config.js
+.prettierrc
+
+# Dev files
+.github/
+coverage/
+*.log
+*.tsbuildinfo
+.env
+
+# Docs (README included via package.json files)
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+SECURITY.md
+CLAUDE.md
+radosgw-admin-*.md
