@@ -29,14 +29,14 @@ function validateBucket(bucket: string): void {
  * @example
  * ```typescript
  * // Throttle alice to 100 read ops/min per RGW
- * await client.rateLimit.setUser({
+ * await client.rateLimit.setUserLimit({
  *   uid: 'alice',
  *   maxReadOps: 100,
  *   maxWriteOps: 50,
  * });
  *
  * // Get current rate limit
- * const limit = await client.rateLimit.getUser('alice');
+ * const limit = await client.rateLimit.getUserLimit('alice');
  * console.log(limit.enabled, limit.maxReadOps);
  * ```
  */
@@ -53,12 +53,12 @@ export class RateLimitModule {
    *
    * @example
    * ```typescript
-   * const limit = await client.rateLimit.getUser('alice');
+   * const limit = await client.rateLimit.getUserLimit('alice');
    * console.log('Read ops/min:', limit.maxReadOps);
    * console.log('Write ops/min:', limit.maxWriteOps);
    * ```
    */
-  async getUser(uid: string): Promise<RGWRateLimit> {
+  async getUserLimit(uid: string): Promise<RGWRateLimit> {
     validateUid(uid);
 
     return this.client.request<RGWRateLimit>({
@@ -79,7 +79,7 @@ export class RateLimitModule {
    *
    * @example
    * ```typescript
-   * await client.rateLimit.setUser({
+   * await client.rateLimit.setUserLimit({
    *   uid: 'alice',
    *   maxReadOps: 100,
    *   maxWriteOps: 50,
@@ -88,7 +88,7 @@ export class RateLimitModule {
    * });
    * ```
    */
-  async setUser(input: SetUserRateLimitInput): Promise<void> {
+  async setUserLimit(input: SetUserRateLimitInput): Promise<void> {
     validateUid(input.uid);
 
     return this.client.request<void>({
@@ -139,11 +139,11 @@ export class RateLimitModule {
    *
    * @example
    * ```typescript
-   * const limit = await client.rateLimit.getBucket('my-bucket');
+   * const limit = await client.rateLimit.getBucketLimit('my-bucket');
    * console.log('Read ops/min:', limit.maxReadOps);
    * ```
    */
-  async getBucket(bucket: string): Promise<RGWRateLimit> {
+  async getBucketLimit(bucket: string): Promise<RGWRateLimit> {
     validateBucket(bucket);
 
     return this.client.request<RGWRateLimit>({
@@ -164,7 +164,7 @@ export class RateLimitModule {
    *
    * @example
    * ```typescript
-   * await client.rateLimit.setBucket({
+   * await client.rateLimit.setBucketLimit({
    *   bucket: 'my-bucket',
    *   maxReadOps: 200,
    *   maxWriteOps: 100,
@@ -172,7 +172,7 @@ export class RateLimitModule {
    * });
    * ```
    */
-  async setBucket(input: SetBucketRateLimitInput): Promise<void> {
+  async setBucketLimit(input: SetBucketRateLimitInput): Promise<void> {
     validateBucket(input.bucket);
 
     return this.client.request<void>({

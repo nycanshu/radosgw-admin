@@ -174,8 +174,10 @@ export class QuotaModule {
   /**
    * Get the bucket-level quota for a user.
    *
-   * @param uid - The user ID.
-   * @returns The bucket quota configuration applied to the user's buckets.
+   * This returns the per-bucket quota applied to all buckets owned by the user,
+   * not a quota for a specific bucket. RGW bucket quotas are configured per-user.
+   *
+   * @param uid - The user ID (bucket owner), not a bucket name.
    * @throws {RGWValidationError} If `uid` is empty.
    * @throws {RGWNotFoundError} If the user does not exist.
    *

@@ -199,16 +199,35 @@ rgw.quota.disableBucketQuota(uid);  // Disable bucket quota
 <details>
 <summary>Quota examples</summary>
 
+`maxSize` accepts a number (bytes) or a human-readable string with binary (1024-based) units:
+
+| Input | Bytes |
+|-------|-------|
+| `'1K'` / `'1KB'` | 1,024 |
+| `'500M'` / `'500MB'` | 524,288,000 |
+| `'10G'` / `'10GB'` | 10,737,418,240 |
+| `'1T'` / `'1TB'` | 1,099,511,627,776 |
+| `'1.5G'` | 1,610,612,736 |
+| `1073741824` | 1,073,741,824 (raw bytes) |
+| `-1` | Unlimited |
+
 ```typescript
 // Set a 10GB user quota with 50k object limit
 await rgw.quota.setUserQuota({
   uid: 'alice',
-  maxSize: '10G',       // accepts "10G", "500M", "1T", or bytes
+  maxSize: '10G',       // → 10737418240 bytes
   maxObjects: 50000,
-  enabled: true,
+  enabled: true,        // default: true when setting
 });
 
-// Check current quota
+// Size limit only, unlimited objects
+await rgw.quota.setUserQuota({
+  uid: 'alice',
+  maxSize: '10G',
+  maxObjects: -1,       // -1 = unlimited
+});
+
+// Check current quota — maxSize is always returned as bytes
 const quota = await rgw.quota.getUserQuota('alice');
 console.log('Enabled:', quota.enabled);
 console.log('Max size:', quota.maxSize, 'bytes');
@@ -216,9 +235,9 @@ console.log('Max size:', quota.maxSize, 'bytes');
 // Disable quota temporarily (preserves values)
 await rgw.quota.disableUserQuota('alice');
 
-// Set a 1GB per-bucket quota
+// Set a 1GB per-bucket quota (applies to all buckets owned by the user)
 await rgw.quota.setBucketQuota({
-  uid: 'alice',
+  uid: 'alice',         // uid, not bucket name — RGW bucket quotas are per-user
   maxSize: '1G',
   maxObjects: 10000,
 });
@@ -231,14 +250,14 @@ await rgw.quota.setBucketQuota({
 > Requires Ceph **Pacific (v16)** or later. Values are per RGW instance — divide by the number of RGW daemons for cluster-wide limits.
 
 ```typescript
-rgw.rateLimit.getUser(uid);        // Get user rate limit
-rgw.rateLimit.setUser(input);      // Set user rate limit
-rgw.rateLimit.disableUserLimit(uid);    // Disable user rate limit
-rgw.rateLimit.getBucket(bucket);       // Get bucket rate limit
-rgw.rateLimit.setBucket(input);        // Set bucket rate limit
-rgw.rateLimit.disableBucketLimit(bucket); // Disable bucket rate limit
-rgw.rateLimit.getGlobal();         // Get global rate limits (user/bucket/anonymous)
-rgw.rateLimit.setGlobal(input);    // Set global rate limit for a scope
+rgw.rateLimit.getUserLimit(uid);           // Get user rate limit
+rgw.rateLimit.setUserLimit(input);         // Set user rate limit
+rgw.rateLimit.disableUserLimit(uid);       // Disable user rate limit
+rgw.rateLimit.getBucketLimit(bucket);      // Get bucket rate limit
+rgw.rateLimit.setBucketLimit(input);       // Set bucket rate limit
+rgw.rateLimit.disableBucketLimit(bucket);  // Disable bucket rate limit
+rgw.rateLimit.getGlobal();                 // Get global rate limits (user/bucket/anonymous)
+rgw.rateLimit.setGlobal(input);            // Set global rate limit for a scope
 ```
 
 <details>
@@ -246,7 +265,7 @@ rgw.rateLimit.setGlobal(input);    // Set global rate limit for a scope
 
 ```typescript
 // Throttle alice to 100 read ops/min and 50MB/min write per RGW instance
-await rgw.rateLimit.setUser({
+await rgw.rateLimit.setUserLimit({
   uid: 'alice',
   maxReadOps: 100,
   maxWriteOps: 50,
@@ -257,7 +276,7 @@ await rgw.rateLimit.setUser({
 await rgw.rateLimit.disableUserLimit('alice');
 
 // Set a bucket-level rate limit
-await rgw.rateLimit.setBucket({
+await rgw.rateLimit.setBucketLimit({
   bucket: 'public-assets',
   maxReadOps: 200,
   maxWriteOps: 10,
