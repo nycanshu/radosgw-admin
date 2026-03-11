@@ -20,7 +20,7 @@ function validateBucket(bucket: string): void {
 }
 
 /**
- * Bucket management module — list, inspect, delete, link, unlink, and check/repair bucket indexes.
+ * Bucket management module — list, inspect, delete, transfer ownership, and verify/repair bucket indexes.
  *
  * @example
  * ```typescript
@@ -123,7 +123,7 @@ export class BucketsModule {
   }
 
   /**
-   * Link a bucket to a different user (transfer ownership).
+   * Transfer ownership of a bucket to a different user.
    *
    * @param input - `bucket`, `bucketId`, and `uid` are all required.
    * @throws {RGWValidationError} If any required field is missing.
@@ -132,14 +132,14 @@ export class BucketsModule {
    * @example
    * ```typescript
    * const info = await client.buckets.getInfo('my-bucket');
-   * await client.buckets.link({
+   * await client.buckets.transferOwnership({
    *   bucket: 'my-bucket',
    *   bucketId: info.id,
    *   uid: 'bob',
    * });
    * ```
    */
-  async link(input: LinkBucketInput): Promise<void> {
+  async transferOwnership(input: LinkBucketInput): Promise<void> {
     validateBucket(input.bucket);
     validateUid(input.uid);
     if (
@@ -162,7 +162,7 @@ export class BucketsModule {
   }
 
   /**
-   * Unlink a bucket from a user (remove ownership without deleting the bucket).
+   * Remove ownership of a bucket from a user without deleting the bucket.
    *
    * @param input - `bucket` and `uid` are required.
    * @throws {RGWValidationError} If any required field is missing.
@@ -170,13 +170,13 @@ export class BucketsModule {
    *
    * @example
    * ```typescript
-   * await client.buckets.unlink({
+   * await client.buckets.removeOwnership({
    *   bucket: 'my-bucket',
    *   uid: 'alice',
    * });
    * ```
    */
-  async unlink(input: UnlinkBucketInput): Promise<void> {
+  async removeOwnership(input: UnlinkBucketInput): Promise<void> {
     validateBucket(input.bucket);
     validateUid(input.uid);
 
@@ -191,7 +191,7 @@ export class BucketsModule {
   }
 
   /**
-   * Check and optionally repair a bucket's index.
+   * Verify and optionally repair a bucket's index.
    *
    * With `fix: false` (default), this is a safe read-only operation that reports
    * any inconsistencies. Set `fix: true` to actually repair detected issues.
@@ -204,7 +204,7 @@ export class BucketsModule {
    * @example
    * ```typescript
    * // Dry run — check only
-   * const result = await client.buckets.checkIndex({
+   * const result = await client.buckets.verifyIndex({
    *   bucket: 'my-bucket',
    *   checkObjects: true,
    *   fix: false,
@@ -212,13 +212,13 @@ export class BucketsModule {
    * console.log('Invalid entries:', result.invalidMultipartEntries);
    *
    * // Fix detected issues
-   * await client.buckets.checkIndex({
+   * await client.buckets.verifyIndex({
    *   bucket: 'my-bucket',
    *   fix: true,
    * });
    * ```
    */
-  async checkIndex(input: CheckBucketIndexInput): Promise<CheckBucketIndexResult> {
+  async verifyIndex(input: CheckBucketIndexInput): Promise<CheckBucketIndexResult> {
     validateBucket(input.bucket);
 
     return this.client.request<CheckBucketIndexResult>({

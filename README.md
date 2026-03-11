@@ -15,7 +15,7 @@ The only existing npm package for RGW Admin Ops (`rgw-admin-client`) was last pu
 
 **What you get:**
 
-- [RGW Admin Ops API](https://docs.ceph.com/en/latest/radosgw/adminops/) coverage — users, keys, subusers, buckets
+- [RGW Admin Ops API](https://docs.ceph.com/en/latest/radosgw/adminops/) coverage — users, keys, subusers, buckets, quotas, rate limits
 - Strict TypeScript with zero `any` — every request and response is fully typed
 - Zero runtime dependencies — AWS SigV4 signing uses only `node:crypto`
 - Dual ESM + CJS build — works in every Node.js environment
@@ -100,8 +100,8 @@ rgw.users.getStats(input); // Get storage usage statistics
 ### Keys
 
 ```typescript
-rgw.keys.create(input); // Generate or assign S3/Swift keys
-rgw.keys.delete(input); // Remove a key pair
+rgw.keys.generate(input); // Generate or assign S3/Swift keys
+rgw.keys.revoke(input);   // Revoke (delete) a key pair
 ```
 
 ### Subusers
@@ -109,7 +109,7 @@ rgw.keys.delete(input); // Remove a key pair
 ```typescript
 rgw.subusers.create(input); // Create a subuser for an existing user
 rgw.subusers.modify(input); // Modify subuser permissions
-rgw.subusers.delete(input); // Delete a subuser
+rgw.subusers.remove(input); // Remove a subuser
 ```
 
 <details>
@@ -133,7 +133,7 @@ await rgw.subusers.modify({
 });
 
 // Remove the subuser
-await rgw.subusers.delete({ uid: 'alice', subuser: 'alice:swift' });
+await rgw.subusers.remove({ uid: 'alice', subuser: 'alice:swift' });
 ```
 
 </details>
@@ -141,12 +141,12 @@ await rgw.subusers.delete({ uid: 'alice', subuser: 'alice:swift' });
 ### Buckets
 
 ```typescript
-rgw.buckets.list(); // List all buckets (optionally filter by user)
-rgw.buckets.getInfo(bucket); // Get bucket metadata and stats
-rgw.buckets.delete(input); // Delete a bucket (optionally purge objects)
-rgw.buckets.link(input); // Link a bucket to a different user
-rgw.buckets.unlink(input); // Unlink a bucket from its owner
-rgw.buckets.checkIndex(input); // Check and optionally repair bucket index
+rgw.buckets.list();                // List all buckets (optionally filter by user)
+rgw.buckets.getInfo(bucket);       // Get bucket metadata and stats
+rgw.buckets.delete(input);         // Delete a bucket (optionally purge objects)
+rgw.buckets.transferOwnership(input); // Transfer bucket to a different user
+rgw.buckets.removeOwnership(input);   // Remove bucket ownership
+rgw.buckets.verifyIndex(input);    // Check and optionally repair bucket index
 ```
 
 <details>
@@ -164,14 +164,14 @@ const info = await rgw.buckets.getInfo('my-bucket');
 console.log(info.usage.rgwMain.numObjects);
 
 // Transfer a bucket to a different user
-await rgw.buckets.link({
+await rgw.buckets.transferOwnership({
   bucket: 'my-bucket',
   bucketId: info.id,
   uid: 'bob',
 });
 
 // Check and repair bucket index
-const result = await rgw.buckets.checkIndex({
+const result = await rgw.buckets.verifyIndex({
   bucket: 'my-bucket',
   checkObjects: true,
   fix: true,
@@ -179,6 +179,122 @@ const result = await rgw.buckets.checkIndex({
 
 // Delete bucket and all its objects
 await rgw.buckets.delete({ bucket: 'my-bucket', purgeObjects: true });
+```
+
+</details>
+
+### Quotas
+
+```typescript
+rgw.quota.getUserQuota(uid);        // Get user-level quota
+rgw.quota.setUserQuota(input);      // Set user-level quota (accepts "10G" size strings)
+rgw.quota.enableUserQuota(uid);     // Enable user quota without changing values
+rgw.quota.disableUserQuota(uid);    // Disable user quota without changing values
+rgw.quota.getBucketQuota(uid);      // Get bucket-level quota for a user
+rgw.quota.setBucketQuota(input);    // Set bucket-level quota
+rgw.quota.enableBucketQuota(uid);   // Enable bucket quota
+rgw.quota.disableBucketQuota(uid);  // Disable bucket quota
+```
+
+<details>
+<summary>Quota examples</summary>
+
+`maxSize` accepts a number (bytes) or a human-readable string with binary (1024-based) units:
+
+| Input | Bytes |
+|-------|-------|
+| `'1K'` / `'1KB'` | 1,024 |
+| `'500M'` / `'500MB'` | 524,288,000 |
+| `'10G'` / `'10GB'` | 10,737,418,240 |
+| `'1T'` / `'1TB'` | 1,099,511,627,776 |
+| `'1.5G'` | 1,610,612,736 |
+| `1073741824` | 1,073,741,824 (raw bytes) |
+| `-1` | Unlimited |
+
+```typescript
+// Set a 10GB user quota with 50k object limit
+await rgw.quota.setUserQuota({
+  uid: 'alice',
+  maxSize: '10G',       // → 10737418240 bytes
+  maxObjects: 50000,
+  enabled: true,        // default: true when setting
+});
+
+// Size limit only, unlimited objects
+await rgw.quota.setUserQuota({
+  uid: 'alice',
+  maxSize: '10G',
+  maxObjects: -1,       // -1 = unlimited
+});
+
+// Check current quota — maxSize is always returned as bytes
+const quota = await rgw.quota.getUserQuota('alice');
+console.log('Enabled:', quota.enabled);
+console.log('Max size:', quota.maxSize, 'bytes');
+
+// Disable quota temporarily (preserves values)
+await rgw.quota.disableUserQuota('alice');
+
+// Set a 1GB per-bucket quota (applies to all buckets owned by the user)
+await rgw.quota.setBucketQuota({
+  uid: 'alice',         // uid, not bucket name — RGW bucket quotas are per-user
+  maxSize: '1G',
+  maxObjects: 10000,
+});
+```
+
+</details>
+
+### Rate Limits
+
+> Requires Ceph **Pacific (v16)** or later. Values are per RGW instance — divide by the number of RGW daemons for cluster-wide limits.
+
+```typescript
+rgw.rateLimit.getUserLimit(uid);           // Get user rate limit
+rgw.rateLimit.setUserLimit(input);         // Set user rate limit
+rgw.rateLimit.disableUserLimit(uid);       // Disable user rate limit
+rgw.rateLimit.getBucketLimit(bucket);      // Get bucket rate limit
+rgw.rateLimit.setBucketLimit(input);       // Set bucket rate limit
+rgw.rateLimit.disableBucketLimit(bucket);  // Disable bucket rate limit
+rgw.rateLimit.getGlobal();                 // Get global rate limits (user/bucket/anonymous)
+rgw.rateLimit.setGlobal(input);            // Set global rate limit for a scope
+```
+
+<details>
+<summary>Rate limit examples</summary>
+
+```typescript
+// Throttle alice to 100 read ops/min and 50MB/min write per RGW instance
+await rgw.rateLimit.setUserLimit({
+  uid: 'alice',
+  maxReadOps: 100,
+  maxWriteOps: 50,
+  maxWriteBytes: 52428800,  // 50MB
+});
+
+// Disable rate limit temporarily (preserves config)
+await rgw.rateLimit.disableUserLimit('alice');
+
+// Set a bucket-level rate limit
+await rgw.rateLimit.setBucketLimit({
+  bucket: 'public-assets',
+  maxReadOps: 200,
+  maxWriteOps: 10,
+});
+
+// Protect public-read buckets from anonymous abuse
+await rgw.rateLimit.setGlobal({
+  scope: 'anonymous',
+  maxReadOps: 50,
+  maxWriteOps: 0,
+  enabled: true,
+});
+
+// View all global rate limits
+const global = await rgw.rateLimit.getGlobal();
+console.log('Anonymous:', global.anonymous);
+console.log('User:', global.user);
+console.log('Bucket:', global.bucket);
 ```
 
 </details>

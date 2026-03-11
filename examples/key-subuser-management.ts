@@ -41,17 +41,20 @@ async function main() {
   // ── Key Rotation ──────────────────────────────────────
 
   // Step 1: Generate a new key
-  const keysAfterCreate = await client.keys.create({ uid: DEMO_UID });
+  const keysAfterCreate = await client.keys.generate({ uid: DEMO_UID });
   const newKey = keysAfterCreate.find((k) => k.accessKey !== originalKey)!;
   log('Rotate: Create', `New key: ${newKey.accessKey} (${keysAfterCreate.length} total)`);
 
   // Step 2: Delete the old key
-  await client.keys.delete({ accessKey: originalKey });
+  await client.keys.revoke({ accessKey: originalKey });
   log('Rotate: Delete', `Revoked old key: ${originalKey}`);
 
   // Verify rotation
   const rotatedUser = await client.users.get(DEMO_UID);
-  log('Rotate: Verify', `${rotatedUser.keys.length} key remaining: ${rotatedUser.keys[0]!.accessKey}`);
+  log(
+    'Rotate: Verify',
+    `${rotatedUser.keys.length} key remaining: ${rotatedUser.keys[0]!.accessKey}`,
+  );
 
   // ── Subuser Lifecycle ─────────────────────────────────
 
@@ -74,7 +77,7 @@ async function main() {
   log('Subuser: Modify', `${modified[0]!.id} → ${modified[0]!.permissions}`);
 
   // Delete subuser
-  await client.subusers.delete({
+  await client.subusers.remove({
     uid: DEMO_UID,
     subuser: `${DEMO_UID}:swift`,
     purgeKeys: true,

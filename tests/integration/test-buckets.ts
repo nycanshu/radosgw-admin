@@ -63,7 +63,7 @@ async function run() {
     // 4. Check index (read-only, safe)
     console.log(`\n4. Checking index for "${sampleBucket}" (dry run)...`);
     try {
-      const checkResult = await client.buckets.checkIndex({
+      const checkResult = await client.buckets.verifyIndex({
         bucket: sampleBucket,
         checkObjects: false,
         fix: false,
@@ -77,7 +77,7 @@ async function run() {
     }
   } else {
     console.log('\n3. Skipping getInfo — no buckets in cluster');
-    console.log('\n4. Skipping checkIndex — no buckets in cluster');
+    console.log('\n4. Skipping verifyIndex — no buckets in cluster');
   }
 
   // 5. Cleanup
