@@ -299,6 +299,56 @@ console.log('Bucket:', global.bucket);
 
 </details>
 
+### Usage & Analytics
+
+> **Prerequisite:** Usage logging must be enabled in `ceph.conf`: `rgw enable usage log = true`. Restart RGW daemons after changing the config.
+
+```typescript
+rgw.usage.get(input?);   // Query usage report (per-user or cluster-wide)
+rgw.usage.trim(input?);  // Delete old usage logs — requires removeAll: true when no uid
+```
+
+<details>
+<summary>Usage examples</summary>
+
+```typescript
+// Usage for alice in January 2025
+const report = await rgw.usage.get({
+  uid: 'alice',
+  start: '2025-01-01',   // accepts 'YYYY-MM-DD' or Date object
+  end: '2025-01-31',
+});
+
+for (const summary of report.summary) {
+  for (const cat of summary.categories) {
+    console.log(`[${cat.category}] ops: ${cat.ops} | sent: ${(cat.bytesSent / 1e6).toFixed(2)} MB`);
+  }
+  console.log('Total sent:', (summary.total.bytesSent / 1e9).toFixed(3), 'GB');
+}
+
+// Cluster-wide usage, all time (omit all filters)
+const all = await rgw.usage.get();
+
+// Trim a single user's logs up to end of 2024
+await rgw.usage.trim({ uid: 'alice', end: '2024-12-31' });
+
+// ⚠️  Trim all cluster usage logs — removeAll: true required when no uid
+await rgw.usage.trim({ end: '2023-12-31', removeAll: true });
+```
+
+</details>
+
+### Cluster Info
+
+```typescript
+rgw.info.get();   // Get cluster FSID and basic endpoint info
+```
+
+```typescript
+const info = await rgw.info.get();
+console.log('Cluster FSID:', info.info.clusterId);
+```
+
 ## Error Handling
 
 Every error thrown is an instance of `RGWError` with structured properties:

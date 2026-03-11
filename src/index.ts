@@ -5,6 +5,8 @@ import { SubusersModule } from './modules/subusers.js';
 import { BucketsModule } from './modules/buckets.js';
 import { QuotaModule } from './modules/quota.js';
 import { RateLimitModule } from './modules/ratelimit.js';
+import { UsageModule } from './modules/usage.js';
+import { InfoModule } from './modules/info.js';
 import type { ClientConfig } from './types/common.types.js';
 
 /**
@@ -49,6 +51,12 @@ export class RadosGWAdminClient {
   /** Rate limit management operations (user, bucket, and global). */
   readonly rateLimit: RateLimitModule;
 
+  /** Usage & analytics operations — query and trim RGW usage logs. */
+  readonly usage: UsageModule;
+
+  /** Cluster info operations. */
+  readonly info: InfoModule;
+
   constructor(config: ClientConfig) {
     this._client = new BaseClient(config);
     this.users = new UsersModule(this._client);
@@ -57,6 +65,8 @@ export class RadosGWAdminClient {
     this.buckets = new BucketsModule(this._client);
     this.quota = new QuotaModule(this._client);
     this.rateLimit = new RateLimitModule(this._client);
+    this.usage = new UsageModule(this._client);
+    this.info = new InfoModule(this._client);
   }
 }
 
@@ -100,6 +110,15 @@ export type {
   SetBucketRateLimitInput,
   SetGlobalRateLimitInput,
 } from './types/quota.types.js';
+export type {
+  GetUsageInput,
+  TrimUsageInput,
+  RGWUsageReport,
+  RGWUsageEntry,
+  RGWUsageSummary,
+  RGWUsageCategory,
+  RGWClusterInfo,
+} from './types/usage.types.js';
 
 // Re-export errors
 export {
