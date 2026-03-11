@@ -22,3 +22,7 @@ coverage
 
 #docs
 radosgw-admin-*.md
+docs/api
+website/.docusaurus
+website/build
+website/node_modules

@@ -57,7 +57,7 @@ export function toCamelCase(obj: unknown): unknown {
   if (obj !== null && typeof obj === 'object') {
     return Object.fromEntries(
       Object.entries(obj as Record<string, unknown>).map(([k, v]) => [
-        k.replace(/[-_.]([a-z])/g, (_, c: string) => c.toUpperCase()),
+        k.replaceAll(/[-_.]([a-z])/g, (_, c: string) => c.toUpperCase()),
         toCamelCase(v),
       ]),
     );
@@ -70,7 +70,7 @@ export function toCamelCase(obj: unknown): unknown {
  * RGW Admin API uses hyphenated params (e.g. display-name, max-buckets).
  */
 function toKebabCase(key: string): string {
-  return key.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+  return key.replaceAll(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
 }
 
 /**
@@ -95,6 +95,7 @@ function mapHttpError(status: number, body: string, code?: string): RGWError {
 
 /**
  * Core HTTP client for making signed requests to the RGW Admin API.
+ * @internal
  */
 export class BaseClient {
   private readonly host: string;
@@ -334,7 +335,10 @@ export class BaseClient {
         fetchOptions.body = JSON.stringify(body);
       }
 
-      this.log('request', { method, url: url.toString() });
+      // Redact secret-key from debug logs — it appears as a query param when callers
+      // provision users with pre-specified credentials (per RGW Admin Ops wire format).
+      const safeUrl = url.toString().replaceAll(/([?&]secret-key=)[^&]*/gi, '$1[REDACTED]');
+      this.log('request', { method, url: safeUrl });
       const response = await fetch(url.toString(), fetchOptions);
       const text = await response.text();
 

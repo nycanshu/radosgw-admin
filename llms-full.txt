@@ -1,0 +1,138 @@
+# radosgw-admin (Full LLM Reference)
+
+## Package Summary
+`radosgw-admin` is a modern TypeScript client for Ceph RGW Admin Ops API. It signs requests using AWS SigV4, exposes module-based APIs, transforms response keys to camelCase, and maps HTTP errors into typed SDK errors.
+
+## Runtime Requirements
+- Node.js >= 18
+- Ceph RGW endpoint with Admin Ops API enabled
+
+## Client Constructor
+`new RadosGWAdminClient(config: ClientConfig)`
+
+### Config Fields
+- `host: string` (required)
+- `accessKey: string` (required)
+- `secretKey: string` (required)
+- `port?: number`
+- `adminPath?: string` (default: `/admin`)
+- `timeout?: number` (default: `10000`)
+- `region?: string` (default: `us-east-1`)
+- `debug?: boolean` (default: `false`)
+- `maxRetries?: number` (default: `0`)
+- `retryDelay?: number` (default: `200`)
+- `insecure?: boolean` (default: `false`; disables TLS verification)
+
+## Public Modules and Methods
+
+### users
+- `create(input: CreateUserInput): Promise<RGWUser>`
+- `get(uid: string): Promise<RGWUser>`
+- `modify(input: ModifyUserInput): Promise<RGWUser>`
+- `delete(input: DeleteUserInput): Promise<void>`
+- `list(): Promise<string[]>`
+- `suspend(uid: string): Promise<RGWUser>`
+- `enable(uid: string): Promise<RGWUser>`
+- `getStats(input: GetUserStatsInput): Promise<RGWUserStats>`
+
+### keys
+- `generate(input: CreateKeyInput): Promise<RGWKey[]>`
+- `revoke(input: DeleteKeyInput): Promise<void>`
+
+### subusers
+- `create(input: CreateSubuserInput): Promise<RGWSubuser[]>`
+- `modify(input: ModifySubuserInput): Promise<RGWSubuser[]>`
+- `remove(input: DeleteSubuserInput): Promise<void>`
+
+### buckets
+- `list(uid?: string): Promise<string[]>`
+- `getInfo(bucket: string): Promise<RGWBucket>`
+- `delete(input: DeleteBucketInput): Promise<void>`
+- `transferOwnership(input: LinkBucketInput): Promise<void>`
+- `removeOwnership(input: UnlinkBucketInput): Promise<void>`
+- `verifyIndex(input: CheckBucketIndexInput): Promise<CheckBucketIndexResult>`
+
+### quota
+- `getUserQuota(uid: string): Promise<RGWQuota>`
+- `setUserQuota(input: SetUserQuotaInput): Promise<void>`
+- `enableUserQuota(uid: string): Promise<void>`
+- `disableUserQuota(uid: string): Promise<void>`
+- `getBucketQuota(uid: string): Promise<RGWQuota>`
+- `setBucketQuota(input: SetBucketQuotaInput): Promise<void>`
+- `enableBucketQuota(uid: string): Promise<void>`
+- `disableBucketQuota(uid: string): Promise<void>`
+
+### rateLimit
+- `getUserLimit(uid: string): Promise<RGWRateLimit>`
+- `setUserLimit(input: SetUserRateLimitInput): Promise<void>`
+- `disableUserLimit(uid: string): Promise<void>`
+- `getBucketLimit(bucket: string): Promise<RGWRateLimit>`
+- `setBucketLimit(input: SetBucketRateLimitInput): Promise<void>`
+- `disableBucketLimit(bucket: string): Promise<void>`
+- `getGlobal(): Promise<RGWGlobalRateLimit>`
+- `setGlobal(input: SetGlobalRateLimitInput): Promise<void>`
+
+### usage
+- `get(input?: GetUsageInput): Promise<RGWUsageReport>`
+- `trim(input?: TrimUsageInput): Promise<void>`
+
+### info
+- `get(): Promise<RGWClusterInfo>`
+
+## Behavioral Contracts
+- Incoming payload keys are transformed to camelCase.
+- Outgoing query keys are transformed to kebab-case.
+- Empty-body success responses resolve as `undefined` for `Promise<void>` methods.
+- Retries apply to retryable failures (network/timeouts/5xx) based on config.
+
+## Error Classes and Mapping
+- 400 -> `RGWValidationError`
+- 403 -> `RGWAuthError`
+- 404 -> `RGWNotFoundError`
+- 409 -> `RGWConflictError`
+- 5xx -> `RGWError`
+
+## Destructive Operations
+- `users.delete({ purgeData: true })`
+- `buckets.delete({ purgeObjects: true })`
+- `usage.trim({ removeAll: true })`
+
+These can permanently delete data and should require explicit confirmation in higher-level applications.
+
+## Common Usage Patterns
+
+### Create and verify user
+```ts
+await rgw.users.create({ uid: 'alice', displayName: 'Alice' });
+const user = await rgw.users.get('alice');
+```
+
+### Set user quota
+```ts
+await rgw.quota.setUserQuota({
+  uid: 'alice',
+  maxSize: '10G',
+  maxObjects: 50000,
+  enabled: true,
+});
+```
+
+### Rotate keys
+```ts
+const keys = await rgw.keys.generate({ uid: 'alice' });
+await rgw.keys.revoke({ accessKey: keys[0].accessKey });
+```
+
+## Repository References
+- Entry point: `src/index.ts`
+- Core client: `src/client.ts`
+- Modules: `src/modules/*.ts`
+- Types: `src/types/*.types.ts`
+- Errors: `src/errors.ts`
+- Tests: `tests/unit/*.test.ts`
+
+## Canonical External Docs
+- Ceph RGW Admin Ops: https://docs.ceph.com/en/latest/radosgw/adminops/
+- Users: https://docs.ceph.com/en/latest/radosgw/adminops/user/
+- Buckets: https://docs.ceph.com/en/latest/radosgw/adminops/bucket/
+- Usage: https://docs.ceph.com/en/latest/radosgw/adminops/usage/

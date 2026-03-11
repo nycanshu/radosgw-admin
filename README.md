@@ -87,14 +87,15 @@ const rgw = new RadosGWAdminClient({
 ### Users
 
 ```typescript
-rgw.users.create(input); // Create a new RGW user
-rgw.users.get(uid); // Get full user info (keys, caps, quotas)
-rgw.users.modify(input); // Update display name, email, max buckets, etc.
-rgw.users.delete(input); // Delete user (optionally purge all data)
-rgw.users.list(); // List all user IDs in the cluster
-rgw.users.suspend(uid); // Suspend a user account
-rgw.users.enable(uid); // Re-enable a suspended user
-rgw.users.getStats(input); // Get storage usage statistics
+rgw.users.create(input);             // Create a new RGW user
+rgw.users.get(uid, tenant?);         // Get full user info (keys, caps, quotas)
+rgw.users.getByAccessKey(accessKey); // Look up a user by their S3 access key
+rgw.users.modify(input);             // Update display name, email, max buckets, etc.
+rgw.users.delete(input);             // Delete user (optionally purge all data)
+rgw.users.list();                    // List all user IDs in the cluster
+rgw.users.suspend(uid);              // Suspend a user account
+rgw.users.enable(uid);               // Re-enable a suspended user
+rgw.users.getStats(uid, sync?);      // Get storage usage statistics
 ```
 
 ### Keys

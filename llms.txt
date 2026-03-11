@@ -1,0 +1,56 @@
+# radosgw-admin
+
+TypeScript SDK for the Ceph RADOS Gateway (RGW) Admin Ops REST API.
+
+## Install
+- npm: `npm install radosgw-admin`
+
+## Entry Point
+- `RadosGWAdminClient` from package root.
+
+## Quick Start
+```ts
+import { RadosGWAdminClient } from 'radosgw-admin';
+
+const rgw = new RadosGWAdminClient({
+  host: 'https://ceph-rgw.example.com',
+  accessKey: process.env.RGW_ADMIN_ACCESS_KEY!,
+  secretKey: process.env.RGW_ADMIN_SECRET_KEY!,
+});
+
+await rgw.users.create({ uid: 'alice', displayName: 'Alice' });
+const user = await rgw.users.get('alice');
+```
+
+## Modules
+- `users`: create/get/modify/delete/list/suspend/enable/getStats
+- `keys`: generate/revoke
+- `subusers`: create/modify/remove
+- `buckets`: list/getInfo/delete/transferOwnership/removeOwnership/verifyIndex
+- `quota`: user and bucket quota operations
+- `rateLimit`: user, bucket, and global rate-limit operations
+- `usage`: get/trim usage logs
+- `info`: get cluster info
+
+## Error Classes
+- `RGWError`
+- `RGWValidationError`
+- `RGWAuthError`
+- `RGWNotFoundError`
+- `RGWConflictError`
+
+## HTTP Error Mapping
+- 400 -> `RGWValidationError`
+- 403 -> `RGWAuthError`
+- 404 -> `RGWNotFoundError`
+- 409 -> `RGWConflictError`
+- 5xx -> `RGWError`
+
+## Safety Notes
+- Destructive operations (`purgeData`, `purgeObjects`, `removeAll`) are dangerous and should be used only with explicit intent.
+- `insecure: true` disables TLS verification and is not recommended for production.
+
+## Canonical References
+- Repo README: ./README.md
+- Full machine-readable reference: ./llms-full.txt
+- Ceph RGW Admin Ops API: https://docs.ceph.com/en/latest/radosgw/adminops/

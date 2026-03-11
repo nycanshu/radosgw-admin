@@ -31,6 +31,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "docs:api": "typedoc",
+    "docs:dev": "cd website && npm run start",
+    "docs:build": "npm run docs:api && cd website && npm run build",
+    "docs:serve": "cd website && npm run serve",
     "prepublishOnly": "npm run build && npm test",
     "check": "npm run typecheck && npm run lint && npm run format:check && npm test",
     "prepare": "husky"
@@ -77,6 +81,7 @@
     "@typescript-eslint/parser": "^8.57.0",
     "@vitest/coverage-v8": "^4.0.18",
     "dotenv": "^17.3.1",
+    "tsx": "^4.19.2",
     "eslint": "^10.0.3",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
@@ -84,6 +89,8 @@
     "prettier": "^3.8.1",
     "publint": "^0.3.18",
     "tsup": "^8.5.1",
+    "typedoc": "^0.28.17",
+    "typedoc-plugin-markdown": "^4.10.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
   },

@@ -1,0 +1,22 @@
+{
+  "name": "radosgw-admin-docs",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "start": "docusaurus start",
+    "build": "docusaurus build",
+    "serve": "docusaurus serve",
+    "clear": "docusaurus clear",
+    "docs:api": "cd .. && npx typedoc"
+  },
+  "dependencies": {
+    "@docusaurus/core": "^3.9.2",
+    "@docusaurus/preset-classic": "^3.9.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "typedoc": "^0.28.17",
+    "typedoc-plugin-markdown": "^4.10.0"
+  }
+}
