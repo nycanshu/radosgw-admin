@@ -20,9 +20,5 @@ coverage
 *.dll
 *.so
 
-#claude
-CLAUDE.md
-AGENTS.md
-
 #docs
 radosgw-admin-*.md
