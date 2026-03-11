@@ -27,6 +27,7 @@ import {
   RGWConflictError,
   RGWAuthError,
 } from '../../src/index.js';
+import { randomBytes } from 'node:crypto';
 import { config } from 'dotenv';
 
 config();
@@ -102,7 +103,7 @@ const badClient = new RadosGWAdminClient({
   secretKey: 'INVALID_SECRET_KEY_YYYY',
 });
 
-const RUN_ID = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+const RUN_ID = `${Date.now()}-${randomBytes(4).toString('hex')}`;
 const TEST_UID = `ct-users-${RUN_ID}`;
 const TEST_UID_CAPS = `ct-users-caps-${RUN_ID}`;
 const TEST_UID_TENANT = `ct-users-tenant-${RUN_ID}`;
