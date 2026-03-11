@@ -67,6 +67,7 @@ function getCanonicalQueryString(url: URL): string {
  * @param request - The request details to sign
  * @param date - Optional date override (used for testing)
  * @returns Headers that must be added to the request
+ * @internal
  */
 export function signRequest(request: SignRequest, date?: Date): SignedHeaders {
   const now = date ?? new Date();
