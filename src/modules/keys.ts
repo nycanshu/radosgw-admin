@@ -23,19 +23,24 @@ export class KeysModule {
   /**
    * Generate a new S3 or Swift key for a user.
    *
+   * Returns the user's **entire** key list after the operation, not just the
+   * newly created key. To identify the new key, compare with the key list
+   * before generation or look for the last entry.
+   *
    * @param input - Key generation parameters. `uid` is required.
-   * @returns Array of keys belonging to the user after generation.
+   * @returns Array of **all** keys belonging to the user after generation.
    * @throws {RGWValidationError} If `uid` is missing or invalid.
    * @throws {RGWNotFoundError} If the user does not exist.
    *
    * @example
    * ```typescript
    * // Auto-generate a new S3 key
-   * const keys = await client.keys.generate({ uid: 'alice' });
-   * console.log('New key:', keys[0].accessKey);
+   * const allKeys = await client.keys.generate({ uid: 'alice' });
+   * const newKey = allKeys[allKeys.length - 1]; // newest key is last
+   * console.log('New key:', newKey.accessKey);
    *
-   * // Generate with specific credentials
-   * const keys = await client.keys.generate({
+   * // Supply specific credentials (disable auto-generation)
+   * const allKeys = await client.keys.generate({
    *   uid: 'alice',
    *   accessKey: 'MY_ACCESS_KEY',
    *   secretKey: 'MY_SECRET_KEY',
@@ -87,6 +92,10 @@ export class KeysModule {
       input.accessKey.trim().length === 0
     ) {
       throw new RGWValidationError('accessKey is required and must be a non-empty string');
+    }
+
+    if (input.keyType === 'swift' && !input.uid) {
+      throw new RGWValidationError('uid is required when revoking a Swift key (keyType: "swift")');
     }
 
     return this.client.request<void>({

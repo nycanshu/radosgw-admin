@@ -92,6 +92,37 @@ describe('KeysModule', () => {
     it('throws RGWValidationError when uid has trailing whitespace', async () => {
       await expect(keys.generate({ uid: 'alice  ' })).rejects.toThrow(RGWValidationError);
     });
+
+    it('passes keyType swift correctly', async () => {
+      client.request.mockResolvedValue(mockKeys);
+
+      await keys.generate({ uid: 'alice', keyType: 'swift' });
+
+      const call = client.request.mock.calls[0]![0] as { query: Record<string, unknown> };
+      expect(call.query.keyType).toBe('swift');
+    });
+
+    it('passes generateKey=true explicitly', async () => {
+      client.request.mockResolvedValue(mockKeys);
+
+      await keys.generate({ uid: 'alice', generateKey: true });
+
+      const call = client.request.mock.calls[0]![0] as { query: Record<string, unknown> };
+      expect(call.query.generateKey).toBe(true);
+    });
+
+    it('returns all user keys after generation', async () => {
+      const threeKeys: RGWKey[] = [
+        { user: 'alice', accessKey: 'KEY1', secretKey: 'SECRET1' },
+        { user: 'alice', accessKey: 'KEY2', secretKey: 'SECRET2' },
+        { user: 'alice', accessKey: 'KEY3', secretKey: 'SECRET3' },
+      ];
+      client.request.mockResolvedValue(threeKeys);
+
+      const result = await keys.generate({ uid: 'alice' });
+      expect(result).toHaveLength(3);
+      expect(result[2].accessKey).toBe('KEY3');
+    });
   });
 
   // ── revoke ──────────────────────────────────────────────
@@ -135,6 +166,34 @@ describe('KeysModule', () => {
 
     it('throws RGWValidationError when accessKey is whitespace-only', async () => {
       await expect(keys.revoke({ accessKey: '   ' })).rejects.toThrow(RGWValidationError);
+    });
+
+    it('throws RGWValidationError when swift key revoked without uid', async () => {
+      await expect(keys.revoke({ accessKey: 'SWIFTKEY', keyType: 'swift' })).rejects.toThrow(
+        RGWValidationError,
+      );
+    });
+
+    it('throws RGWValidationError with descriptive swift message', async () => {
+      await expect(keys.revoke({ accessKey: 'SWIFTKEY', keyType: 'swift' })).rejects.toThrow(
+        /uid is required.*swift/i,
+      );
+    });
+
+    it('does not require uid for s3 key revocation', async () => {
+      client.request.mockResolvedValue(undefined);
+
+      await expect(keys.revoke({ accessKey: 'S3KEY', keyType: 's3' })).resolves.toBeUndefined();
+    });
+
+    it('sends optional fields as undefined when not provided', async () => {
+      client.request.mockResolvedValue(undefined);
+
+      await keys.revoke({ accessKey: 'KEY1' });
+
+      const call = client.request.mock.calls[0]![0] as { query: Record<string, unknown> };
+      expect(call.query.uid).toBeUndefined();
+      expect(call.query.keyType).toBeUndefined();
     });
   });
 });

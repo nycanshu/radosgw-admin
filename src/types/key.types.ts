@@ -6,7 +6,11 @@ export interface CreateKeyInput {
   keyType?: 's3' | 'swift';
   /** Specify an access key instead of auto-generating. */
   accessKey?: string;
-  /** Specify a secret key instead of auto-generating. */
+  /**
+   * Specify a secret key instead of auto-generating.
+   * @remarks This value is transmitted as a query parameter per the RGW Admin Ops API wire
+   * format. It is redacted from debug logs by the client.
+   */
   secretKey?: string;
   /** Whether to auto-generate the key. Default: true. */
   generateKey?: boolean;
