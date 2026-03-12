@@ -112,6 +112,13 @@ const config = {
             title: 'Modules',
             items: [
               { label: 'Users', to: '/guides/users' },
+              { label: 'Keys', to: '/guides/keys' },
+              { label: 'Subusers', to: '/guides/subusers' },
+              { label: 'Buckets', to: '/guides/buckets' },
+              { label: 'Quota', to: '/guides/quota' },
+              { label: 'Rate Limits', to: '/guides/ratelimit' },
+              { label: 'Usage', to: '/guides/usage' },
+              { label: 'Info', to: '/guides/info' },
               { label: 'API Reference', to: '/api' },
             ],
           },
@@ -137,7 +144,7 @@ const config = {
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} radosgw-admin · MIT License`,
+        copyright: `Copyright © ${new Date().getFullYear()} radosgw-admin · Apache-2.0 License`,
       },
 
       prism: {
