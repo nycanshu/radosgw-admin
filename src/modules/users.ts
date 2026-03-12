@@ -266,9 +266,13 @@ export class UsersModule {
   /**
    * List all user IDs in the cluster (or tenant).
    *
-   * Returns the full list in a single call. For clusters with a very large number
-   * of users, this may be a large response — there is no server-side pagination
-   * support on the `/metadata/user` endpoint.
+   * Returns the full list in a single call. The RGW `/metadata/user` endpoint
+   * supports `marker` and `max-entries` for server-side pagination, but has a
+   * default limit of 1000 entries. This method requests up to 100,000 entries
+   * to avoid silent truncation on large clusters.
+   *
+   * For clusters with more than 100k users, use the planned `paginate()` method
+   * (see v1.6 roadmap).
    *
    * @returns Array of user ID strings.
    *
@@ -279,10 +283,18 @@ export class UsersModule {
    * ```
    */
   async list(): Promise<string[]> {
-    return this.client.request<string[]>({
+    const result = await this.client.request<string[] | { keys: string[] }>({
       method: 'GET',
       path: '/metadata/user',
+      query: { maxEntries: 100000 },
     });
+
+    // With max-entries, RGW returns { keys: [...], truncated, marker }
+    // instead of a plain array. Normalize to string[].
+    if (Array.isArray(result)) {
+      return result;
+    }
+    return result.keys;
   }
 
   /**
@@ -336,13 +348,18 @@ export class UsersModule {
   /**
    * Get storage usage statistics for a user.
    *
-   * Returns the full user object with an additional `stats` field containing
-   * storage size and object counts. Pass `sync: true` to force RGW to
-   * recalculate stats from the backing store before returning (slower but accurate).
+   * Returns the full user object with an additional `stats` field containing:
+   * - `size` / `sizeKb` — logical bytes/KB used
+   * - `sizeActual` / `sizeKbActual` — bytes/KB on disk (accounting for alignment)
+   * - `sizeUtilized` / `sizeKbUtilized` — bytes/KB utilized (used + overhead)
+   * - `numObjects` — total number of objects stored
+   *
+   * Pass `sync: true` to force RGW to recalculate stats from the backing store
+   * before returning (slower but accurate).
    *
    * @param uid - The user ID.
    * @param sync - If true, forces a stats sync before returning. Default: false.
-   * @returns User object with embedded `stats` field.
+   * @returns User object with embedded {@link RGWUserStatData} `stats` field.
    * @throws {RGWValidationError} If `uid` is empty.
    * @throws {RGWNotFoundError} If the user does not exist.
    *
@@ -352,10 +369,11 @@ export class UsersModule {
    * const result = await client.users.getStats('alice');
    *
    * // Force sync — accurate but slower
-   * const result = await client.users.getStats('alice', true);
+   * const synced = await client.users.getStats('alice', true);
    *
    * console.log('Objects:', result.stats.numObjects);
    * console.log('Size (KB):', result.stats.sizeKb);
+   * console.log('Actual disk (KB):', result.stats.sizeKbActual);
    * ```
    */
   async getStats(uid: string, sync?: boolean): Promise<RGWUserWithStats> {

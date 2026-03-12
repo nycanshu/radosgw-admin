@@ -35,6 +35,14 @@ export class BucketsModule {
   /**
    * List all buckets, optionally filtered by user.
    *
+   * The RGW `/bucket` endpoint supports `marker` and `max-entries` for
+   * server-side pagination, but has a default limit of 1000 entries.
+   * This method requests up to 100,000 entries to avoid silent truncation
+   * on large clusters.
+   *
+   * For clusters with more than 100k buckets, use the planned `paginate()`
+   * method (see v1.6 roadmap).
+   *
    * @param uid - If provided, only list buckets owned by this user.
    * @returns Array of bucket name strings.
    *
@@ -48,7 +56,7 @@ export class BucketsModule {
    * ```
    */
   async list(uid?: string): Promise<string[]> {
-    const query: Record<string, string | undefined> = {};
+    const query: Record<string, string | number | undefined> = {};
     if (uid !== undefined) {
       validateUid(uid);
       query.uid = uid;
