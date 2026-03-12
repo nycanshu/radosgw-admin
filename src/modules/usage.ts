@@ -1,5 +1,6 @@
 import type { BaseClient } from '../client.js';
 import { RGWValidationError } from '../errors.js';
+import { validateUid } from '../validators.js';
 import type { GetUsageInput, TrimUsageInput, RGWUsageReport } from '../types/usage.types.js';
 
 /**
@@ -21,6 +22,17 @@ function normalizeDate(value: string | Date): string {
     );
   }
   return value.trim();
+}
+
+/**
+ * Warns if start date is after end date (RGW returns empty results silently).
+ */
+function warnIfInvertedRange(start: string | undefined, end: string | undefined): void {
+  if (start !== undefined && end !== undefined && start > end) {
+    console.warn(
+      `[radosgw-admin] WARNING: start "${start}" is after end "${end}" — RGW will return empty results`,
+    );
+  }
 }
 
 /**
@@ -56,6 +68,7 @@ export class UsageModule {
    *
    * @param input - Optional filters: `uid`, `start`, `end`, `showEntries`, `showSummary`.
    * @returns A usage report with `entries` (per-bucket detail) and `summary` (per-user totals).
+   * @throws {RGWValidationError} If `uid` is provided but empty/whitespace.
    * @throws {RGWValidationError} If a date string is not in a recognised format.
    *
    * @example
@@ -76,8 +89,13 @@ export class UsageModule {
    * ```
    */
   async get(input: GetUsageInput = {}): Promise<RGWUsageReport> {
+    if (input.uid !== undefined) {
+      validateUid(input.uid);
+    }
+
     const start = input.start !== undefined ? normalizeDate(input.start) : undefined;
     const end = input.end !== undefined ? normalizeDate(input.end) : undefined;
+    warnIfInvertedRange(start, end);
 
     return this.client.request<RGWUsageReport>({
       method: 'GET',
@@ -101,6 +119,7 @@ export class UsageModule {
    * `removeAll: true` is required to prevent accidental full-cluster log wipes.
    *
    * @param input - Trim filters. Omit entirely to trim nothing (use `removeAll: true` explicitly).
+   * @throws {RGWValidationError} If `uid` is provided but empty/whitespace.
    * @throws {RGWValidationError} If `uid` is omitted but `removeAll` is not `true`.
    * @throws {RGWValidationError} If a date string is not in a recognised format.
    *
@@ -114,6 +133,10 @@ export class UsageModule {
    * ```
    */
   async trim(input: TrimUsageInput = {}): Promise<void> {
+    if (input.uid !== undefined) {
+      validateUid(input.uid);
+    }
+
     if (!input.uid && input.removeAll !== true) {
       throw new RGWValidationError(
         'trim() without a uid removes logs for ALL users. Set removeAll: true to confirm.',
@@ -129,6 +152,7 @@ export class UsageModule {
 
     const start = input.start !== undefined ? normalizeDate(input.start) : undefined;
     const end = input.end !== undefined ? normalizeDate(input.end) : undefined;
+    warnIfInvertedRange(start, end);
 
     return this.client.request<void>({
       method: 'DELETE',

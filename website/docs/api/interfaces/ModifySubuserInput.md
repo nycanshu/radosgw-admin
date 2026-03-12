@@ -4,7 +4,7 @@
 
 # Interface: ModifySubuserInput
 
-Defined in: src/types/key.types.ts:42
+Defined in: src/types/key.types.ts:50
 
 Input for modifying a subuser.
 
@@ -14,7 +14,7 @@ Input for modifying a subuser.
 
 > `optional` **access**: `"read"` \| `"write"` \| `"readwrite"` \| `"full"`
 
-Defined in: src/types/key.types.ts:52
+Defined in: src/types/key.types.ts:64
 
 Updated access level.
 
@@ -24,7 +24,7 @@ Updated access level.
 
 > `optional` **generateSecret**: `boolean`
 
-Defined in: src/types/key.types.ts:54
+Defined in: src/types/key.types.ts:66
 
 Whether to auto-generate a secret.
 
@@ -34,7 +34,7 @@ Whether to auto-generate a secret.
 
 > `optional` **keyType**: `"s3"` \| `"swift"`
 
-Defined in: src/types/key.types.ts:50
+Defined in: src/types/key.types.ts:62
 
 Key type for the subuser.
 
@@ -44,9 +44,14 @@ Key type for the subuser.
 
 > `optional` **secretKey**: `string`
 
-Defined in: src/types/key.types.ts:48
+Defined in: src/types/key.types.ts:60
 
 Secret key for the subuser.
+
+#### Remarks
+
+This value is transmitted as a query parameter per the RGW Admin Ops API wire
+format. It is redacted from debug logs by the client.
 
 ***
 
@@ -54,9 +59,9 @@ Secret key for the subuser.
 
 > **subuser**: `string`
 
-Defined in: src/types/key.types.ts:46
+Defined in: src/types/key.types.ts:54
 
-Subuser ID (e.g. "alice:swift"). Required.
+Subuser ID in `uid:name` format (e.g. `"alice:swift"`). Required.
 
 ***
 
@@ -64,6 +69,6 @@ Subuser ID (e.g. "alice:swift"). Required.
 
 > **uid**: `string`
 
-Defined in: src/types/key.types.ts:44
+Defined in: src/types/key.types.ts:52
 
 Parent user UID. Required.

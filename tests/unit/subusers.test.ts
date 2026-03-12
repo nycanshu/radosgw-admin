@@ -109,6 +109,18 @@ describe('SubusersModule', () => {
         RGWValidationError,
       );
     });
+
+    it('throws RGWValidationError when subuser is missing colon format', async () => {
+      await expect(subusers.create({ uid: 'alice', subuser: 'aliceswift' })).rejects.toThrow(
+        RGWValidationError,
+      );
+    });
+
+    it('throws RGWValidationError with descriptive format message', async () => {
+      await expect(subusers.create({ uid: 'alice', subuser: 'aliceswift' })).rejects.toThrow(
+        /uid:name/,
+      );
+    });
   });
 
   // ── modify ──────────────────────────────────────────────
@@ -156,6 +168,12 @@ describe('SubusersModule', () => {
     it('throws RGWValidationError when subuser is empty', async () => {
       await expect(subusers.modify({ uid: 'alice', subuser: '' })).rejects.toThrow(
         RGWValidationError,
+      );
+    });
+
+    it('throws RGWValidationError when subuser is missing colon format', async () => {
+      await expect(subusers.modify({ uid: 'alice', subuser: 'aliceswift' })).rejects.toThrow(
+        /uid:name/,
       );
     });
   });
@@ -221,6 +239,42 @@ describe('SubusersModule', () => {
       await expect(subusers.remove({ uid: 'alice', subuser: '' })).rejects.toThrow(
         RGWValidationError,
       );
+    });
+
+    it('throws RGWValidationError when subuser is missing colon format', async () => {
+      await expect(subusers.remove({ uid: 'alice', subuser: 'aliceswift' })).rejects.toThrow(
+        /uid:name/,
+      );
+    });
+
+    it('emits console.warn when purgeKeys is true', async () => {
+      client.request.mockResolvedValue(undefined);
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      await subusers.remove({ uid: 'alice', subuser: 'alice:swift', purgeKeys: true });
+
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('purgeKeys=true'));
+      warnSpy.mockRestore();
+    });
+
+    it('does not emit console.warn when purgeKeys is false', async () => {
+      client.request.mockResolvedValue(undefined);
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      await subusers.remove({ uid: 'alice', subuser: 'alice:swift', purgeKeys: false });
+
+      expect(warnSpy).not.toHaveBeenCalled();
+      warnSpy.mockRestore();
+    });
+
+    it('does not emit console.warn when purgeKeys is omitted', async () => {
+      client.request.mockResolvedValue(undefined);
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      await subusers.remove({ uid: 'alice', subuser: 'alice:swift' });
+
+      expect(warnSpy).not.toHaveBeenCalled();
+      warnSpy.mockRestore();
     });
   });
 });

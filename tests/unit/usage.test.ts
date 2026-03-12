@@ -145,6 +145,25 @@ describe('UsageModule', () => {
     it('throws RGWValidationError for invalid Date object', async () => {
       await expect(usage.get({ start: new Date('invalid') })).rejects.toThrow(RGWValidationError);
     });
+
+    it('throws RGWValidationError for empty uid', async () => {
+      await expect(usage.get({ uid: '' })).rejects.toThrow(RGWValidationError);
+    });
+
+    it('throws RGWValidationError for whitespace-only uid', async () => {
+      await expect(usage.get({ uid: '   ' })).rejects.toThrow(RGWValidationError);
+    });
+
+    it('emits console.warn when start > end', async () => {
+      client.request.mockResolvedValue(mockReport);
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      await usage.get({ start: '2025-06-01', end: '2025-01-01' });
+
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('start'));
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('empty results'));
+      warnSpy.mockRestore();
+    });
   });
 
   // ── trim ─────────────────────────────────────────────────
@@ -200,6 +219,24 @@ describe('UsageModule', () => {
       await expect(usage.trim({ uid: 'alice', start: 'bad-date' })).rejects.toThrow(
         RGWValidationError,
       );
+    });
+
+    it('throws RGWValidationError for empty uid', async () => {
+      await expect(usage.trim({ uid: '' })).rejects.toThrow(RGWValidationError);
+    });
+
+    it('throws RGWValidationError for whitespace-only uid (prevents safety bypass)', async () => {
+      await expect(usage.trim({ uid: '   ' })).rejects.toThrow(RGWValidationError);
+    });
+
+    it('emits console.warn when start > end', async () => {
+      client.request.mockResolvedValue(undefined);
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      await usage.trim({ uid: 'alice', start: '2025-06-01', end: '2025-01-01' });
+
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('empty results'));
+      warnSpy.mockRestore();
     });
 
     it('emits console.warn for removeAll=true with uid', async () => {

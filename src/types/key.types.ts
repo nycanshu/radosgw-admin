@@ -6,7 +6,11 @@ export interface CreateKeyInput {
   keyType?: 's3' | 'swift';
   /** Specify an access key instead of auto-generating. */
   accessKey?: string;
-  /** Specify a secret key instead of auto-generating. */
+  /**
+   * Specify a secret key instead of auto-generating.
+   * @remarks This value is transmitted as a query parameter per the RGW Admin Ops API wire
+   * format. It is redacted from debug logs by the client.
+   */
   secretKey?: string;
   /** Whether to auto-generate the key. Default: true. */
   generateKey?: boolean;
@@ -26,9 +30,13 @@ export interface DeleteKeyInput {
 export interface CreateSubuserInput {
   /** Parent user UID. Required. */
   uid: string;
-  /** Subuser ID (e.g. "alice:swift"). Required. */
+  /** Subuser ID in `uid:name` format (e.g. `"alice:swift"`). Required. */
   subuser: string;
-  /** Secret key for the subuser. Auto-generated if omitted. */
+  /**
+   * Secret key for the subuser. Auto-generated if omitted.
+   * @remarks This value is transmitted as a query parameter per the RGW Admin Ops API wire
+   * format. It is redacted from debug logs by the client.
+   */
   secretKey?: string;
   /** Key type for the subuser. */
   keyType?: 'swift' | 's3';
@@ -42,9 +50,13 @@ export interface CreateSubuserInput {
 export interface ModifySubuserInput {
   /** Parent user UID. Required. */
   uid: string;
-  /** Subuser ID (e.g. "alice:swift"). Required. */
+  /** Subuser ID in `uid:name` format (e.g. `"alice:swift"`). Required. */
   subuser: string;
-  /** Secret key for the subuser. */
+  /**
+   * Secret key for the subuser.
+   * @remarks This value is transmitted as a query parameter per the RGW Admin Ops API wire
+   * format. It is redacted from debug logs by the client.
+   */
   secretKey?: string;
   /** Key type for the subuser. */
   keyType?: 'swift' | 's3';
@@ -58,7 +70,7 @@ export interface ModifySubuserInput {
 export interface DeleteSubuserInput {
   /** Parent user UID. Required. */
   uid: string;
-  /** Subuser ID to delete. Required. */
+  /** Subuser ID in `uid:name` format (e.g. `"alice:swift"`). Required. */
   subuser: string;
   /** Whether to also purge the subuser's keys. Default: true. */
   purgeKeys?: boolean;

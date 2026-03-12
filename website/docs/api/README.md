@@ -6,7 +6,6 @@
 
 ## Classes
 
-- [BaseClient](classes/BaseClient.md)
 - [RadosGWAdminClient](classes/RadosGWAdminClient.md)
 - [RGWAuthError](classes/RGWAuthError.md)
 - [RGWConflictError](classes/RGWConflictError.md)
@@ -39,8 +38,10 @@
 - [RGWKey](interfaces/RGWKey.md)
 - [RGWQuota](interfaces/RGWQuota.md)
 - [RGWRateLimit](interfaces/RGWRateLimit.md)
+- [RGWStorageBackend](interfaces/RGWStorageBackend.md)
 - [RGWSubuser](interfaces/RGWSubuser.md)
 - [RGWSwiftKey](interfaces/RGWSwiftKey.md)
+- [RGWUsageBucket](interfaces/RGWUsageBucket.md)
 - [RGWUsageCategory](interfaces/RGWUsageCategory.md)
 - [RGWUsageEntry](interfaces/RGWUsageEntry.md)
 - [RGWUsageReport](interfaces/RGWUsageReport.md)
@@ -59,7 +60,3 @@
 ## Type Aliases
 
 - [HttpMethod](type-aliases/HttpMethod.md)
-
-## Functions
-
-- [signRequest](functions/signRequest.md)

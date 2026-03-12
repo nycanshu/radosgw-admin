@@ -21,6 +21,16 @@ import type { RGWQuota, SetUserQuotaInput, SetBucketQuotaInput } from '../types/
  * parseSizeString('100');     // 100
  * ```
  */
+/**
+ * Validates that a numeric quota value is either -1 (unlimited) or >= 0.
+ * Other negative values have no meaning in RGW and likely indicate a bug.
+ */
+function validateQuotaValue(field: string, value: number | undefined): void {
+  if (value !== undefined && typeof value === 'number' && value < -1) {
+    throw new RGWValidationError(`${field} must be -1 (unlimited) or >= 0, got ${value}`);
+  }
+}
+
 export function parseSizeString(size: number | string): number {
   if (typeof size === 'number') return size;
 
@@ -95,7 +105,7 @@ export class QuotaModule {
    * like `"10G"`, `"500M"`, `"1T"`.
    *
    * @param input - Quota settings. `uid` is required.
-   * @throws {RGWValidationError} If `uid` is empty or `maxSize` format is invalid.
+   * @throws {RGWValidationError} If `uid` is empty, `maxSize` format is invalid, or `maxSize`/`maxObjects` is a negative number other than -1.
    * @throws {RGWNotFoundError} If the user does not exist.
    *
    * @example
@@ -110,8 +120,10 @@ export class QuotaModule {
    */
   async setUserQuota(input: SetUserQuotaInput): Promise<void> {
     validateUid(input.uid);
+    validateQuotaValue('maxObjects', input.maxObjects);
 
     const maxSize = input.maxSize !== undefined ? parseSizeString(input.maxSize) : undefined;
+    validateQuotaValue('maxSize', maxSize);
 
     return this.client.request<void>({
       method: 'PUT',
@@ -204,7 +216,7 @@ export class QuotaModule {
    * like `"1G"`, `"500M"`.
    *
    * @param input - Quota settings. `uid` is required.
-   * @throws {RGWValidationError} If `uid` is empty or `maxSize` format is invalid.
+   * @throws {RGWValidationError} If `uid` is empty, `maxSize` format is invalid, or `maxSize`/`maxObjects` is a negative number other than -1.
    * @throws {RGWNotFoundError} If the user does not exist.
    *
    * @example
@@ -219,8 +231,10 @@ export class QuotaModule {
    */
   async setBucketQuota(input: SetBucketQuotaInput): Promise<void> {
     validateUid(input.uid);
+    validateQuotaValue('maxObjects', input.maxObjects);
 
     const maxSize = input.maxSize !== undefined ? parseSizeString(input.maxSize) : undefined;
+    validateQuotaValue('maxSize', maxSize);
 
     return this.client.request<void>({
       method: 'PUT',

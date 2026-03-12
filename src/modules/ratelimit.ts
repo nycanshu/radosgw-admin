@@ -19,6 +19,31 @@ function validateBucket(bucket: string): void {
 }
 
 /**
+ * Validates that a rate limit value is >= 0 when provided.
+ * In RGW rate limits, 0 = unlimited (unlike quotas where -1 = unlimited).
+ */
+function validateRateLimitValue(field: string, value: number | undefined): void {
+  if (value !== undefined && typeof value === 'number' && value < 0) {
+    throw new RGWValidationError(`${field} must be >= 0 (0 = unlimited), got ${value}`);
+  }
+}
+
+/**
+ * Validates all rate limit fields in an input object.
+ */
+function validateRateLimitFields(input: {
+  maxReadOps?: number;
+  maxWriteOps?: number;
+  maxReadBytes?: number;
+  maxWriteBytes?: number;
+}): void {
+  validateRateLimitValue('maxReadOps', input.maxReadOps);
+  validateRateLimitValue('maxWriteOps', input.maxWriteOps);
+  validateRateLimitValue('maxReadBytes', input.maxReadBytes);
+  validateRateLimitValue('maxWriteBytes', input.maxWriteBytes);
+}
+
+/**
  * Rate limit management module — get, set, and disable rate limits for users, buckets, and globally.
  *
  * Rate limits are enforced **per RGW instance**. If you have 3 RGW daemons and want a
@@ -64,7 +89,7 @@ export class RateLimitModule {
     return this.client.request<RGWRateLimit>({
       method: 'GET',
       path: '/ratelimit',
-      query: { rateLimit: '', uid, scope: 'user' },
+      query: { ratelimit: '', uid, scope: 'user' },
     });
   }
 
@@ -73,8 +98,8 @@ export class RateLimitModule {
    *
    * Values are per RGW instance. Divide by the number of RGW daemons for cluster-wide limits.
    *
-   * @param input - Rate limit settings. `uid` is required.
-   * @throws {RGWValidationError} If `uid` is empty.
+   * @param input - Rate limit settings. `uid` is required. `enabled` defaults to `true`.
+   * @throws {RGWValidationError} If `uid` is empty or any rate limit value is negative.
    * @throws {RGWNotFoundError} If the user does not exist.
    *
    * @example
@@ -90,12 +115,13 @@ export class RateLimitModule {
    */
   async setUserLimit(input: SetUserRateLimitInput): Promise<void> {
     validateUid(input.uid);
+    validateRateLimitFields(input);
 
     return this.client.request<void>({
       method: 'POST',
       path: '/ratelimit',
       query: {
-        rateLimit: '',
+        ratelimit: '',
         uid: input.uid,
         scope: 'user',
         maxReadOps: input.maxReadOps,
@@ -125,7 +151,7 @@ export class RateLimitModule {
     return this.client.request<void>({
       method: 'POST',
       path: '/ratelimit',
-      query: { rateLimit: '', uid, scope: 'user', enabled: false },
+      query: { ratelimit: '', uid, scope: 'user', enabled: false },
     });
   }
 
@@ -149,7 +175,7 @@ export class RateLimitModule {
     return this.client.request<RGWRateLimit>({
       method: 'GET',
       path: '/ratelimit',
-      query: { rateLimit: '', bucket, scope: 'bucket' },
+      query: { ratelimit: '', bucket, scope: 'bucket' },
     });
   }
 
@@ -158,8 +184,8 @@ export class RateLimitModule {
    *
    * Values are per RGW instance. Divide by the number of RGW daemons for cluster-wide limits.
    *
-   * @param input - Rate limit settings. `bucket` is required.
-   * @throws {RGWValidationError} If `bucket` is empty.
+   * @param input - Rate limit settings. `bucket` is required. `enabled` defaults to `true`.
+   * @throws {RGWValidationError} If `bucket` is empty or any rate limit value is negative.
    * @throws {RGWNotFoundError} If the bucket does not exist.
    *
    * @example
@@ -174,12 +200,13 @@ export class RateLimitModule {
    */
   async setBucketLimit(input: SetBucketRateLimitInput): Promise<void> {
     validateBucket(input.bucket);
+    validateRateLimitFields(input);
 
     return this.client.request<void>({
       method: 'POST',
       path: '/ratelimit',
       query: {
-        rateLimit: '',
+        ratelimit: '',
         bucket: input.bucket,
         scope: 'bucket',
         maxReadOps: input.maxReadOps,
@@ -209,7 +236,7 @@ export class RateLimitModule {
     return this.client.request<void>({
       method: 'POST',
       path: '/ratelimit',
-      query: { rateLimit: '', bucket, scope: 'bucket', enabled: false },
+      query: { ratelimit: '', bucket, scope: 'bucket', enabled: false },
     });
   }
 
@@ -228,7 +255,7 @@ export class RateLimitModule {
     return this.client.request<RGWGlobalRateLimit>({
       method: 'GET',
       path: '/ratelimit',
-      query: { rateLimit: '', global: '' },
+      query: { ratelimit: '', global: '' },
     });
   }
 
@@ -237,8 +264,8 @@ export class RateLimitModule {
    *
    * Use `scope: 'anonymous'` to protect public-read buckets from abuse.
    *
-   * @param input - Rate limit settings. `scope` is required.
-   * @throws {RGWValidationError} If `scope` is invalid.
+   * @param input - Rate limit settings. `scope` is required. `enabled` defaults to `true`.
+   * @throws {RGWValidationError} If `scope` is invalid or any rate limit value is negative.
    *
    * @example
    * ```typescript
@@ -258,12 +285,13 @@ export class RateLimitModule {
         `scope must be one of: ${validScopes.join(', ')}. Got: "${input.scope}"`,
       );
     }
+    validateRateLimitFields(input);
 
     return this.client.request<void>({
       method: 'POST',
       path: '/ratelimit',
       query: {
-        rateLimit: '',
+        ratelimit: '',
         global: '',
         scope: input.scope,
         maxReadOps: input.maxReadOps,

@@ -70,7 +70,7 @@ describe('BucketsModule', () => {
   // ── list ──────────────────────────────────────────────
 
   describe('list', () => {
-    it('sends GET /bucket without uid', async () => {
+    it('sends GET /bucket with maxEntries', async () => {
       client.request.mockResolvedValue(['bucket-a', 'bucket-b']);
 
       const result = await buckets.list();
@@ -78,22 +78,9 @@ describe('BucketsModule', () => {
       expect(client.request).toHaveBeenCalledWith({
         method: 'GET',
         path: '/bucket',
-        query: {},
+        query: { maxEntries: 100000 },
       });
       expect(result).toEqual(['bucket-a', 'bucket-b']);
-    });
-
-    it('sends GET /bucket with uid filter', async () => {
-      client.request.mockResolvedValue(['bucket-a']);
-
-      const result = await buckets.list('alice');
-
-      expect(client.request).toHaveBeenCalledWith({
-        method: 'GET',
-        path: '/bucket',
-        query: { uid: 'alice' },
-      });
-      expect(result).toEqual(['bucket-a']);
     });
 
     it('returns empty array when no buckets exist', async () => {
@@ -104,8 +91,53 @@ describe('BucketsModule', () => {
       expect(result).toEqual([]);
     });
 
+    it('extracts buckets from paginated response shape', async () => {
+      client.request.mockResolvedValue({ buckets: ['bucket-a'], count: 1, truncated: false });
+
+      const result = await buckets.list();
+
+      expect(result).toEqual(['bucket-a']);
+    });
+
+    it('returns empty array from paginated empty response', async () => {
+      client.request.mockResolvedValue({ buckets: [], count: 0, truncated: false });
+
+      const result = await buckets.list();
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  // ── listByUser ──────────────────────────────────────────
+
+  describe('listByUser', () => {
+    it('sends GET /bucket with uid filter', async () => {
+      client.request.mockResolvedValue(['bucket-a']);
+
+      const result = await buckets.listByUser('alice');
+
+      expect(client.request).toHaveBeenCalledWith({
+        method: 'GET',
+        path: '/bucket',
+        query: { uid: 'alice' },
+      });
+      expect(result).toEqual(['bucket-a']);
+    });
+
+    it('returns empty array when user has no buckets', async () => {
+      client.request.mockResolvedValue([]);
+
+      const result = await buckets.listByUser('alice');
+
+      expect(result).toEqual([]);
+    });
+
     it('throws RGWValidationError when uid is empty string', async () => {
-      await expect(buckets.list('')).rejects.toThrow(RGWValidationError);
+      await expect(buckets.listByUser('')).rejects.toThrow(RGWValidationError);
+    });
+
+    it('throws RGWValidationError when uid has whitespace', async () => {
+      await expect(buckets.listByUser('  alice')).rejects.toThrow(RGWValidationError);
     });
   });
 
@@ -178,6 +210,16 @@ describe('BucketsModule', () => {
       client.request.mockResolvedValue(undefined);
 
       await buckets.delete({ bucket: 'my-bucket', purgeObjects: false });
+
+      expect(warnSpy).not.toHaveBeenCalled();
+      warnSpy.mockRestore();
+    });
+
+    it('does not emit console.warn when purgeObjects is omitted', async () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      client.request.mockResolvedValue(undefined);
+
+      await buckets.delete({ bucket: 'my-bucket' });
 
       expect(warnSpy).not.toHaveBeenCalled();
       warnSpy.mockRestore();
@@ -298,6 +340,37 @@ describe('BucketsModule', () => {
       const call = client.request.mock.calls[0]![0] as { query: Record<string, unknown> };
       expect(call.query.checkObjects).toBeUndefined();
       expect(call.query.fix).toBeUndefined();
+    });
+
+    it('emits console.warn when fix is true', async () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      client.request.mockResolvedValue(mockCheckResult);
+
+      await buckets.verifyIndex({ bucket: 'my-bucket', fix: true });
+
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('fix=true'));
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('"my-bucket"'));
+      warnSpy.mockRestore();
+    });
+
+    it('does not emit console.warn when fix is false', async () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      client.request.mockResolvedValue(mockCheckResult);
+
+      await buckets.verifyIndex({ bucket: 'my-bucket', fix: false });
+
+      expect(warnSpy).not.toHaveBeenCalled();
+      warnSpy.mockRestore();
+    });
+
+    it('does not emit console.warn when fix is omitted', async () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      client.request.mockResolvedValue(mockCheckResult);
+
+      await buckets.verifyIndex({ bucket: 'my-bucket' });
+
+      expect(warnSpy).not.toHaveBeenCalled();
+      warnSpy.mockRestore();
     });
 
     it('throws RGWValidationError when bucket is empty', async () => {

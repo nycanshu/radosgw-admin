@@ -10,7 +10,7 @@ Defined in: src/types/usage.types.ts:51
 
 ### buckets
 
-> **buckets**: `RGWUsageBucket`[]
+> **buckets**: [`RGWUsageBucket`](RGWUsageBucket.md)[]
 
 Defined in: src/types/usage.types.ts:55
 

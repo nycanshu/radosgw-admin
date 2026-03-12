@@ -4,7 +4,7 @@
 
 # Interface: DeleteKeyInput
 
-Defined in: src/types/key.types.ts:16
+Defined in: src/types/key.types.ts:20
 
 Input for deleting an S3 or Swift key.
 
@@ -14,7 +14,7 @@ Input for deleting an S3 or Swift key.
 
 > **accessKey**: `string`
 
-Defined in: src/types/key.types.ts:18
+Defined in: src/types/key.types.ts:22
 
 The access key to delete. Required.
 
@@ -24,7 +24,7 @@ The access key to delete. Required.
 
 > `optional` **keyType**: `"s3"` \| `"swift"`
 
-Defined in: src/types/key.types.ts:22
+Defined in: src/types/key.types.ts:26
 
 Key type. Default: 's3'.
 
@@ -34,6 +34,6 @@ Key type. Default: 's3'.
 
 > `optional` **uid**: `string`
 
-Defined in: src/types/key.types.ts:20
+Defined in: src/types/key.types.ts:24
 
 User ID. Required for Swift keys.

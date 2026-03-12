@@ -4,7 +4,7 @@
 
 [![CI](https://github.com/nycanshu/radosgw-admin/actions/workflows/ci.yml/badge.svg)](https://github.com/nycanshu/radosgw-admin/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/radosgw-admin)](https://www.npmjs.com/package/radosgw-admin)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](https://www.typescriptlang.org/)
 
 ---
@@ -142,7 +142,8 @@ await rgw.subusers.remove({ uid: 'alice', subuser: 'alice:swift' });
 ### Buckets
 
 ```typescript
-rgw.buckets.list();                // List all buckets (optionally filter by user)
+rgw.buckets.list();                // List all buckets in the cluster
+rgw.buckets.listByUser(uid);      // List buckets owned by a specific user
 rgw.buckets.getInfo(bucket);       // Get bucket metadata and stats
 rgw.buckets.delete(input);         // Delete a bucket (optionally purge objects)
 rgw.buckets.transferOwnership(input); // Transfer bucket to a different user
@@ -158,7 +159,7 @@ rgw.buckets.verifyIndex(input);    // Check and optionally repair bucket index
 const allBuckets = await rgw.buckets.list();
 
 // List buckets owned by a specific user
-const userBuckets = await rgw.buckets.list('alice');
+const userBuckets = await rgw.buckets.listByUser('alice');
 
 // Get detailed bucket info
 const info = await rgw.buckets.getInfo('my-bucket');
@@ -347,7 +348,7 @@ rgw.info.get();   // Get cluster FSID and basic endpoint info
 
 ```typescript
 const info = await rgw.info.get();
-console.log('Cluster FSID:', info.info.clusterId);
+console.log('Cluster FSID:', info.info.storageBackends[0].clusterId);
 ```
 
 ## Error Handling
@@ -407,4 +408,4 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## License
 
-[MIT](LICENSE) &copy; nycanshu
+[Apache 2.0](LICENSE) &copy; nycanshu

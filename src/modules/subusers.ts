@@ -9,11 +9,14 @@ import type {
 } from '../types/key.types.js';
 
 /**
- * Validates that a subuser ID is a non-empty string.
+ * Validates that a subuser ID is a non-empty string in `uid:name` format.
  */
 function validateSubuser(subuser: string): void {
   if (!subuser || typeof subuser !== 'string' || subuser.trim().length === 0) {
     throw new RGWValidationError('subuser is required and must be a non-empty string');
+  }
+  if (!subuser.includes(':')) {
+    throw new RGWValidationError('subuser must be in "uid:name" format (e.g. "alice:swift")');
   }
 }
 
@@ -37,9 +40,14 @@ export class SubusersModule {
   /**
    * Create a new subuser for a user.
    *
+   * Returns the user's **entire** subuser list after the operation, not just the
+   * newly created subuser. To identify the new entry, compare with the list
+   * before creation or look for the matching `id`.
+   *
    * @param input - Subuser creation parameters. `uid` and `subuser` are required.
-   * @returns Array of subusers belonging to the user after creation.
-   * @throws {RGWValidationError} If `uid` or `subuser` is missing or invalid.
+   *   `subuser` must be in `uid:name` format (e.g. `"alice:swift"`).
+   * @returns Array of **all** subusers belonging to the user after creation.
+   * @throws {RGWValidationError} If `uid` or `subuser` is missing, invalid, or not in `uid:name` format.
    * @throws {RGWNotFoundError} If the parent user does not exist.
    *
    * @example
@@ -111,6 +119,7 @@ export class SubusersModule {
    * Remove a subuser from a user. Optionally purge the subuser's keys.
    *
    * @param input - `uid` and `subuser` are required. `purgeKeys` defaults to true.
+   * @returns Resolves when the subuser has been removed.
    * @throws {RGWValidationError} If `uid` or `subuser` is missing or invalid.
    * @throws {RGWNotFoundError} If the parent user or subuser does not exist.
    *
@@ -133,6 +142,12 @@ export class SubusersModule {
   async remove(input: DeleteSubuserInput): Promise<void> {
     validateUid(input.uid);
     validateSubuser(input.subuser);
+
+    if (input.purgeKeys === true) {
+      console.warn(
+        `[radosgw-admin] WARNING: purgeKeys=true will permanently delete all keys for subuser "${input.subuser}"`,
+      );
+    }
 
     return this.client.request<void>({
       method: 'DELETE',

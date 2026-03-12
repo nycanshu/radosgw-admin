@@ -4,7 +4,7 @@
 
 # Interface: DeleteSubuserInput
 
-Defined in: src/types/key.types.ts:58
+Defined in: src/types/key.types.ts:70
 
 Input for deleting a subuser.
 
@@ -14,7 +14,7 @@ Input for deleting a subuser.
 
 > `optional` **purgeKeys**: `boolean`
 
-Defined in: src/types/key.types.ts:64
+Defined in: src/types/key.types.ts:76
 
 Whether to also purge the subuser's keys. Default: true.
 
@@ -24,9 +24,9 @@ Whether to also purge the subuser's keys. Default: true.
 
 > **subuser**: `string`
 
-Defined in: src/types/key.types.ts:62
+Defined in: src/types/key.types.ts:74
 
-Subuser ID to delete. Required.
+Subuser ID in `uid:name` format (e.g. `"alice:swift"`). Required.
 
 ***
 
@@ -34,6 +34,6 @@ Subuser ID to delete. Required.
 
 > **uid**: `string`
 
-Defined in: src/types/key.types.ts:60
+Defined in: src/types/key.types.ts:72
 
 Parent user UID. Required.

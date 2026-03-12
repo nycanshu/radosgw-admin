@@ -484,7 +484,7 @@ describe('UsersModule', () => {
   // ── list ────────────────────────────────────────────────
 
   describe('list', () => {
-    it('sends GET /metadata/user and returns uid array', async () => {
+    it('sends GET /metadata/user with maxEntries', async () => {
       client.request.mockResolvedValue(['alice', 'bob', 'charlie']);
 
       const result = await users.list();
@@ -492,12 +492,28 @@ describe('UsersModule', () => {
       expect(client.request).toHaveBeenCalledWith({
         method: 'GET',
         path: '/metadata/user',
+        query: { maxEntries: 100000 },
       });
       expect(result).toEqual(['alice', 'bob', 'charlie']);
     });
 
+    it('extracts keys from paginated response shape', async () => {
+      client.request.mockResolvedValue({
+        keys: ['alice', 'bob'],
+        truncated: false,
+      });
+
+      const result = await users.list();
+      expect(result).toEqual(['alice', 'bob']);
+    });
+
     it('returns empty array when no users exist', async () => {
       client.request.mockResolvedValue([]);
+      expect(await users.list()).toEqual([]);
+    });
+
+    it('returns empty array from paginated empty response', async () => {
+      client.request.mockResolvedValue({ keys: [], truncated: false });
       expect(await users.list()).toEqual([]);
     });
 
