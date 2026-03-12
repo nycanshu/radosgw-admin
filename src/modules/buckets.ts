@@ -24,7 +24,8 @@ function validateBucket(bucket: string): void {
  *
  * @example
  * ```typescript
- * const buckets = await client.buckets.list('alice');
+ * const allBuckets = await client.buckets.list();
+ * const userBuckets = await client.buckets.listByUser('alice');
  * const info = await client.buckets.getInfo('my-bucket');
  * console.log(info.owner, info.usage.rgwMain.numObjects);
  * ```
@@ -33,39 +34,56 @@ export class BucketsModule {
   constructor(private readonly client: BaseClient) {}
 
   /**
-   * List all buckets, optionally filtered by user.
+   * List all buckets in the cluster.
    *
-   * The RGW `/bucket` endpoint supports `marker` and `max-entries` for
-   * server-side pagination, but has a default limit of 1000 entries.
+   * The RGW `/bucket` endpoint has a default limit of 1000 entries.
    * This method requests up to 100,000 entries to avoid silent truncation
    * on large clusters.
    *
    * For clusters with more than 100k buckets, use the planned `paginate()`
    * method (see v1.6 roadmap).
    *
-   * @param uid - If provided, only list buckets owned by this user.
    * @returns Array of bucket name strings.
    *
    * @example
    * ```typescript
-   * // All buckets in the cluster
    * const all = await client.buckets.list();
-   *
-   * // Buckets for a specific user
-   * const userBuckets = await client.buckets.list('alice');
+   * console.log(`Cluster has ${all.length} buckets`);
    * ```
    */
-  async list(uid?: string): Promise<string[]> {
-    const query: Record<string, string | number | undefined> = {};
-    if (uid !== undefined) {
-      validateUid(uid);
-      query.uid = uid;
+  async list(): Promise<string[]> {
+    const result = await this.client.request<string[] | { buckets: string[] }>({
+      method: 'GET',
+      path: '/bucket',
+      query: { maxEntries: 100000 },
+    });
+
+    if (Array.isArray(result)) {
+      return result;
     }
+    return result.buckets;
+  }
+
+  /**
+   * List buckets owned by a specific user.
+   *
+   * @param uid - User ID to filter buckets by. Required.
+   * @returns Array of bucket name strings owned by the user.
+   * @throws {RGWValidationError} If `uid` is missing or invalid.
+   *
+   * @example
+   * ```typescript
+   * const userBuckets = await client.buckets.listByUser('alice');
+   * console.log(`alice has ${userBuckets.length} buckets`);
+   * ```
+   */
+  async listByUser(uid: string): Promise<string[]> {
+    validateUid(uid);
 
     return this.client.request<string[]>({
       method: 'GET',
       path: '/bucket',
-      query,
+      query: { uid },
     });
   }
 
@@ -172,6 +190,10 @@ export class BucketsModule {
   /**
    * Remove ownership of a bucket from a user without deleting the bucket.
    *
+   * **Warning:** This leaves the bucket in an orphaned state with no owner.
+   * The bucket and its objects remain intact but cannot be managed via the
+   * S3 API until ownership is reassigned with {@link transferOwnership}.
+   *
    * @param input - `bucket` and `uid` are required.
    * @throws {RGWValidationError} If any required field is missing.
    * @throws {RGWNotFoundError} If the bucket or user does not exist.
@@ -228,6 +250,12 @@ export class BucketsModule {
    */
   async verifyIndex(input: CheckBucketIndexInput): Promise<CheckBucketIndexResult> {
     validateBucket(input.bucket);
+
+    if (input.fix === true) {
+      console.warn(
+        `[radosgw-admin] WARNING: fix=true will repair the bucket index for "${input.bucket}" — this mutates index data`,
+      );
+    }
 
     return this.client.request<CheckBucketIndexResult>({
       method: 'GET',

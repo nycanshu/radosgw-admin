@@ -142,7 +142,8 @@ await rgw.subusers.remove({ uid: 'alice', subuser: 'alice:swift' });
 ### Buckets
 
 ```typescript
-rgw.buckets.list();                // List all buckets (optionally filter by user)
+rgw.buckets.list();                // List all buckets in the cluster
+rgw.buckets.listByUser(uid);      // List buckets owned by a specific user
 rgw.buckets.getInfo(bucket);       // Get bucket metadata and stats
 rgw.buckets.delete(input);         // Delete a bucket (optionally purge objects)
 rgw.buckets.transferOwnership(input); // Transfer bucket to a different user
@@ -158,7 +159,7 @@ rgw.buckets.verifyIndex(input);    // Check and optionally repair bucket index
 const allBuckets = await rgw.buckets.list();
 
 // List buckets owned by a specific user
-const userBuckets = await rgw.buckets.list('alice');
+const userBuckets = await rgw.buckets.listByUser('alice');
 
 // Get detailed bucket info
 const info = await rgw.buckets.getInfo('my-bucket');
