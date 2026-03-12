@@ -10,11 +10,6 @@ on:
       - '.github/workflows/docs-pages.yml'
   pull_request:
     branches: [main]
-    paths:
-      - 'src/**'
-      - 'website/**'
-      - 'typedoc.json'
-      - '.github/workflows/docs-pages.yml'
   workflow_dispatch:
 
 permissions:
