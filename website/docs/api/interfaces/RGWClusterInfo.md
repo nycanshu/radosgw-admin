@@ -4,7 +4,7 @@
 
 # Interface: RGWClusterInfo
 
-Defined in: src/types/usage.types.ts:81
+Defined in: src/types/info.types.ts:10
 
 ## Properties
 
@@ -12,10 +12,10 @@ Defined in: src/types/usage.types.ts:81
 
 > **info**: `object`
 
-Defined in: src/types/usage.types.ts:82
+Defined in: src/types/info.types.ts:11
 
-#### clusterId
+#### storageBackends
 
-> **clusterId**: `string`
+> **storageBackends**: [`RGWStorageBackend`](RGWStorageBackend.md)[]
 
-The Ceph cluster FSID (unique identifier for the cluster).
+Storage backends available in this cluster.

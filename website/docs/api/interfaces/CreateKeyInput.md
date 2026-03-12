@@ -24,7 +24,7 @@ Specify an access key instead of auto-generating.
 
 > `optional` **generateKey**: `boolean`
 
-Defined in: src/types/key.types.ts:12
+Defined in: src/types/key.types.ts:16
 
 Whether to auto-generate the key. Default: true.
 
@@ -44,9 +44,14 @@ Key type. Default: 's3'.
 
 > `optional` **secretKey**: `string`
 
-Defined in: src/types/key.types.ts:10
+Defined in: src/types/key.types.ts:14
 
 Specify a secret key instead of auto-generating.
+
+#### Remarks
+
+This value is transmitted as a query parameter per the RGW Admin Ops API wire
+format. It is redacted from debug logs by the client.
 
 ***
 

@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "Modern TypeScript client for the Ceph RADOS Gateway Admin Ops REST API",
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": {
       "import": {

@@ -46,16 +46,6 @@ Defined in: src/index.ts:60
 
 ## Properties
 
-### \_client
-
-> `readonly` **\_client**: [`BaseClient`](BaseClient.md)
-
-Defined in: src/index.ts:34
-
-**`Internal`**
-
-***
-
 ### buckets
 
 > `readonly` **buckets**: `BucketsModule`
