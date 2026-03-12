@@ -1,5 +1,5 @@
 import type { BaseClient } from '../client.js';
-import type { RGWClusterInfo } from '../types/usage.types.js';
+import type { RGWClusterInfo } from '../types/info.types.js';
 
 /**
  * Cluster info module — retrieve basic cluster/endpoint information.
@@ -7,7 +7,7 @@ import type { RGWClusterInfo } from '../types/usage.types.js';
  * @example
  * ```typescript
  * const info = await client.info.get();
- * console.log('Cluster FSID:', info.info.clusterId);
+ * console.log('Cluster FSID:', info.info.storageBackends[0].clusterId);
  * ```
  */
 export class InfoModule {
@@ -20,11 +20,12 @@ export class InfoModule {
    * client is connected to when managing multiple environments.
    *
    * @returns Cluster info containing the cluster ID (FSID).
+   * @throws {RGWAuthError} If the credentials are invalid or lack permission.
    *
    * @example
    * ```typescript
    * const info = await client.info.get();
-   * console.log('Cluster FSID:', info.info.clusterId);
+   * console.log('Cluster FSID:', info.info.storageBackends[0].clusterId);
    * ```
    */
   async get(): Promise<RGWClusterInfo> {

@@ -1,11 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { InfoModule } from '../../src/modules/info.js';
+import { RGWAuthError } from '../../src/errors.js';
 import type { BaseClient } from '../../src/client.js';
-import type { RGWClusterInfo } from '../../src/types/usage.types.js';
+import type { RGWClusterInfo } from '../../src/types/info.types.js';
 
 const mockClusterInfo: RGWClusterInfo = {
   info: {
-    clusterId: 'a0b1c2d3-e4f5-6789-abcd-ef0123456789',
+    storageBackends: [
+      {
+        name: 'rados',
+        clusterId: 'a0b1c2d3-e4f5-6789-abcd-ef0123456789',
+      },
+    ],
   },
 };
 
@@ -35,7 +41,10 @@ describe('InfoModule', () => {
         path: '/info',
         query: {},
       });
-      expect(result.info.clusterId).toBe('a0b1c2d3-e4f5-6789-abcd-ef0123456789');
+      expect(result.info.storageBackends).toHaveLength(1);
+      expect(result.info.storageBackends[0]!.clusterId).toBe(
+        'a0b1c2d3-e4f5-6789-abcd-ef0123456789',
+      );
     });
 
     it('returns the cluster info shape', async () => {
@@ -44,8 +53,16 @@ describe('InfoModule', () => {
       const result = await info.get();
 
       expect(result).toHaveProperty('info');
-      expect(result.info).toHaveProperty('clusterId');
-      expect(typeof result.info.clusterId).toBe('string');
+      expect(result.info).toHaveProperty('storageBackends');
+      expect(Array.isArray(result.info.storageBackends)).toBe(true);
+      expect(result.info.storageBackends[0]).toHaveProperty('name');
+      expect(result.info.storageBackends[0]).toHaveProperty('clusterId');
+    });
+
+    it('propagates errors from the client', async () => {
+      client.request.mockRejectedValue(new RGWAuthError('Forbidden'));
+
+      await expect(info.get()).rejects.toThrow(RGWAuthError);
     });
   });
 });

@@ -75,12 +75,3 @@ export interface RGWUsageReport {
   /** Per-user aggregated summaries (present when showSummary is true). */
   summary: RGWUsageSummary[];
 }
-
-// ── Cluster info types ────────────────────────────────────────────────────────
-
-export interface RGWClusterInfo {
-  info: {
-    /** The Ceph cluster FSID (unique identifier for the cluster). */
-    clusterId: string;
-  };
-}

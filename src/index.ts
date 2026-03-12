@@ -117,8 +117,8 @@ export type {
   RGWUsageEntry,
   RGWUsageSummary,
   RGWUsageCategory,
-  RGWClusterInfo,
 } from './types/usage.types.js';
+export type { RGWClusterInfo, RGWStorageBackend } from './types/info.types.js';
 
 // Re-export errors
 export {

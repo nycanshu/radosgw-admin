@@ -66,4 +66,4 @@ console.log('Trimmed all cluster usage logs before 2024.');
 // ── Cluster info ────────────────────────────────────────────────────────────
 
 const info = await client.info.get();
-console.log(`\nCluster FSID: ${info.info.clusterId}`);
+console.log(`\nCluster FSID: ${info.info.storageBackends[0].clusterId}`);
