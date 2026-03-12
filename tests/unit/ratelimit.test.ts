@@ -44,7 +44,7 @@ describe('RateLimitModule', () => {
       expect(client.request).toHaveBeenCalledWith({
         method: 'GET',
         path: '/ratelimit',
-        query: { rateLimit: '', uid: 'alice', scope: 'user' },
+        query: { ratelimit: '', uid: 'alice', scope: 'user' },
       });
       expect(result.maxReadOps).toBe(100);
       expect(result.maxWriteOps).toBe(50);
@@ -52,6 +52,10 @@ describe('RateLimitModule', () => {
 
     it('throws RGWValidationError when uid is empty', async () => {
       await expect(rateLimit.getUserLimit('')).rejects.toThrow(RGWValidationError);
+    });
+
+    it('throws RGWValidationError when uid has whitespace', async () => {
+      await expect(rateLimit.getUserLimit('  alice')).rejects.toThrow(RGWValidationError);
     });
   });
 
@@ -73,7 +77,7 @@ describe('RateLimitModule', () => {
         method: 'POST',
         path: '/ratelimit',
         query: {
-          rateLimit: '',
+          ratelimit: '',
           uid: 'alice',
           scope: 'user',
           maxReadOps: 100,
@@ -118,6 +122,31 @@ describe('RateLimitModule', () => {
     it('throws RGWValidationError when uid is empty', async () => {
       await expect(rateLimit.setUserLimit({ uid: '' })).rejects.toThrow(RGWValidationError);
     });
+
+    it('throws RGWValidationError when uid has whitespace', async () => {
+      await expect(rateLimit.setUserLimit({ uid: '  alice' })).rejects.toThrow(RGWValidationError);
+    });
+
+    it('throws RGWValidationError when maxReadOps is negative', async () => {
+      await expect(rateLimit.setUserLimit({ uid: 'alice', maxReadOps: -1 })).rejects.toThrow(
+        RGWValidationError,
+      );
+    });
+
+    it('throws RGWValidationError when maxWriteBytes is negative', async () => {
+      await expect(rateLimit.setUserLimit({ uid: 'alice', maxWriteBytes: -5 })).rejects.toThrow(
+        RGWValidationError,
+      );
+    });
+
+    it('accepts maxReadOps=0 (unlimited)', async () => {
+      client.request.mockResolvedValue(undefined);
+
+      await rateLimit.setUserLimit({ uid: 'alice', maxReadOps: 0 });
+
+      const call = client.request.mock.calls[0]![0] as { query: Record<string, unknown> };
+      expect(call.query.maxReadOps).toBe(0);
+    });
   });
 
   // ── disableUserLimit ─────────────────────────────────
@@ -131,12 +160,16 @@ describe('RateLimitModule', () => {
       expect(client.request).toHaveBeenCalledWith({
         method: 'POST',
         path: '/ratelimit',
-        query: { rateLimit: '', uid: 'alice', scope: 'user', enabled: false },
+        query: { ratelimit: '', uid: 'alice', scope: 'user', enabled: false },
       });
     });
 
     it('throws RGWValidationError when uid is empty', async () => {
       await expect(rateLimit.disableUserLimit('')).rejects.toThrow(RGWValidationError);
+    });
+
+    it('throws RGWValidationError when uid has whitespace', async () => {
+      await expect(rateLimit.disableUserLimit('  alice')).rejects.toThrow(RGWValidationError);
     });
   });
 
@@ -151,7 +184,7 @@ describe('RateLimitModule', () => {
       expect(client.request).toHaveBeenCalledWith({
         method: 'GET',
         path: '/ratelimit',
-        query: { rateLimit: '', bucket: 'my-bucket', scope: 'bucket' },
+        query: { ratelimit: '', bucket: 'my-bucket', scope: 'bucket' },
       });
       expect(result.enabled).toBe(true);
     });
@@ -177,7 +210,7 @@ describe('RateLimitModule', () => {
         method: 'POST',
         path: '/ratelimit',
         query: {
-          rateLimit: '',
+          ratelimit: '',
           bucket: 'my-bucket',
           scope: 'bucket',
           maxReadOps: 200,
@@ -189,12 +222,48 @@ describe('RateLimitModule', () => {
       });
     });
 
+    it('defaults enabled to true', async () => {
+      client.request.mockResolvedValue(undefined);
+
+      await rateLimit.setBucketLimit({ bucket: 'my-bucket', maxReadOps: 200 });
+
+      const call = client.request.mock.calls[0]![0] as { query: Record<string, unknown> };
+      expect(call.query.enabled).toBe(true);
+    });
+
+    it('respects explicit enabled=false', async () => {
+      client.request.mockResolvedValue(undefined);
+
+      await rateLimit.setBucketLimit({ bucket: 'my-bucket', maxReadOps: 200, enabled: false });
+
+      const call = client.request.mock.calls[0]![0] as { query: Record<string, unknown> };
+      expect(call.query.enabled).toBe(false);
+    });
+
+    it('sends undefined for omitted optional fields', async () => {
+      client.request.mockResolvedValue(undefined);
+
+      await rateLimit.setBucketLimit({ bucket: 'my-bucket' });
+
+      const call = client.request.mock.calls[0]![0] as { query: Record<string, unknown> };
+      expect(call.query.maxReadOps).toBeUndefined();
+      expect(call.query.maxWriteOps).toBeUndefined();
+      expect(call.query.maxReadBytes).toBeUndefined();
+      expect(call.query.maxWriteBytes).toBeUndefined();
+    });
+
     it('throws RGWValidationError when bucket is empty', async () => {
       await expect(rateLimit.setBucketLimit({ bucket: '' })).rejects.toThrow(RGWValidationError);
     });
 
     it('throws RGWValidationError when bucket is whitespace', async () => {
       await expect(rateLimit.setBucketLimit({ bucket: '   ' })).rejects.toThrow(RGWValidationError);
+    });
+
+    it('throws RGWValidationError when maxWriteOps is negative', async () => {
+      await expect(
+        rateLimit.setBucketLimit({ bucket: 'my-bucket', maxWriteOps: -1 }),
+      ).rejects.toThrow(RGWValidationError);
     });
   });
 
@@ -209,12 +278,16 @@ describe('RateLimitModule', () => {
       expect(client.request).toHaveBeenCalledWith({
         method: 'POST',
         path: '/ratelimit',
-        query: { rateLimit: '', bucket: 'my-bucket', scope: 'bucket', enabled: false },
+        query: { ratelimit: '', bucket: 'my-bucket', scope: 'bucket', enabled: false },
       });
     });
 
     it('throws RGWValidationError when bucket is empty', async () => {
       await expect(rateLimit.disableBucketLimit('')).rejects.toThrow(RGWValidationError);
+    });
+
+    it('throws RGWValidationError when bucket is whitespace', async () => {
+      await expect(rateLimit.disableBucketLimit('   ')).rejects.toThrow(RGWValidationError);
     });
   });
 
@@ -229,7 +302,7 @@ describe('RateLimitModule', () => {
       expect(client.request).toHaveBeenCalledWith({
         method: 'GET',
         path: '/ratelimit',
-        query: { rateLimit: '', global: '' },
+        query: { ratelimit: '', global: '' },
       });
       expect(result.anonymous.enabled).toBe(true);
       expect(result.anonymous.maxReadOps).toBe(50);
@@ -253,7 +326,7 @@ describe('RateLimitModule', () => {
         method: 'POST',
         path: '/ratelimit',
         query: {
-          rateLimit: '',
+          ratelimit: '',
           global: '',
           scope: 'anonymous',
           maxReadOps: 50,
@@ -305,6 +378,24 @@ describe('RateLimitModule', () => {
       await expect(
         rateLimit.setGlobal({ scope: 'invalid' as 'user', maxReadOps: 50 }),
       ).rejects.toThrow(RGWValidationError);
+    });
+
+    it('throws RGWValidationError when maxReadOps is negative', async () => {
+      await expect(rateLimit.setGlobal({ scope: 'user', maxReadOps: -10 })).rejects.toThrow(
+        RGWValidationError,
+      );
+    });
+
+    it('sends undefined for omitted optional fields', async () => {
+      client.request.mockResolvedValue(undefined);
+
+      await rateLimit.setGlobal({ scope: 'user' });
+
+      const call = client.request.mock.calls[0]![0] as { query: Record<string, unknown> };
+      expect(call.query.maxReadOps).toBeUndefined();
+      expect(call.query.maxWriteOps).toBeUndefined();
+      expect(call.query.maxReadBytes).toBeUndefined();
+      expect(call.query.maxWriteBytes).toBeUndefined();
     });
   });
 });
