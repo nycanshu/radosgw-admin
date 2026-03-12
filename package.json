@@ -20,7 +20,8 @@
   "types": "./dist/index.d.ts",
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsup",
@@ -70,7 +71,7 @@
   "bugs": {
     "url": "https://github.com/nycanshu/radosgw-admin/issues"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "engines": {
     "node": ">=18.0.0"
   },
