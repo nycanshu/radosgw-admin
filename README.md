@@ -348,7 +348,7 @@ rgw.info.get();   // Get cluster FSID and basic endpoint info
 
 ```typescript
 const info = await rgw.info.get();
-console.log('Cluster FSID:', info.info.clusterId);
+console.log('Cluster FSID:', info.info.storageBackends[0].clusterId);
 ```
 
 ## Error Handling

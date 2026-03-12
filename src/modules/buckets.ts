@@ -117,6 +117,7 @@ export class BucketsModule {
    * Delete a bucket. Optionally purge all objects inside it.
    *
    * @param input - `bucket` is required. Set `purgeObjects: true` to delete all objects.
+   * @returns Resolves when the bucket has been deleted.
    * @throws {RGWValidationError} If `bucket` is empty.
    * @throws {RGWNotFoundError} If the bucket does not exist.
    *
@@ -152,6 +153,7 @@ export class BucketsModule {
    * Transfer ownership of a bucket to a different user.
    *
    * @param input - `bucket`, `bucketId`, and `uid` are all required.
+   * @returns Resolves when ownership has been transferred.
    * @throws {RGWValidationError} If any required field is missing.
    * @throws {RGWNotFoundError} If the bucket or user does not exist.
    *
@@ -195,6 +197,7 @@ export class BucketsModule {
    * S3 API until ownership is reassigned with {@link transferOwnership}.
    *
    * @param input - `bucket` and `uid` are required.
+   * @returns Resolves when ownership has been removed.
    * @throws {RGWValidationError} If any required field is missing.
    * @throws {RGWNotFoundError} If the bucket or user does not exist.
    *

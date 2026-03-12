@@ -69,6 +69,7 @@ export class KeysModule {
    * Revoke an S3 or Swift key.
    *
    * @param input - `accessKey` is required. `uid` is required for Swift keys.
+   * @returns Resolves when the key has been revoked.
    * @throws {RGWValidationError} If `accessKey` is missing.
    * @throws {RGWNotFoundError} If the key does not exist.
    *

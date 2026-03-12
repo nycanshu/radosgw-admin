@@ -119,6 +119,7 @@ export class SubusersModule {
    * Remove a subuser from a user. Optionally purge the subuser's keys.
    *
    * @param input - `uid` and `subuser` are required. `purgeKeys` defaults to true.
+   * @returns Resolves when the subuser has been removed.
    * @throws {RGWValidationError} If `uid` or `subuser` is missing or invalid.
    * @throws {RGWNotFoundError} If the parent user or subuser does not exist.
    *
