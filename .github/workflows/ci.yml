@@ -17,18 +17,6 @@ on:
       - '.github/workflows/ci.yml'
   pull_request:
     branches: [main]
-    paths:
-      - 'src/**'
-      - 'tests/**'
-      - 'package.json'
-      - 'tsconfig*.json'
-      - '.eslintrc*'
-      - '.eslintignore'
-      - 'eslint.config*'
-      - '.prettierrc*'
-      - 'vitest.config*'
-      - 'tsup.config*'
-      - '.github/workflows/ci.yml'
 
 jobs:
   lint:
