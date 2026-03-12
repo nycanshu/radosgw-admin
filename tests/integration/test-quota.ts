@@ -8,7 +8,7 @@
  *   npx tsx tests/integration/test-quota.ts
  */
 
-import { RadosGWAdminClient } from '../../src/index.js';
+import { RadosGWAdminClient, RGWNotFoundError } from '../../src/index.js';
 import { config } from 'dotenv';
 
 config();
@@ -167,9 +167,41 @@ async function run() {
   if (!reenabledBucket.enabled) throw new Error('Expected bucket quota to be re-enabled');
   console.log('   Re-enabled');
 
+  // ── Error Paths ──────────────────────────────────────
+
+  // 12. getUserQuota on non-existent user
+  console.log('\n12. Getting user quota for non-existent user...');
+  try {
+    await client.quota.getUserQuota('non-existent-user-xyz');
+    throw new Error('Expected RGWNotFoundError but call succeeded');
+  } catch (err) {
+    if (err instanceof RGWNotFoundError) {
+      console.log('   Confirmed: RGWNotFoundError thrown');
+    } else if (err instanceof Error && err.message.includes('Expected RGWNotFoundError')) {
+      throw err;
+    } else {
+      console.log(`   Got error (acceptable): ${(err as Error).message}`);
+    }
+  }
+
+  // 13. setUserQuota on non-existent user
+  console.log('\n13. Setting user quota for non-existent user...');
+  try {
+    await client.quota.setUserQuota({ uid: 'non-existent-user-xyz', maxSize: '1G' });
+    throw new Error('Expected RGWNotFoundError but call succeeded');
+  } catch (err) {
+    if (err instanceof RGWNotFoundError) {
+      console.log('   Confirmed: RGWNotFoundError thrown');
+    } else if (err instanceof Error && err.message.includes('Expected RGWNotFoundError')) {
+      throw err;
+    } else {
+      console.log(`   Got error (acceptable): ${(err as Error).message}`);
+    }
+  }
+
   // ── Cleanup ─────────────────────────────────────────
 
-  console.log('\n12. Cleaning up test user...');
+  console.log('\n14. Cleaning up test user...');
   await client.users.delete({ uid: TEST_UID, purgeData: true });
   console.log('   Deleted.');
 

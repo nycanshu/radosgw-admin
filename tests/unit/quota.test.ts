@@ -105,6 +105,10 @@ describe('QuotaModule', () => {
     it('throws RGWValidationError when uid is empty', async () => {
       await expect(quota.getUserQuota('')).rejects.toThrow(RGWValidationError);
     });
+
+    it('throws RGWValidationError when uid has whitespace', async () => {
+      await expect(quota.getUserQuota('  alice')).rejects.toThrow(RGWValidationError);
+    });
   });
 
   // ── setUserQuota ─────────────────────────────────────────
@@ -174,6 +178,40 @@ describe('QuotaModule', () => {
       await expect(quota.setUserQuota({ uid: 'alice', maxSize: 'invalid' })).rejects.toThrow(
         RGWValidationError,
       );
+    });
+
+    it('throws RGWValidationError when uid has whitespace', async () => {
+      await expect(quota.setUserQuota({ uid: '  alice' })).rejects.toThrow(RGWValidationError);
+    });
+
+    it('throws RGWValidationError when maxObjects is invalid negative', async () => {
+      await expect(quota.setUserQuota({ uid: 'alice', maxObjects: -5 })).rejects.toThrow(
+        RGWValidationError,
+      );
+    });
+
+    it('throws RGWValidationError when maxSize is invalid negative number', async () => {
+      await expect(quota.setUserQuota({ uid: 'alice', maxSize: -100 })).rejects.toThrow(
+        RGWValidationError,
+      );
+    });
+
+    it('accepts maxObjects=-1 (unlimited)', async () => {
+      client.request.mockResolvedValue(undefined);
+
+      await quota.setUserQuota({ uid: 'alice', maxObjects: -1 });
+
+      const call = client.request.mock.calls[0]![0] as { query: Record<string, unknown> };
+      expect(call.query.maxObjects).toBe(-1);
+    });
+
+    it('accepts maxSize=-1 (unlimited)', async () => {
+      client.request.mockResolvedValue(undefined);
+
+      await quota.setUserQuota({ uid: 'alice', maxSize: -1 });
+
+      const call = client.request.mock.calls[0]![0] as { query: Record<string, unknown> };
+      expect(call.query.maxSize).toBe(-1);
     });
   });
 
@@ -258,8 +296,61 @@ describe('QuotaModule', () => {
       });
     });
 
+    it('converts size string to bytes', async () => {
+      client.request.mockResolvedValue(undefined);
+
+      await quota.setBucketQuota({ uid: 'alice', maxSize: '500M' });
+
+      const call = client.request.mock.calls[0]![0] as { query: Record<string, unknown> };
+      expect(call.query.maxSize).toBe(524288000);
+    });
+
+    it('defaults enabled to true', async () => {
+      client.request.mockResolvedValue(undefined);
+
+      await quota.setBucketQuota({ uid: 'alice', maxSize: 1024 });
+
+      const call = client.request.mock.calls[0]![0] as { query: Record<string, unknown> };
+      expect(call.query.enabled).toBe(true);
+    });
+
+    it('respects explicit enabled=false', async () => {
+      client.request.mockResolvedValue(undefined);
+
+      await quota.setBucketQuota({ uid: 'alice', maxSize: 1024, enabled: false });
+
+      const call = client.request.mock.calls[0]![0] as { query: Record<string, unknown> };
+      expect(call.query.enabled).toBe(false);
+    });
+
+    it('sends undefined for omitted optional fields', async () => {
+      client.request.mockResolvedValue(undefined);
+
+      await quota.setBucketQuota({ uid: 'alice' });
+
+      const call = client.request.mock.calls[0]![0] as { query: Record<string, unknown> };
+      expect(call.query.maxSize).toBeUndefined();
+      expect(call.query.maxObjects).toBeUndefined();
+    });
+
     it('throws RGWValidationError when uid is empty', async () => {
       await expect(quota.setBucketQuota({ uid: '' })).rejects.toThrow(RGWValidationError);
+    });
+
+    it('throws RGWValidationError when uid has whitespace', async () => {
+      await expect(quota.setBucketQuota({ uid: '  alice' })).rejects.toThrow(RGWValidationError);
+    });
+
+    it('throws RGWValidationError for invalid size string', async () => {
+      await expect(quota.setBucketQuota({ uid: 'alice', maxSize: 'invalid' })).rejects.toThrow(
+        RGWValidationError,
+      );
+    });
+
+    it('throws RGWValidationError when maxObjects is invalid negative', async () => {
+      await expect(quota.setBucketQuota({ uid: 'alice', maxObjects: -5 })).rejects.toThrow(
+        RGWValidationError,
+      );
     });
   });
 
