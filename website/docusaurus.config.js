@@ -128,6 +128,11 @@ const config = {
               { label: 'Subusers', to: '/docs/guides/subusers' },
               { label: 'Buckets', to: '/docs/guides/buckets' },
               { label: 'Quota', to: '/docs/guides/quota' },
+            ],
+          },
+          {
+            title: 'More Modules',
+            items: [
               { label: 'Rate Limits', to: '/docs/guides/ratelimit' },
               { label: 'Usage', to: '/docs/guides/usage' },
               { label: 'Info', to: '/docs/guides/info' },

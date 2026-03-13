@@ -9,8 +9,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 85vh;
-  padding: 6rem 2rem 4rem;
+  min-height: 80vh;
+  padding: 3rem 2rem 4rem;
   text-align: center;
 }
 
@@ -88,11 +88,9 @@
 }
 
 .hero-mascot {
-  width: 280px;
-  height: 280px;
-  object-fit: cover;
-  object-position: center top;
-  border-radius: 24px;
+  width: 300px;
+  height: auto;
+  border-radius: 20px;
   display: block;
 }
 
@@ -192,15 +190,15 @@
   gap: 0.6rem;
   margin-bottom: 2rem;
   padding: 0.7rem 1rem 0.7rem 1.25rem;
-  background: #0f172a;
-  border: 1px solid var(--dark-border);
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
   border-radius: 999px;
   cursor: pointer;
   outline: none;
   font-family: var(--ifm-font-family-monospace);
   font-size: 0.9rem;
   line-height: 1;
-  color: #e2e8f0;
+  color: #1e293b;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
@@ -251,12 +249,17 @@
 
 /* Light mode overrides */
 :root .hero-install {
-  background: #f8fafc;
-  border-color: #e2e8f0;
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #1e293b;
 }
 
 :root .hero-install:hover {
   border-color: #cbd5e1;
+}
+
+:root .hero-install-prompt {
+  color: #0d9488;
 }
 
 :root .hero-install-text {
@@ -286,6 +289,10 @@
 
 [data-theme='dark'] .hero-install:hover {
   border-color: var(--dark-border);
+}
+
+[data-theme='dark'] .hero-install-text {
+  color: #ffffff;
 }
 
 /* Buttons */
@@ -844,7 +851,7 @@
 
   .hero-mascot {
     width: 200px;
-    height: 200px;
+    height: auto;
   }
 
   .hero-title {
@@ -881,8 +888,8 @@
 
 @media (max-width: 520px) {
   .hero-section {
-    min-height: 70vh;
-    padding: 4rem 1.25rem 3rem;
+    min-height: 65vh;
+    padding: 2.5rem 1.25rem 3rem;
   }
 
   .hero-title {
