@@ -1,0 +1,58 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#1e293b"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2dd4bf"/>
+      <stop offset="50%" style="stop-color:#0d9488"/>
+      <stop offset="100%" style="stop-color:#818cf8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <!-- Grid pattern -->
+  <g opacity="0.05" stroke="#fff" stroke-width="1">
+    <line x1="0" y1="0" x2="0" y2="630"/><line x1="60" y1="0" x2="60" y2="630"/>
+    <line x1="120" y1="0" x2="120" y2="630"/><line x1="180" y1="0" x2="180" y2="630"/>
+    <line x1="240" y1="0" x2="240" y2="630"/><line x1="300" y1="0" x2="300" y2="630"/>
+    <line x1="360" y1="0" x2="360" y2="630"/><line x1="420" y1="0" x2="420" y2="630"/>
+    <line x1="480" y1="0" x2="480" y2="630"/><line x1="540" y1="0" x2="540" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/><line x1="660" y1="0" x2="660" y2="630"/>
+    <line x1="720" y1="0" x2="720" y2="630"/><line x1="780" y1="0" x2="780" y2="630"/>
+    <line x1="840" y1="0" x2="840" y2="630"/><line x1="900" y1="0" x2="900" y2="630"/>
+    <line x1="960" y1="0" x2="960" y2="630"/><line x1="1020" y1="0" x2="1020" y2="630"/>
+    <line x1="1080" y1="0" x2="1080" y2="630"/><line x1="1140" y1="0" x2="1140" y2="630"/>
+    <line x1="0" y1="60" x2="1200" y2="60"/><line x1="0" y1="120" x2="1200" y2="120"/>
+    <line x1="0" y1="180" x2="1200" y2="180"/><line x1="0" y1="240" x2="1200" y2="240"/>
+    <line x1="0" y1="300" x2="1200" y2="300"/><line x1="0" y1="360" x2="1200" y2="360"/>
+    <line x1="0" y1="420" x2="1200" y2="420"/><line x1="0" y1="480" x2="1200" y2="480"/>
+    <line x1="0" y1="540" x2="1200" y2="540"/>
+  </g>
+  <!-- Glow -->
+  <circle cx="600" cy="200" r="300" fill="#2dd4bf" opacity="0.06"/>
+  <!-- Package name -->
+  <text x="600" y="210" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="72" font-weight="800" fill="url(#accent)">radosgw-admin</text>
+  <!-- Tagline -->
+  <text x="600" y="280" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="28" font-weight="400" fill="#94a3b8">Modern TypeScript SDK for Ceph Object Storage</text>
+  <!-- Stats -->
+  <text x="310" y="400" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="40" font-weight="800" fill="#2dd4bf">8</text>
+  <text x="310" y="430" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="14" font-weight="500" fill="#64748b" letter-spacing="2">MODULES</text>
+  <text x="500" y="400" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="40" font-weight="800" fill="#2dd4bf">45+</text>
+  <text x="500" y="430" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="14" font-weight="500" fill="#64748b" letter-spacing="2">METHODS</text>
+  <text x="700" y="400" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="40" font-weight="800" fill="#2dd4bf">0</text>
+  <text x="700" y="430" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="14" font-weight="500" fill="#64748b" letter-spacing="2">DEPENDENCIES</text>
+  <text x="890" y="400" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="40" font-weight="800" fill="#2dd4bf">280+</text>
+  <text x="890" y="430" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-size="14" font-weight="500" fill="#64748b" letter-spacing="2">TESTS</text>
+  <!-- Bottom pills -->
+  <rect x="370" y="490" width="120" height="34" rx="17" fill="#1e293b"/>
+  <text x="430" y="512" text-anchor="middle" font-family="monospace" font-size="14" font-weight="500" fill="#e2e8f0">TypeScript</text>
+  <rect x="510" y="490" width="90" height="34" rx="17" fill="#1e293b"/>
+  <text x="555" y="512" text-anchor="middle" font-family="monospace" font-size="14" font-weight="500" fill="#e2e8f0">ESM</text>
+  <rect x="620" y="490" width="90" height="34" rx="17" fill="#1e293b"/>
+  <text x="665" y="512" text-anchor="middle" font-family="monospace" font-size="14" font-weight="500" fill="#e2e8f0">CJS</text>
+  <rect x="730" y="490" width="110" height="34" rx="17" fill="#1e293b"/>
+  <text x="785" y="512" text-anchor="middle" font-family="monospace" font-size="14" font-weight="500" fill="#e2e8f0">Zero Deps</text>
+  <!-- Border accent line at top -->
+  <rect x="0" y="0" width="1200" height="4" fill="url(#accent)"/>
+</svg>
