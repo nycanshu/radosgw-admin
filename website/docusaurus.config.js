@@ -65,6 +65,14 @@ const config = {
 
       navbar: {
         title: 'radosgw-admin',
+        logo: {
+          alt: 'radosgw-admin mascot',
+          src: 'img/radosgw-admin-light-logo.png',
+          srcDark: 'img/radosgw-admin-dark-log.png',
+          height: 36,
+          width: 36,
+          style: { borderRadius: '8px', objectFit: 'cover', objectPosition: 'center top' },
+        },
         hideOnScroll: false,
         items: [
           {

@@ -16,13 +16,13 @@
   --ifm-font-family-base: 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   --ifm-font-family-monospace: 'JetBrains Mono', 'SFMono-Regular', Menlo, Monaco, Consolas,
     monospace;
-  --ifm-font-size-base: 15px;
-  --ifm-line-height-base: 1.7;
-  --ifm-heading-line-height: 1.25;
-  --ifm-h1-font-size: 2rem;
-  --ifm-h2-font-size: 1.5rem;
-  --ifm-h3-font-size: 1.2rem;
-  --ifm-code-font-size: 0.875rem;
+  --ifm-font-size-base: 14px;
+  --ifm-line-height-base: 1.65;
+  --ifm-heading-line-height: 1.2;
+  --ifm-h1-font-size: 1.75rem;
+  --ifm-h2-font-size: 1.3rem;
+  --ifm-h3-font-size: 1.1rem;
+  --ifm-code-font-size: 0.85rem;
   --ifm-heading-font-weight: 600;
 
   /* Surface */
@@ -60,8 +60,13 @@
 }
 
 /* ── Dark mode tokens ──────────────────────────────────────────────────────── */
+/*
+   Unified dark palette — one base, one surface, one border.
+   Inspired by the mascot's dark navy background (#111827 base, #1a2744 surface).
+   No more 3 slightly-different near-blacks.
+*/
 [data-theme='dark'] {
-  /* Brand — lighter teal on dark bg */
+  /* Brand */
   --ifm-color-primary: #2dd4bf;
   --ifm-color-primary-dark: #14b8a6;
   --ifm-color-primary-darker: #0d9488;
@@ -70,38 +75,43 @@
   --ifm-color-primary-lighter: #7ff0e4;
   --ifm-color-primary-lightest: #99f6ef;
 
+  /* ── The only two dark shades used everywhere ── */
+  --dark-bg: #111827;        /* page background */
+  --dark-surface: #1a2744;   /* cards, sidebars, elevated surfaces */
+  --dark-border: #243358;    /* borders and dividers */
+
   /* Surface */
-  --ifm-background-color: #0f172a;
-  --ifm-background-surface-color: #1e293b;
-  --ifm-toc-border-color: #334155;
-  --ifm-hr-border-color: #334155;
-  --ifm-color-emphasis-300: #475569;
+  --ifm-background-color: var(--dark-bg);
+  --ifm-background-surface-color: var(--dark-surface);
+  --ifm-toc-border-color: var(--dark-border);
+  --ifm-hr-border-color: var(--dark-border);
+  --ifm-color-emphasis-300: #374b6e;
 
   /* Navbar */
-  --ifm-navbar-background-color: rgba(15, 23, 42, 0.92);
-  --ifm-navbar-shadow: 0 1px 0 0 #1e293b;
-  --ifm-navbar-link-color: #cbd5e1;
+  --ifm-navbar-background-color: rgba(17, 24, 39, 0.94);
+  --ifm-navbar-shadow: 0 1px 0 0 var(--dark-border);
+  --ifm-navbar-link-color: #c8d6f0;
   --ifm-navbar-link-hover-color: #2dd4bf;
 
   /* Footer */
-  --ifm-footer-background-color: #020617;
-  --ifm-footer-color: #64748b;
-  --ifm-footer-link-color: #64748b;
+  --ifm-footer-background-color: #0d1424;
+  --ifm-footer-color: #5a7299;
+  --ifm-footer-link-color: #5a7299;
   --ifm-footer-link-hover-color: #2dd4bf;
-  --ifm-footer-title-color: #e2e8f0;
+  --ifm-footer-title-color: #dde6f5;
 
   /* Code blocks */
-  --prism-background-color: #1e293b;
-  --ifm-code-background: #1e293b;
+  --prism-background-color: #162035;
+  --ifm-code-background: #162035;
 
   /* Text */
-  --ifm-font-color-base: #e2e8f0;
-  --ifm-font-color-secondary: #94a3b8;
+  --ifm-font-color-base: #dde6f5;
+  --ifm-font-color-secondary: #8ba4c8;
 
   /* Misc */
-  --docsearch-searchbox-background: #1e293b;
-  --docsearch-modal-background: #0f172a;
-  --docsearch-footer-background: #1e293b;
+  --docsearch-searchbox-background: var(--dark-surface);
+  --docsearch-modal-background: var(--dark-bg);
+  --docsearch-footer-background: var(--dark-surface);
 }
 
 /* ── Base ──────────────────────────────────────────────────────────────────── */
@@ -109,6 +119,13 @@ html {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Force unified dark background everywhere — override Docusaurus defaults */
+[data-theme='dark'] body,
+[data-theme='dark'] #__docusaurus,
+[data-theme='dark'] .main-wrapper {
+  background-color: var(--dark-bg) !important;
 }
 
 /* ── Navbar ────────────────────────────────────────────────────────────────── */
@@ -178,23 +195,23 @@ html {
 }
 
 .theme-doc-markdown h1 {
-  font-size: 1.875rem;
+  font-size: 1.625rem;
   font-weight: 700;
-  letter-spacing: -0.025em;
-  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.75rem;
 }
 
 .theme-doc-markdown h2 {
-  font-size: 1.35rem;
+  font-size: 1.2rem;
   font-weight: 600;
-  letter-spacing: -0.015em;
-  margin-top: 2.5rem;
-  padding-bottom: 0.5rem;
+  letter-spacing: -0.01em;
+  margin-top: 2rem;
+  padding-bottom: 0.4rem;
   border-bottom: 1px solid var(--ifm-toc-border-color);
 }
 
 .theme-doc-markdown h3 {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
 }
 
@@ -213,7 +230,7 @@ html {
 }
 
 [data-theme='dark'] .theme-code-block {
-  border-color: #334155;
+  border-color: var(--dark-border);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
@@ -229,8 +246,8 @@ code {
 }
 
 [data-theme='dark'] code {
-  background: #1e293b;
-  color: #e2e8f0;
+  background: var(--dark-surface);
+  color: var(--ifm-font-color-base);
 }
 
 /* Code block title bar */
@@ -280,7 +297,7 @@ code {
 /* ── Footer ────────────────────────────────────────────────────────────────── */
 .footer {
   padding: 2.5rem 0 1.5rem;
-  border-top: 1px solid #1e293b;
+  border-top: 1px solid var(--ifm-toc-border-color);
 }
 
 .footer__inner {
@@ -321,7 +338,7 @@ code {
 .footer__copyright {
   font-size: 0.8rem;
   color: #475569;
-  border-top: 1px solid #1e293b;
+  border-top: 1px solid var(--ifm-toc-border-color);
   padding-top: 1.25rem;
   margin-top: 0;
 }
@@ -343,10 +360,10 @@ div[class*='announcementBar'] {
 /* ── Responsive ────────────────────────────────────────────────────────────── */
 @media (max-width: 996px) {
   :root {
-    --ifm-font-size-base: 14px;
-    --ifm-h1-font-size: 1.6rem;
-    --ifm-h2-font-size: 1.25rem;
-    --ifm-h3-font-size: 1.05rem;
+    --ifm-font-size-base: 13.5px;
+    --ifm-h1-font-size: 1.5rem;
+    --ifm-h2-font-size: 1.15rem;
+    --ifm-h3-font-size: 1rem;
   }
 
   .theme-doc-markdown {
