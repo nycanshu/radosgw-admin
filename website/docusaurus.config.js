@@ -16,6 +16,7 @@ const config = {
   baseUrl,
   organizationName: orgName,
   projectName,
+  favicon: 'img/favicon.svg',
   trailingSlash: false,
   onBrokenLinks: 'throw',
   markdown: {
@@ -33,12 +34,15 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
-          routeBasePath: '/',
+          routeBasePath: '/docs',
           sidebarPath: require.resolve('./sidebars.js'),
         },
         blog: false,
         theme: {
-          customCss: require.resolve('./src/css/custom.css'),
+          customCss: [
+            require.resolve('./src/css/custom.css'),
+            require.resolve('./src/css/landing.css'),
+          ],
         },
       }),
     ],
@@ -76,7 +80,7 @@ const config = {
             position: 'left',
           },
           {
-            to: '/api',
+            to: '/docs/api',
             label: 'API',
             position: 'left',
           },
@@ -102,24 +106,24 @@ const config = {
           {
             title: 'Documentation',
             items: [
-              { label: 'Getting Started', to: '/getting-started' },
-              { label: 'Configuration', to: '/configuration' },
-              { label: 'Error Handling', to: '/error-handling' },
-              { label: 'Recipes', to: '/recipes' },
+              { label: 'Getting Started', to: '/docs/getting-started' },
+              { label: 'Configuration', to: '/docs/configuration' },
+              { label: 'Error Handling', to: '/docs/error-handling' },
+              { label: 'Recipes', to: '/docs/recipes' },
             ],
           },
           {
             title: 'Modules',
             items: [
-              { label: 'Users', to: '/guides/users' },
-              { label: 'Keys', to: '/guides/keys' },
-              { label: 'Subusers', to: '/guides/subusers' },
-              { label: 'Buckets', to: '/guides/buckets' },
-              { label: 'Quota', to: '/guides/quota' },
-              { label: 'Rate Limits', to: '/guides/ratelimit' },
-              { label: 'Usage', to: '/guides/usage' },
-              { label: 'Info', to: '/guides/info' },
-              { label: 'API Reference', to: '/api' },
+              { label: 'Users', to: '/docs/guides/users' },
+              { label: 'Keys', to: '/docs/guides/keys' },
+              { label: 'Subusers', to: '/docs/guides/subusers' },
+              { label: 'Buckets', to: '/docs/guides/buckets' },
+              { label: 'Quota', to: '/docs/guides/quota' },
+              { label: 'Rate Limits', to: '/docs/guides/ratelimit' },
+              { label: 'Usage', to: '/docs/guides/usage' },
+              { label: 'Info', to: '/docs/guides/info' },
+              { label: 'API Reference', to: '/docs/api' },
             ],
           },
           {
