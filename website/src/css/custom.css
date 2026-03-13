@@ -142,9 +142,13 @@ html {
   font-size: 0.875rem;
   border-radius: 6px;
   padding: 0.35rem 0.75rem;
+  transition: color 0.15s;
 }
 
-.menu__link--active {
+.menu__link--active,
+.menu__link--active:hover {
+  background: transparent !important;
+  color: var(--ifm-color-primary) !important;
   font-weight: 600;
 }
 
@@ -165,6 +169,12 @@ html {
 /* ── Content ───────────────────────────────────────────────────────────────── */
 .theme-doc-markdown {
   max-width: 820px;
+  animation: docFadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes docFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .theme-doc-markdown h1 {

@@ -523,7 +523,10 @@
 }
 
 .module-card {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 90px;
   padding: 1.25rem 1.5rem;
   border-radius: 10px;
   border: 1px solid #e2e8f0;
@@ -684,6 +687,88 @@
 
 [data-theme='dark'] .cta-subtitle {
   color: #94a3b8;
+}
+
+/* ── Scroll Reveal ────────────────────────────────────────────────────────── */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.scroll-reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Floating Orbs ────────────────────────────────────────────────────────── */
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(60px);
+  opacity: 0;
+  animation: orbFloat 8s ease-in-out infinite;
+}
+
+.hero-orb--1 {
+  width: 320px;
+  height: 320px;
+  top: 10%;
+  left: 5%;
+  background: radial-gradient(circle, rgba(45, 212, 191, 0.18), transparent 70%);
+  animation-delay: 0s;
+  animation-duration: 10s;
+  opacity: 0.6;
+}
+
+.hero-orb--2 {
+  width: 240px;
+  height: 240px;
+  top: 20%;
+  right: 8%;
+  background: radial-gradient(circle, rgba(129, 140, 248, 0.18), transparent 70%);
+  animation-delay: -3s;
+  animation-duration: 12s;
+  opacity: 0.5;
+}
+
+.hero-orb--3 {
+  width: 180px;
+  height: 180px;
+  bottom: 15%;
+  left: 20%;
+  background: radial-gradient(circle, rgba(244, 114, 182, 0.12), transparent 70%);
+  animation-delay: -6s;
+  animation-duration: 9s;
+  opacity: 0.4;
+}
+
+[data-theme='dark'] .hero-orb--1 { opacity: 0.9; }
+[data-theme='dark'] .hero-orb--2 { opacity: 0.7; }
+[data-theme='dark'] .hero-orb--3 { opacity: 0.5; }
+
+@keyframes orbFloat {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  33%       { transform: translateY(-18px) scale(1.04); }
+  66%       { transform: translateY(10px) scale(0.97); }
+}
+
+/* ── Secondary hero glow ──────────────────────────────────────────────────── */
+.hero-glow--secondary {
+  top: auto;
+  bottom: -50%;
+  left: 30%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(
+    circle,
+    rgba(129, 140, 248, 0.06) 0%,
+    transparent 70%
+  );
+  animation-delay: -3s;
 }
 
 /* ── Responsive ───────────────────────────────────────────────────────────── */

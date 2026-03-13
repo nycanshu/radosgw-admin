@@ -7,6 +7,7 @@ const sidebars = {
     {
       type: 'category',
       label: 'Module Guides',
+      collapsed: false,
       link: {
         type: 'doc',
         id: 'modules',
