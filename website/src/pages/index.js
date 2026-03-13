@@ -266,8 +266,8 @@ export default function Home() {
             </div>
           </div>
           <div className="hero-mascot-wrap">
-            <img src={useBaseUrl('/img/radosgw-admin-light-logo.png')} alt="radosgw-admin mascot" className="hero-mascot hero-mascot-light" />
-            <img src={useBaseUrl('/img/radosgw-admin-dark-log.png')} alt="radosgw-admin mascot" className="hero-mascot hero-mascot-dark" />
+            <img src={useBaseUrl('/img/radosgw-admin-light-logo-removebg-preview.png')} alt="radosgw-admin mascot" className="hero-mascot hero-mascot-light" />
+            <img src={useBaseUrl('/img/radosgw-admin-dark-log-removebg-preview.png')} alt="radosgw-admin mascot" className="hero-mascot hero-mascot-dark" />
           </div>
         </div>
       </header>

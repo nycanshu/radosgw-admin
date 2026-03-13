@@ -60,6 +60,7 @@ const config = {
         content:
           '⭐ If you find radosgw-admin useful, <a href="https://github.com/nycanshu/radosgw-admin" target="_blank">star it on GitHub</a>',
         backgroundColor: 'transparent',
+        textColor: '#e2e8f0',
         isCloseable: true,
       },
 
@@ -67,11 +68,11 @@ const config = {
         title: 'radosgw-admin',
         logo: {
           alt: 'radosgw-admin mascot',
-          src: 'img/radosgw-admin-light-logo.png',
-          srcDark: 'img/radosgw-admin-dark-log.png',
+          src: 'img/radosgw-admin-light-logo-removebg-preview.png',
+          srcDark: 'img/radosgw-admin-dark-log-removebg-preview.png',
           height: 36,
           width: 36,
-          style: { borderRadius: '8px', objectFit: 'cover', objectPosition: 'center top' },
+          style: { objectFit: 'contain' },
         },
         hideOnScroll: false,
         items: [

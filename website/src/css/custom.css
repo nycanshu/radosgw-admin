@@ -423,7 +423,16 @@ div[class*='announcementBar'] {
   font-size: 0.875rem;
   font-weight: 500;
   padding: 0.6rem 1rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--ifm-color-primary) 30%, transparent);
+  background: var(--ifm-navbar-background-color) !important;
+  border-bottom: 1px solid var(--ifm-toc-border-color);
+  color: var(--ifm-font-color-base);
+}
+
+div[class*='announcementBar'] a {
+  color: var(--ifm-color-primary);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 /* ── Responsive ────────────────────────────────────────────────────────────── */
