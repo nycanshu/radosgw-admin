@@ -6,7 +6,7 @@ Run a structured production-readiness audit for this TypeScript SDK before relea
 ## Canonical References
 - Ceph RGW Admin Ops API docs: https://docs.ceph.com/en/latest/radosgw/adminops/
 - Package publish policy (`package.json`, `CHANGELOG.md`, `README.md`)
-- Internal spec: `radosgw-admin-SRD.md`
+- Internal spec: `myplan/radosgw-admin-SRD.md`
 
 ## When To Use
 - Before `npm publish`
