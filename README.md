@@ -3,7 +3,9 @@
 > Modern, zero-dependency TypeScript client for the Ceph RADOS Gateway Admin Ops API.
 
 [![CI](https://github.com/nycanshu/radosgw-admin/actions/workflows/ci.yml/badge.svg)](https://github.com/nycanshu/radosgw-admin/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/nycanshu/radosgw-admin/graph/badge.svg)](https://codecov.io/gh/nycanshu/radosgw-admin)
 [![npm version](https://img.shields.io/npm/v/radosgw-admin)](https://www.npmjs.com/package/radosgw-admin)
+[![npm downloads](https://img.shields.io/npm/dm/radosgw-admin)](https://www.npmjs.com/package/radosgw-admin)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](https://www.typescriptlang.org/)
 
