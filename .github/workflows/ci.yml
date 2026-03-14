@@ -7,16 +7,24 @@ on:
       - 'src/**'
       - 'tests/**'
       - 'package.json'
+      - 'package-lock.json'
       - 'tsconfig*.json'
-      - '.eslintrc*'
-      - '.eslintignore'
       - 'eslint.config*'
-      - '.prettierrc*'
       - 'vitest.config*'
       - 'tsup.config*'
       - '.github/workflows/ci.yml'
   pull_request:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'tsconfig*.json'
+      - 'eslint.config*'
+      - 'vitest.config*'
+      - 'tsup.config*'
+      - '.github/workflows/ci.yml'
 
 jobs:
   lint:
