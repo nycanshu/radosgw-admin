@@ -2,7 +2,7 @@
 
 ## Project Overview
 Modern TypeScript client for the Ceph RADOS Gateway (RGW) Admin Ops REST API.
-Full spec: `radosgw-admin-SRD.md`
+Full spec: `myplan/radosgw-admin-SRD.md`
 
 ## Commands
 - `npm run build` — Build ESM + CJS with tsup

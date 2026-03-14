@@ -389,6 +389,102 @@ Tested against Ceph **Quincy (v17)** and **Reef (v18)**. The Admin Ops API is av
 - Admin Ops API must be accessible (default path: `/admin`)
 - For `insecure: true` — only use with self-signed certificates in dev/test environments
 
+## FAQ
+
+<details>
+<summary><strong>How do I connect to an RGW with a self-signed certificate?</strong></summary>
+
+Set `insecure: true` in the client config. This skips TLS certificate verification — use only in dev/test environments:
+
+```typescript
+const rgw = new RadosGWAdminClient({
+  host: 'https://rgw.internal',
+  accessKey: '...',
+  secretKey: '...',
+  insecure: true, // skips TLS verification
+});
+```
+
+</details>
+
+<details>
+<summary><strong>Which Ceph versions are supported?</strong></summary>
+
+The Admin Ops API has been available since Ceph **Luminous (v12)**. This package is tested against **Quincy (v17)** and **Reef (v18)**.
+
+| Feature | Minimum Ceph Version |
+|---|---|
+| Users, keys, subusers, buckets | Luminous (v12) |
+| Quotas | Luminous (v12) |
+| Rate limits | Pacific (v16) |
+| Usage logging | Luminous (v12) |
+
+</details>
+
+<details>
+<summary><strong>How do I troubleshoot connection issues?</strong></summary>
+
+Enable debug mode to see full HTTP request/response details:
+
+```typescript
+const rgw = new RadosGWAdminClient({
+  host: 'http://rgw.example.com',
+  accessKey: '...',
+  secretKey: '...',
+  debug: true, // logs request method, URL, headers, and response
+});
+```
+
+Common issues:
+- **403 AccessDenied** — admin user lacks required capabilities. Grant with: `radosgw-admin caps add --uid=admin --caps="users=*;buckets=*"`
+- **Connection refused** — check host/port and that the RGW daemon is running
+- **Timeout** — increase the `timeout` value (default: 10000ms) or check network connectivity
+
+</details>
+
+<details>
+<summary><strong>Can I use this with Rook-Ceph on Kubernetes?</strong></summary>
+
+Yes. Port-forward or expose the RGW service, then point the client at it:
+
+```bash
+kubectl port-forward svc/rook-ceph-rgw-my-store 8080:80 -n rook-ceph
+```
+
+```typescript
+const rgw = new RadosGWAdminClient({
+  host: 'http://localhost',
+  port: 8080,
+  accessKey: '...',
+  secretKey: '...',
+});
+```
+
+To get admin credentials from Rook:
+```bash
+kubectl get secret rook-ceph-dashboard-admin-gateway -n rook-ceph -o jsonpath='{.data.accessKey}' | base64 -d
+kubectl get secret rook-ceph-dashboard-admin-gateway -n rook-ceph -o jsonpath='{.data.secretKey}' | base64 -d
+```
+
+</details>
+
+<details>
+<summary><strong>Does this package work with OpenShift Data Foundation (ODF)?</strong></summary>
+
+Yes. ODF uses Ceph under the hood. Point the client at the RGW route or service endpoint. The admin credentials are stored in the `ocs-storagecluster-ceph-rgw-admin-ops-user` secret in the `openshift-storage` namespace.
+
+</details>
+
+<details>
+<summary><strong>Why zero dependencies?</strong></summary>
+
+AWS SigV4 signing is implemented using only `node:crypto` (built-in). No `aws-sdk`, no `axios`, no `node-fetch`. This means:
+- Smaller `node_modules` footprint
+- No supply chain risk from transitive dependencies
+- No version conflicts with other packages in your project
+
+</details>
+
 ## Development
 
 ```bash
