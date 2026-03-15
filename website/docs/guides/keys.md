@@ -1,6 +1,7 @@
 ---
 title: Keys Guide
 sidebar_position: 2
+description: Generate and revoke Ceph RGW S3 and Swift access keys programmatically with the radosgw-admin Node.js SDK.
 ---
 
 # Keys Guide

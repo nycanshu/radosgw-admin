@@ -98,6 +98,33 @@ const stats = [
   { value: '280+', label: 'Tests' },
 ];
 
+const faqItems = [
+  {
+    q: 'What is the Ceph RADOS Gateway Admin Ops API?',
+    a: 'The Ceph RADOS Gateway (RGW) Admin Ops API is a REST interface built into Ceph that lets administrators manage users, access keys, buckets, quotas, and rate limits programmatically. It is separate from the S3-compatible data API — it is specifically for cluster administration.',
+  },
+  {
+    q: 'How do I manage Ceph RGW users from Node.js?',
+    a: 'Install radosgw-admin (npm install radosgw-admin), create a RadosGWAdminClient with your RGW host and admin credentials, then call rgw.users.create(), rgw.users.get(), rgw.users.suspend(), and other methods. The SDK covers the full user lifecycle.',
+  },
+  {
+    q: 'Does radosgw-admin work with Rook-Ceph?',
+    a: 'Yes. radosgw-admin works with any Ceph RGW instance including Rook-Ceph on Kubernetes. Point the host to your RGW service endpoint (e.g. http://rook-ceph-rgw-my-store.rook-ceph.svc) and provide admin credentials from the Kubernetes secret.',
+  },
+  {
+    q: 'Does it work with OpenShift Data Foundation (ODF)?',
+    a: 'Yes. OpenShift Data Foundation uses Ceph RGW internally. radosgw-admin connects to the ODF RGW endpoint the same way as any other Ceph cluster.',
+  },
+  {
+    q: 'Does it have any runtime dependencies?',
+    a: 'No. radosgw-admin has zero runtime dependencies. AWS SigV4 request signing is implemented using only the built-in node:crypto module.',
+  },
+  {
+    q: 'What Node.js version is required?',
+    a: 'Node.js 18 or later. The SDK uses native fetch and node:crypto which are stable from Node.js 18 onwards. It also works with Bun.',
+  },
+];
+
 const quickExample = `import { RadosGWAdminClient } from 'radosgw-admin';
 
 const rgw = new RadosGWAdminClient({
@@ -223,6 +250,15 @@ export default function Home() {
         <meta name="twitter:description" content="Node.js SDK for the Ceph RADOS Gateway Admin Ops API. Zero dependencies, full TypeScript, works with Rook-Ceph and ODF." />
         <link rel="canonical" href="https://nycanshu.github.io/radosgw-admin/" />
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
+        <script type="application/ld+json">{JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: faqItems.map(f => ({
+            '@type': 'Question',
+            name: f.q,
+            acceptedAnswer: { '@type': 'Answer', text: f.a },
+          })),
+        })}</script>
       </Head>
 
       {/* ─── HERO ──────────────────────────────────────────────────────── */}
@@ -375,6 +411,23 @@ export default function Home() {
               <AnimatedSection key={c.label} className="compat-card" delay={i * 80}>
                 <div className="compat-label">{c.label}</div>
                 <div className="compat-items">{c.items}</div>
+              </AnimatedSection>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── FAQ ───────────────────────────────────────────────────────── */}
+      <section className="faq-section">
+        <div className="section-container">
+          <AnimatedSection className="">
+            <h2 className="section-title">Frequently Asked Questions</h2>
+          </AnimatedSection>
+          <div className="faq-list">
+            {faqItems.map((item, i) => (
+              <AnimatedSection key={item.q} className="faq-item" delay={i * 60}>
+                <h3 className="faq-question">{item.q}</h3>
+                <p className="faq-answer">{item.a}</p>
               </AnimatedSection>
             ))}
           </div>

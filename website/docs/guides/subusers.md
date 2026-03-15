@@ -1,6 +1,7 @@
 ---
 title: Subusers Guide
 sidebar_position: 3
+description: Create, modify and remove Ceph RGW subusers with the radosgw-admin Node.js SDK.
 ---
 
 # Subusers Guide

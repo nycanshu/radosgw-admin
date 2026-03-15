@@ -1,6 +1,7 @@
 ---
 title: Quota Guide
 sidebar_position: 5
+description: Set and manage per-user and per-bucket storage quotas on Ceph RGW with the radosgw-admin Node.js SDK.
 ---
 
 # Quota Guide
