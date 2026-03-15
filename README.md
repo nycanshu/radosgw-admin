@@ -1,6 +1,6 @@
 # radosgw-admin
 
-> Modern, zero-dependency TypeScript client for the Ceph RADOS Gateway Admin Ops API.
+> Node.js SDK for the Ceph RADOS Gateway Admin Ops API — manage users, buckets, quotas, rate limits and access keys programmatically.
 
 [![CI](https://github.com/nycanshu/radosgw-admin/actions/workflows/ci.yml/badge.svg)](https://github.com/nycanshu/radosgw-admin/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/nycanshu/radosgw-admin/graph/badge.svg)](https://codecov.io/gh/nycanshu/radosgw-admin)
@@ -17,12 +17,12 @@ The only existing npm package for RGW Admin Ops (`rgw-admin-client`) was last pu
 
 **What you get:**
 
-- [RGW Admin Ops API](https://docs.ceph.com/en/latest/radosgw/adminops/) coverage — users, keys, subusers, buckets, quotas, rate limits
-- Strict TypeScript with zero `any` — every request and response is fully typed
+- Full [RGW Admin Ops API](https://docs.ceph.com/en/latest/radosgw/adminops/) coverage — users, keys, subusers, buckets, quotas, rate limits
 - Zero runtime dependencies — AWS SigV4 signing uses only `node:crypto`
-- Dual ESM + CJS build — works in every Node.js environment
-- Automatic snake_case/camelCase conversion — idiomatic JS API over RGW's REST interface
 - Structured error hierarchy — catch specific failures, not generic HTTP errors
+- Automatic snake_case/camelCase conversion — idiomatic JS API over RGW's REST interface
+- TypeScript with strict types and zero `any` — every request and response is fully typed
+- Dual ESM + CJS build — works in every Node.js environment
 
 ## Install
 

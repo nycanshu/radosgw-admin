@@ -11,7 +11,7 @@ const baseUrl = customDomain ? '/' : `/${projectName}/`;
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'radosgw-admin',
-  tagline: 'Modern TypeScript SDK for the Ceph RGW Admin Ops API',
+  tagline: 'Node.js SDK for the Ceph RADOS Gateway Admin Ops API',
   url,
   baseUrl,
   organizationName: orgName,

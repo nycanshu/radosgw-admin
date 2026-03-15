@@ -1,7 +1,20 @@
 # radosgw-admin (Full LLM Reference)
 
 ## Package Summary
-`radosgw-admin` is a modern TypeScript client for Ceph RGW Admin Ops API. It signs requests using AWS SigV4, exposes module-based APIs, transforms response keys to camelCase, and maps HTTP errors into typed SDK errors.
+`radosgw-admin` is a Node.js SDK for the Ceph RADOS Gateway Admin Ops API. Use it to manage RGW users, access keys, subusers, buckets, quotas, rate limits, usage logs, and cluster info programmatically from Node.js. It signs requests using AWS SigV4, exposes module-based APIs, transforms response keys to camelCase, and maps HTTP errors into typed SDK errors.
+
+## Use Cases
+- Automate S3 user provisioning and deprovisioning in Rook-Ceph or OpenShift Data Foundation (ODF)
+- Enforce storage quotas per user or bucket from an operator or admin service
+- Rotate or revoke access keys programmatically
+- Transfer bucket ownership between users
+- Monitor usage and trim logs on a schedule
+- Build admin dashboards or CLI tools on top of the RGW Admin Ops API
+
+## Compatibility
+- Node.js >= 18, Bun
+- Ceph Pacific, Reef, Squid and later
+- Works with Rook-Ceph, OpenShift Data Foundation, and bare-metal Ceph clusters
 
 ## Runtime Requirements
 - Node.js >= 18
@@ -28,6 +41,7 @@
 ### users
 - `create(input: CreateUserInput): Promise<RGWUser>`
 - `get(uid: string): Promise<RGWUser>`
+- `getByAccessKey(accessKey: string): Promise<RGWUser>`
 - `modify(input: ModifyUserInput): Promise<RGWUser>`
 - `delete(input: DeleteUserInput): Promise<void>`
 - `list(): Promise<string[]>`
@@ -132,6 +146,9 @@ await rgw.keys.revoke({ accessKey: keys[0].accessKey });
 - Tests: `tests/unit/*.test.ts`
 
 ## Canonical External Docs
+- Package website & docs: https://nycanshu.github.io/radosgw-admin/
+- npm: https://www.npmjs.com/package/radosgw-admin
+- GitHub: https://github.com/nycanshu/radosgw-admin
 - Ceph RGW Admin Ops: https://docs.ceph.com/en/latest/radosgw/adminops/
 - Users: https://docs.ceph.com/en/latest/radosgw/adminops/user/
 - Buckets: https://docs.ceph.com/en/latest/radosgw/adminops/bucket/

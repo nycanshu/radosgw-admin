@@ -51,17 +51,17 @@ const features = [
   {
     icon: '⬡',
     title: 'Zero Dependencies',
-    desc: 'No runtime deps. Just node:crypto for AWS SigV4 signing. Minimal attack surface, minimal bundle.',
+    desc: 'No runtime deps. AWS SigV4 signing uses only node:crypto. Minimal attack surface, minimal bundle.',
   },
   {
-    icon: '⚡',
-    title: 'Full TypeScript',
-    desc: 'Strict types everywhere — no any. Autocomplete every method, param, and response field.',
+    icon: '👥',
+    title: 'User & Bucket Admin',
+    desc: 'Create users, transfer bucket ownership, revoke access keys — every Admin Ops endpoint covered across 8 modules.',
   },
   {
-    icon: '📦',
-    title: 'ESM + CJS',
-    desc: 'Dual build with proper exports map. Works in Node.js, Bun, and bundlers out of the box.',
+    icon: '🔒',
+    title: 'Quotas & Rate Limits',
+    desc: 'Set per-user and per-bucket quotas, rate limits, and global policies — all programmatically.',
   },
   {
     icon: '🛡️',
@@ -69,14 +69,14 @@ const features = [
     desc: 'Catch RGWNotFoundError, RGWAuthError, RGWConflictError — not generic HTTP status codes.',
   },
   {
-    icon: '🔄',
-    title: 'Auto Case Transform',
-    desc: 'Send camelCase, receive camelCase. The SDK handles snake_case conversion to/from RGW.',
+    icon: '⚙️',
+    title: 'Rook · ODF · Bare Metal',
+    desc: 'Works with Rook-Ceph, OpenShift Data Foundation, and bare-metal Ceph clusters (Pacific through Squid).',
   },
   {
-    icon: '✅',
-    title: 'Input Validation',
-    desc: 'Validates params before hitting the network. Fail fast with clear error messages.',
+    icon: '⚡',
+    title: 'Full TypeScript',
+    desc: 'Strict types everywhere — no any. Autocomplete every method, param, and response field.',
   },
 ];
 
@@ -195,7 +195,7 @@ export default function Home() {
     '@context': 'https://schema.org',
     '@type': 'SoftwareSourceCode',
     name: 'radosgw-admin',
-    description: 'Modern TypeScript SDK for the Ceph RADOS Gateway Admin Ops REST API. Zero dependencies, full type safety, ESM + CJS.',
+    description: 'Node.js SDK for the Ceph RADOS Gateway Admin Ops API. Manage users, buckets, quotas, rate limits and access keys — 8 modules, 45+ methods, zero dependencies.',
     codeRepository: 'https://github.com/nycanshu/radosgw-admin',
     programmingLanguage: ['TypeScript', 'JavaScript'],
     runtimePlatform: 'Node.js',
@@ -209,18 +209,18 @@ export default function Home() {
 
   return (
     <Layout
-      title="Modern TypeScript SDK for Ceph RGW Admin"
-      description="Zero-dependency TypeScript client for the Ceph RADOS Gateway Admin Ops REST API. Manage users, buckets, quotas, and more — with full type safety."
+      title="radosgw-admin — Node.js SDK for Ceph RADOS Gateway Admin Ops"
+      description="Node.js SDK for the Ceph RADOS Gateway Admin Ops API. Manage users, buckets, quotas, rate limits programmatically. Zero dependencies, TypeScript, ESM + CJS."
     >
       <Head>
-        <meta name="keywords" content="ceph, radosgw, rados gateway, rgw admin, s3, object storage, typescript, sdk, ceph admin api, bucket management, rook ceph, openshift data foundation" />
+        <meta name="keywords" content="ceph, radosgw, rados gateway, rgw admin, rgw admin ops, ceph admin api, s3, object storage, rook ceph, openshift data foundation, node.js, typescript, sdk, bucket management, user management, quota, rate limit" />
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="radosgw-admin — TypeScript SDK for Ceph RGW" />
-        <meta property="og:description" content="Zero-dependency TypeScript client for the Ceph RADOS Gateway Admin Ops REST API. 8 modules, 45+ methods, full type safety." />
+        <meta property="og:title" content="radosgw-admin — Node.js SDK for Ceph RADOS Gateway Admin Ops" />
+        <meta property="og:description" content="Manage Ceph RGW users, buckets, quotas, rate limits and access keys from Node.js. 8 modules, 45+ methods, zero dependencies." />
         <meta property="og:image" content="https://nycanshu.github.io/radosgw-admin/img/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="radosgw-admin — TypeScript SDK for Ceph RGW" />
-        <meta name="twitter:description" content="Zero-dependency TypeScript client for the Ceph RADOS Gateway Admin Ops REST API." />
+        <meta name="twitter:title" content="radosgw-admin — Node.js SDK for Ceph RADOS Gateway Admin Ops" />
+        <meta name="twitter:description" content="Node.js SDK for the Ceph RADOS Gateway Admin Ops API. Zero dependencies, full TypeScript, works with Rook-Ceph and ODF." />
         <link rel="canonical" href="https://nycanshu.github.io/radosgw-admin/" />
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
       </Head>
@@ -240,12 +240,12 @@ export default function Home() {
               Open Source &middot; Apache-2.0
             </div>
             <h1 className="hero-title">
-              The modern SDK for<br />
-              <span className="hero-gradient-text">Ceph Object Storage</span>
+              A Node.js SDK for<br />
+              <span className="hero-gradient-text">Ceph RGW Admin Ops</span>
             </h1>
             <p className="hero-subtitle">
-              A zero-dependency TypeScript client for the Ceph RADOS Gateway Admin Ops API.
-              Manage users, buckets, quotas, and more — with full type safety.
+              The Node.js SDK for the Ceph RADOS Gateway Admin Ops API.
+              Manage users, buckets, quotas, rate limits and more — from Rook-Ceph to bare metal. Modern TypeScript support included.
             </p>
             <CopyInstall />
             <div className="hero-actions">
