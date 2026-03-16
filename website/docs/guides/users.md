@@ -1,6 +1,7 @@
 ---
 title: Users Guide
 sidebar_position: 1
+description: Manage Ceph RGW users from Node.js — create, get, modify, suspend, enable and delete users with the radosgw-admin SDK.
 ---
 
 # Users Guide

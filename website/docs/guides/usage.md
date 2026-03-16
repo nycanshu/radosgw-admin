@@ -1,6 +1,7 @@
 ---
 title: Usage Guide
 sidebar_position: 7
+description: Query and trim Ceph RGW usage logs and storage reports with the radosgw-admin Node.js SDK.
 ---
 
 # Usage Guide

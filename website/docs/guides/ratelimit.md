@@ -1,6 +1,7 @@
 ---
 title: Rate Limit Guide
 sidebar_position: 6
+description: Set per-user, per-bucket and global rate limits on Ceph RGW with the radosgw-admin Node.js SDK.
 ---
 
 # Rate Limit Guide

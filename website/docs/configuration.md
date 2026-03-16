@@ -1,5 +1,7 @@
 ---
 sidebar_position: 3
+title: Configuration
+description: Configure the radosgw-admin Node.js SDK — host, access keys, port, timeouts, retries, TLS and debug options for Ceph RGW.
 ---
 
 # Configuration

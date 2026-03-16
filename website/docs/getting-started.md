@@ -1,5 +1,7 @@
 ---
 sidebar_position: 2
+title: Getting Started
+description: Install radosgw-admin and make your first request to the Ceph RADOS Gateway Admin Ops API in minutes.
 ---
 
 # Getting Started

@@ -11,7 +11,7 @@ const baseUrl = customDomain ? '/' : `/${projectName}/`;
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'radosgw-admin',
-  tagline: 'Modern TypeScript SDK for the Ceph RGW Admin Ops API',
+  tagline: 'Node.js SDK for the Ceph RADOS Gateway Admin Ops API',
   url,
   baseUrl,
   organizationName: orgName,
@@ -50,6 +50,12 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      metadata: [
+        { name: 'keywords', content: 'ceph, radosgw, rados gateway, rgw admin, rgw admin ops, ceph admin api, rook-ceph, openshift data foundation, odf, node.js, sdk, bucket management, user management, quota, rate limit, kubernetes storage' },
+        { name: 'author', content: 'nycanshu' },
+        { property: 'og:site_name', content: 'radosgw-admin' },
+      ],
+
       colorMode: {
         defaultMode: 'dark',
         respectPrefersColorScheme: true,

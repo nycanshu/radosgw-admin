@@ -1,7 +1,7 @@
 {
   "name": "radosgw-admin",
   "version": "0.1.0",
-  "description": "Modern TypeScript client for the Ceph RADOS Gateway Admin Ops REST API",
+  "description": "Node.js SDK for the Ceph RADOS Gateway Admin Ops API — manage users, buckets, quotas and rate limits programmatically",
   "type": "module",
   "sideEffects": false,
   "exports": {

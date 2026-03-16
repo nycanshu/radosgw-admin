@@ -1,6 +1,7 @@
 ---
 title: Buckets Guide
 sidebar_position: 4
+description: List, inspect, delete and transfer ownership of Ceph RGW buckets with the radosgw-admin Node.js SDK.
 ---
 
 # Buckets Guide

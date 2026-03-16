@@ -1,6 +1,12 @@
 # radosgw-admin
 
-TypeScript SDK for the Ceph RADOS Gateway (RGW) Admin Ops REST API.
+Node.js SDK for the Ceph RADOS Gateway (RGW) Admin Ops REST API. Manage users, buckets, quotas, rate limits and access keys programmatically from Node.js.
+
+## When to use this
+- You have a Ceph cluster (Rook-Ceph, OpenShift Data Foundation, bare metal) and need to automate admin tasks from Node.js
+- You want to provision/deprovision S3 users, enforce quotas, or manage bucket ownership via code
+- There was no actively maintained Node.js SDK for the RGW Admin Ops API and you need one
+- You are building Kubernetes operators, automation scripts, or admin tooling on top of Ceph RGW
 
 ## Install
 - npm: `npm install radosgw-admin`
@@ -14,23 +20,32 @@ import { RadosGWAdminClient } from 'radosgw-admin';
 
 const rgw = new RadosGWAdminClient({
   host: 'https://ceph-rgw.example.com',
-  accessKey: process.env.RGW_ADMIN_ACCESS_KEY!,
-  secretKey: process.env.RGW_ADMIN_SECRET_KEY!,
+  accessKey: process.env.RGW_ACCESS_KEY,
+  secretKey: process.env.RGW_SECRET_KEY,
 });
 
+// Create a user and set a 10 GB quota
 await rgw.users.create({ uid: 'alice', displayName: 'Alice' });
-const user = await rgw.users.get('alice');
+await rgw.quota.setUserQuota({ uid: 'alice', maxSize: '10G', enabled: true });
+
+// Transfer a bucket to another user
+await rgw.buckets.transferOwnership({ bucket: 'my-bucket', uid: 'alice' });
 ```
 
 ## Modules
-- `users`: create/get/modify/delete/list/suspend/enable/getStats
+- `users`: create/get/getByAccessKey/modify/delete/list/suspend/enable/getStats
 - `keys`: generate/revoke
 - `subusers`: create/modify/remove
 - `buckets`: list/getInfo/delete/transferOwnership/removeOwnership/verifyIndex
-- `quota`: user and bucket quota operations
+- `quota`: user and bucket quota get/set/enable/disable operations
 - `rateLimit`: user, bucket, and global rate-limit operations
 - `usage`: get/trim usage logs
-- `info`: get cluster info
+- `info`: get cluster info (FSID, backends)
+
+## Compatibility
+- Node.js >= 18, Bun
+- Ceph Pacific, Reef, Squid and later
+- Rook-Ceph, OpenShift Data Foundation (ODF), bare-metal Ceph
 
 ## Error Classes
 - `RGWError`
@@ -47,10 +62,11 @@ const user = await rgw.users.get('alice');
 - 5xx -> `RGWError`
 
 ## Safety Notes
-- Destructive operations (`purgeData`, `purgeObjects`, `removeAll`) are dangerous and should be used only with explicit intent.
+- Destructive operations (`purgeData`, `purgeObjects`, `removeAll`) permanently delete data — use only with explicit intent.
 - `insecure: true` disables TLS verification and is not recommended for production.
 
 ## Canonical References
+- Website & Docs: https://nycanshu.github.io/radosgw-admin/
 - Repo README: ./README.md
 - Full machine-readable reference: ./llms-full.txt
 - Ceph RGW Admin Ops API: https://docs.ceph.com/en/latest/radosgw/adminops/

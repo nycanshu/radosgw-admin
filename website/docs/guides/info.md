@@ -1,6 +1,7 @@
 ---
 title: Info Guide
 sidebar_position: 8
+description: Retrieve Ceph RGW cluster info — FSID and storage backends — with the radosgw-admin Node.js SDK.
 ---
 
 # Info Guide
