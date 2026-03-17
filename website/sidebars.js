@@ -23,6 +23,15 @@ const sidebars = {
         'guides/info',
       ],
     },
+    {
+      type: 'category',
+      label: 'Platform Guides',
+      collapsed: false,
+      items: [
+        'guides/rook-ceph',
+        'guides/odf',
+      ],
+    },
     'error-handling',
     'recipes',
     {
