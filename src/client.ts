@@ -5,6 +5,8 @@ import {
   RGWAuthError,
   RGWConflictError,
   RGWValidationError,
+  RGWRateLimitError,
+  RGWServiceError,
 } from './errors.js';
 import type {
   ClientConfig,
@@ -84,22 +86,44 @@ function toKebabCase(key: string): string {
 }
 
 /**
- * Maps HTTP error responses to typed RGW errors.
+ * Extracts the human-readable error message from an RGW JSON error response.
+ * RGW typically returns `{"Code": "NoSuchUser", "Message": "No user found..."}`.
+ * Falls back to the raw body if parsing fails.
  */
-function mapHttpError(status: number, body: string, code?: string): RGWError {
+function parseErrorBody(body: string): { message: string; code: string | undefined } {
+  try {
+    const parsed = JSON.parse(body) as Record<string, unknown>;
+    const code = typeof parsed.Code === 'string' ? parsed.Code : undefined;
+    const message = typeof parsed.Message === 'string' ? parsed.Message : undefined;
+    // Use Message if available, otherwise build a readable message from Code
+    return { message: message ?? (code ? code : body), code };
+  } catch {
+    return { message: body, code: undefined };
+  }
+}
+
+/**
+ * Maps HTTP error responses to typed RGW errors.
+ * Preserves the actual RGW error code from the response body.
+ */
+function mapHttpError(status: number, body: string): RGWError {
+  const { message, code } = parseErrorBody(body);
   switch (status) {
-    case 404:
-      return new RGWNotFoundError('Resource', code ?? 'unknown');
-    case 403:
-      return new RGWAuthError(
-        body || 'Access denied. Check your admin credentials and user capabilities.',
-      );
-    case 409:
-      return new RGWConflictError('Resource', code ?? 'unknown');
     case 400:
-      return new RGWValidationError(body || 'Invalid request parameters');
+      return new RGWValidationError(message || 'Invalid request parameters', 400, code);
+    case 403:
+      return new RGWAuthError(message, code);
+    case 404:
+      return new RGWNotFoundError(message, code);
+    case 409:
+      return new RGWConflictError(message, code);
+    case 429:
+      return new RGWRateLimitError(message, code);
     default:
-      return new RGWError(body || `HTTP ${status}`, status, code);
+      if (status >= 500) {
+        return new RGWServiceError(message, status, code);
+      }
+      return new RGWError(message || `HTTP ${status}`, status, code);
   }
 }
 
@@ -170,7 +194,7 @@ export class BaseClient {
   private isRetryable(error: unknown): boolean {
     if (error instanceof RGWError) {
       if (error.statusCode !== undefined) {
-        return error.statusCode >= 500;
+        return error.statusCode >= 500 || error.statusCode === 429;
       }
       // Network errors wrapped by wrapFetchError
       if (error.code === 'NetworkError' || error.code === 'Timeout') {
@@ -289,18 +313,6 @@ export class BaseClient {
       delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
     } else {
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = prev;
-    }
-  }
-
-  /**
-   * Parses an error response body to extract the RGW error code.
-   */
-  private parseErrorCode(text: string): string | undefined {
-    try {
-      const errorBody = JSON.parse(text) as Record<string, unknown>;
-      return (errorBody.Code as string) ?? undefined;
-    } catch {
-      return undefined;
     }
   }
 
@@ -436,7 +448,7 @@ export class BaseClient {
       const text = await response.text();
 
       if (!response.ok) {
-        const error = mapHttpError(response.status, text, this.parseErrorCode(text));
+        const error = mapHttpError(response.status, text);
         await this.runAfterHooks({
           ...hookCtx,
           status: response.status,

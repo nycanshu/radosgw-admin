@@ -1,24 +1,26 @@
 # AGENTS.md — radosgw-admin
 
 ## Project Overview
-Modern TypeScript client for the Ceph RADOS Gateway (RGW) Admin Ops REST API.
+Node.js SDK for the Ceph RADOS Gateway (RGW) Admin Ops REST API.
 Full spec: `myplan/radosgw-admin-SRD.md`
 
 ## Commands
 - `npm run build` — Build ESM + CJS with tsup
 - `npm run typecheck` — TypeScript strict type checking
 - `npm test` — Run vitest unit tests
+- `npm run test:integration` — Run integration tests against a live RGW
 - `npm run lint` — ESLint
 - `npm run format` — Prettier format
 - `npm run check` — Run all checks (typecheck + lint + format + test)
 
 ## Architecture
-- **Entry point**: `src/index.ts` → exports `RadosGWAdminClient` class
-- **Core client**: `src/client.ts` → `BaseClient` handles HTTP requests, SigV4 signing, response transforms
+- **Entry point**: `src/index.ts` → exports `RadosGWAdminClient` class + `healthCheck()` method
+- **Core client**: `src/client.ts` → `BaseClient` handles HTTP requests, SigV4 signing, response transforms, retry with jitter, request/response hooks, User-Agent header, AbortSignal support
 - **Signer**: `src/signer.ts` → AWS Signature V4 implementation (zero external deps)
 - **Modules**: `src/modules/*.ts` → Each module (users, keys, buckets, etc.) is attached to the client as a namespaced property
-- **Types**: `src/types/*.types.ts` → One file per domain (user, bucket, quota, usage, common)
-- **Errors**: `src/errors.ts` → Error class hierarchy (RGWError → NotFound, Validation, Auth, Conflict)
+- **Types**: `src/types/*.types.ts` → One file per domain (user, bucket, quota, usage, common) + hook types (`BeforeRequestHook`, `AfterResponseHook`, `HookContext`)
+- **Errors**: `src/errors.ts` → Error class hierarchy (RGWError → NotFound, Validation, Auth, Conflict, RateLimit, Service). All errors preserve RGW error codes via `code` field.
+- **Version injection**: `tsup.config.ts` → injects `__SDK_VERSION__` at build time for User-Agent header
 
 ## Conventions
 - **No `any`** — `strict: true`, `noImplicitAny: true` in tsconfig
@@ -52,17 +54,28 @@ Then attached in RadosGWAdminClient constructor: `this.users = new UsersModule(t
 - **No Ceph jargon** — Use user-facing language, not internal Ceph terms: `transferOwnership` not `link`, `removeOwnership` not `unlink`
 - **Consistent CRUD verbs** — `create`, `get`, `modify`, `delete` for standard CRUD; specialized verbs (`generate`, `revoke`, `suspend`, `enable`) when they better describe the action
 
+## Client Features (v0.2.0)
+- **Request hooks** — `onBeforeRequest`/`onAfterResponse` callbacks on `ClientConfig`. Hooks run on every request across all modules. Errors in hooks are swallowed (never break requests).
+- **Health check** — `rgw.healthCheck()` returns `Promise<boolean>` by calling `info.get()` internally.
+- **Custom User-Agent** — `userAgent` option on `ClientConfig`. Default: `radosgw-admin/<version> node/<nodeVersion>`.
+- **AbortSignal** — `signal` field on `RequestOptions` for external request cancellation. Combined with internal timeout signal (Node 18 compatible).
+- **Retry with jitter** — Full jitter on exponential backoff (`base + random * base`). Prevents thundering herd.
+
 ## Testing
-- Tests in `tests/unit/*.test.ts`
-- Mock the HTTP layer, verify request params and response parsing
+- Unit tests in `tests/unit/*.test.ts` — mock HTTP layer, fast, run on every commit
+- Integration tests in `tests/integration/*.ts` — standalone `npx tsx` scripts against real RGW
+- `tests/integration/run-all.ts` — sequential runner, starts with health check
 - Cover happy paths + all error classes
 - Target: >= 80% line coverage on `src/modules/`
 
 ## Error Mapping
-| HTTP Status | Thrown As |
-|---|---|
-| 404 | `RGWNotFoundError` |
-| 409 | `RGWConflictError` |
-| 403 | `RGWAuthError` |
-| 400 | `RGWValidationError` |
-| 5xx | `RGWError` (base) |
+| HTTP Status | Thrown As | Retryable |
+|---|---|---|
+| 400 | `RGWValidationError` (codes: InvalidArgument, InvalidBucketName, MalformedPolicy) | No |
+| 403 | `RGWAuthError` (codes: AccessDenied, InvalidAccessKeyId, SignatureDoesNotMatch) | No |
+| 404 | `RGWNotFoundError` (codes: NoSuchUser, NoSuchBucket, NoSuchKey, NoSuchSubUser) | No |
+| 409 | `RGWConflictError` (codes: UserAlreadyExists, BucketAlreadyExists, KeyExists, EmailExists) | No |
+| 429 | `RGWRateLimitError` (codes: TooManyRequests, SlowDown) | Yes |
+| 5xx | `RGWServiceError` (codes: InternalError, ServiceUnavailable) | Yes |
+| Network | `RGWError` (code: NetworkError) | Yes |
+| Timeout | `RGWError` (code: Timeout) | Yes |

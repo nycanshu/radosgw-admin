@@ -22,9 +22,16 @@ _Nothing unreleased._
 - **`llms.txt` on docs site** — AI crawlers can now discover the SDK at the docs URL.
 - **Hook types exported** — `BeforeRequestHook`, `AfterResponseHook`, `HookContext` available for consumers.
 
+- **`RGWRateLimitError`** — new error class for 429 Too Many Requests. Automatically retried when `maxRetries > 0`.
+- **`RGWServiceError`** — new error class for 5xx server errors, distinct from network errors.
+- **RGW error code passthrough** — errors now preserve the actual RGW code (`NoSuchUser`, `BucketAlreadyExists`, `SlowDown`, etc.) on the `code` property instead of generic codes.
+- **Comprehensive error docs** — full error reference with RGW code tables, retry behavior, and usage examples.
+
 ### Changed
 
 - **Retry backoff now uses full jitter** — `base + random(0, base)` instead of fixed exponential delay. Prevents thundering herd in multi-client production setups. Non-breaking behavioral change.
+- **429 responses are now retryable** — rate limit errors are automatically retried with backoff alongside 5xx and network errors.
+- **Error constructors accept RGW codes** — `RGWNotFoundError`, `RGWAuthError`, `RGWConflictError` now accept an optional `code` parameter for the actual RGW error code.
 - **Homepage** now points to documentation site instead of GitHub README.
 - **SDK version injected at build time** via tsup `define` for User-Agent header.
 

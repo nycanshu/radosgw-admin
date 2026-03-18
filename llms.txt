@@ -55,18 +55,23 @@ await rgw.buckets.transferOwnership({ bucket: 'my-bucket', uid: 'alice' });
 - Rook-Ceph, OpenShift Data Foundation (ODF), bare-metal Ceph
 
 ## Error Classes
-- `RGWError`
-- `RGWValidationError`
-- `RGWAuthError`
-- `RGWNotFoundError`
-- `RGWConflictError`
+- `RGWError` (base)
+- `RGWValidationError` (400 / client-side)
+- `RGWAuthError` (403)
+- `RGWNotFoundError` (404)
+- `RGWConflictError` (409)
+- `RGWRateLimitError` (429, retryable)
+- `RGWServiceError` (5xx, retryable)
+
+All errors include a `code` field with the actual RGW error code (e.g. `NoSuchUser`, `UserAlreadyExists`, `InvalidAccessKeyId`, `SlowDown`).
 
 ## HTTP Error Mapping
-- 400 -> `RGWValidationError`
-- 403 -> `RGWAuthError`
-- 404 -> `RGWNotFoundError`
-- 409 -> `RGWConflictError`
-- 5xx -> `RGWError`
+- 400 -> `RGWValidationError` (codes: InvalidArgument, InvalidBucketName, MalformedPolicy, ValidationError)
+- 403 -> `RGWAuthError` (codes: AccessDenied, InvalidAccessKeyId, SignatureDoesNotMatch)
+- 404 -> `RGWNotFoundError` (codes: NoSuchUser, NoSuchBucket, NoSuchKey)
+- 409 -> `RGWConflictError` (codes: UserAlreadyExists, BucketAlreadyExists, KeyExists)
+- 429 -> `RGWRateLimitError` (codes: TooManyRequests, SlowDown) — retryable
+- 5xx -> `RGWServiceError` (codes: InternalError, ServiceUnavailable) — retryable
 
 ## Safety Notes
 - Destructive operations (`purgeData`, `purgeObjects`, `removeAll`) permanently delete data — use only with explicit intent.

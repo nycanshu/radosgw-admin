@@ -27,11 +27,12 @@ Run a structured production-readiness audit for this TypeScript SDK before relea
 
 3. Error Semantics
 - HTTP mapping remains stable:
-  - 400 -> `RGWValidationError`
-  - 403 -> `RGWAuthError`
-  - 404 -> `RGWNotFoundError`
-  - 409 -> `RGWConflictError`
-  - 5xx -> `RGWError`
+  - 400 -> `RGWValidationError` (codes: InvalidArgument, InvalidBucketName, MalformedPolicy)
+  - 403 -> `RGWAuthError` (codes: AccessDenied, InvalidAccessKeyId, SignatureDoesNotMatch)
+  - 404 -> `RGWNotFoundError` (codes: NoSuchUser, NoSuchBucket, NoSuchKey, NoSuchSubUser)
+  - 409 -> `RGWConflictError` (codes: UserAlreadyExists, BucketAlreadyExists, KeyExists, EmailExists)
+  - 429 -> `RGWRateLimitError` (codes: TooManyRequests, SlowDown) — retryable
+  - 5xx -> `RGWServiceError` (codes: InternalError, ServiceUnavailable) — retryable
 - Error messages are actionable and include operation context.
 
 4. Reliability Controls

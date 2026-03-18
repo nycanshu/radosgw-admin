@@ -147,6 +147,8 @@ export {
   RGWValidationError,
   RGWAuthError,
   RGWConflictError,
+  RGWRateLimitError,
+  RGWServiceError,
 } from './errors.js';
 
 // Re-export internals for advanced use cases (extending the client, custom signing)

@@ -382,13 +382,16 @@ try {
 }
 ```
 
-| Error Class          | HTTP Status     | Condition                                |
-| -------------------- | --------------- | ---------------------------------------- |
-| `RGWValidationError` | _(pre-request)_ | Invalid input (missing uid, bad params)  |
-| `RGWNotFoundError`   | 404             | Resource does not exist                  |
-| `RGWConflictError`   | 409             | Resource already exists                  |
-| `RGWAuthError`       | 403             | Insufficient credentials or capabilities |
-| `RGWError`           | 5xx             | Server-side failure                      |
+| Error Class          | HTTP Status     | Retryable | Condition                                |
+| -------------------- | --------------- | --------- | ---------------------------------------- |
+| `RGWValidationError` | 400 / _(pre-request)_ | No        | Invalid input (missing uid, bad params)  |
+| `RGWNotFoundError`   | 404             | No        | Resource does not exist                  |
+| `RGWConflictError`   | 409             | No        | Resource already exists                  |
+| `RGWAuthError`       | 403             | No        | Insufficient credentials or capabilities |
+| `RGWRateLimitError`  | 429             | Yes       | Rate limit exceeded                      |
+| `RGWServiceError`    | 5xx             | Yes       | RGW server error                         |
+
+All errors include a `code` field with the RGW error code (e.g., `NoSuchUser`, `BucketAlreadyExists`, `SlowDown`).
 
 > **Note:** Destructive operations (`purgeData`, `purgeObjects`) emit a `console.warn` before executing. To suppress in CI/automation, redirect stderr or patch `console.warn`.
 
