@@ -19,6 +19,8 @@ The only existing npm package for RGW Admin Ops (`rgw-admin-client`) was last pu
 
 - Full [RGW Admin Ops API](https://docs.ceph.com/en/latest/radosgw/adminops/) coverage — users, keys, subusers, buckets, quotas, rate limits
 - Zero runtime dependencies — AWS SigV4 signing uses only `node:crypto`
+- Request hooks — add logging, Prometheus metrics, or audit trails via `onBeforeRequest`/`onAfterResponse`
+- Health check — `rgw.healthCheck()` for one-liner connectivity verification
 - Structured error hierarchy — catch specific failures, not generic HTTP errors
 - Automatic snake_case/camelCase conversion — idiomatic JS API over RGW's REST interface
 - TypeScript with strict types and zero `any` — every request and response is fully typed
@@ -28,6 +30,12 @@ The only existing npm package for RGW Admin Ops (`rgw-admin-client`) was last pu
 
 ```bash
 npm install radosgw-admin
+# or
+yarn add radosgw-admin
+# or
+pnpm add radosgw-admin
+# or
+bun add radosgw-admin
 ```
 
 Requires **Node.js >= 18** and a Ceph RGW instance with the Admin Ops API enabled.

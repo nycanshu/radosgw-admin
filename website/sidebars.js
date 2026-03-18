@@ -33,6 +33,7 @@ const sidebars = {
       ],
     },
     'guides/hooks',
+    'compatibility',
     'error-handling',
     'recipes',
     {
