@@ -33,6 +33,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:integration": "tsx tests/integration/run-all.ts",
     "docs:api": "typedoc",
     "docs:dev": "cd website && npm run start",
     "docs:build": "npm run docs:api && cd website && npm run build",

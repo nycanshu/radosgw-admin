@@ -80,7 +80,10 @@ const rgw = new RadosGWAdminClient({
   insecure: false, // Optional — skip TLS verification (default: false)
   debug: false, // Optional — enable request/response logging (default: false)
   maxRetries: 3, // Optional — retry transient errors (default: 0)
-  retryDelay: 200, // Optional — base delay for exponential backoff in ms (default: 200)
+  retryDelay: 200, // Optional — base delay for exponential backoff w/ jitter in ms (default: 200)
+  userAgent: 'my-app/1.0', // Optional — custom User-Agent (default: "radosgw-admin/<ver> node/<ver>")
+  onBeforeRequest: [(ctx) => {}], // Optional — hooks called before each request
+  onAfterResponse: [(ctx) => {}], // Optional — hooks called after each response
 });
 ```
 
@@ -380,6 +383,54 @@ try {
 | `RGWError`           | 5xx             | Server-side failure                      |
 
 > **Note:** Destructive operations (`purgeData`, `purgeObjects`) emit a `console.warn` before executing. To suppress in CI/automation, redirect stderr or patch `console.warn`.
+
+## Health Check
+
+Verify RGW connectivity before running operations:
+
+```typescript
+const ok = await rgw.healthCheck();
+if (!ok) throw new Error('Cannot reach RGW');
+```
+
+## Request Hooks
+
+Add logging, metrics, or telemetry without modifying the SDK:
+
+```typescript
+const rgw = new RadosGWAdminClient({
+  host: 'http://rgw:8080',
+  accessKey: '...',
+  secretKey: '...',
+  onBeforeRequest: [
+    (ctx) => console.log(`→ ${ctx.method} ${ctx.path}`),
+  ],
+  onAfterResponse: [
+    (ctx) => console.log(`← ${ctx.status} in ${ctx.durationMs}ms`),
+  ],
+});
+```
+
+Hooks run on **every request across all modules**. If a hook throws, the error is swallowed — hooks never break RGW operations.
+
+Hook context includes: `method`, `path`, `url`, `query`, `attempt` (retry number), `startTime`, and for after-hooks: `status`, `durationMs`, `error`.
+
+> **Security note:** Hook context includes the full request URL which may contain sensitive query parameters (e.g. `secret-key` when creating users with pre-specified credentials). If you log or send hook data to external systems, redact sensitive fields. The SDK already redacts `secret-key` from its own debug logs, but hooks receive the raw URL.
+
+## Request Cancellation
+
+Pass an `AbortSignal` to cancel in-flight requests:
+
+```typescript
+const controller = new AbortController();
+setTimeout(() => controller.abort(), 5000);
+
+await rgw._client.request({
+  method: 'GET',
+  path: '/user',
+  signal: controller.signal,
+});
+```
 
 ## Compatibility
 
