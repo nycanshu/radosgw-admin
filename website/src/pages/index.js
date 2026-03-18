@@ -71,7 +71,7 @@ const features = [
   {
     icon: '🛡️',
     title: 'Typed Errors',
-    desc: 'Catch RGWNotFoundError, RGWAuthError, RGWConflictError — not generic HTTP status codes.',
+    desc: 'Catch RGWNotFoundError, RGWRateLimitError, RGWServiceError — with actual RGW error codes like NoSuchUser, SlowDown.',
   },
   {
     icon: '⚙️',

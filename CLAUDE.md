@@ -19,7 +19,7 @@ Full spec: `myplan/radosgw-admin-SRD.md`
 - **Signer**: `src/signer.ts` → AWS Signature V4 implementation (zero external deps)
 - **Modules**: `src/modules/*.ts` → Each module (users, keys, buckets, etc.) is attached to the client as a namespaced property
 - **Types**: `src/types/*.types.ts` → One file per domain (user, bucket, quota, usage, common) + hook types (`BeforeRequestHook`, `AfterResponseHook`, `HookContext`)
-- **Errors**: `src/errors.ts` → Error class hierarchy (RGWError → NotFound, Validation, Auth, Conflict)
+- **Errors**: `src/errors.ts` → Error class hierarchy (RGWError → NotFound, Validation, Auth, Conflict, RateLimit, Service). All errors preserve RGW error codes via `code` field.
 - **Version injection**: `tsup.config.ts` → injects `__SDK_VERSION__` at build time for User-Agent header
 
 ## Conventions
@@ -69,10 +69,13 @@ Then attached in RadosGWAdminClient constructor: `this.users = new UsersModule(t
 - Target: >= 80% line coverage on `src/modules/`
 
 ## Error Mapping
-| HTTP Status | Thrown As |
-|---|---|
-| 404 | `RGWNotFoundError` |
-| 409 | `RGWConflictError` |
-| 403 | `RGWAuthError` |
-| 400 | `RGWValidationError` |
-| 5xx | `RGWError` (base) |
+| HTTP Status | Thrown As | Retryable |
+|---|---|---|
+| 400 | `RGWValidationError` (codes: InvalidArgument, InvalidBucketName, MalformedPolicy) | No |
+| 403 | `RGWAuthError` (codes: AccessDenied, InvalidAccessKeyId, SignatureDoesNotMatch) | No |
+| 404 | `RGWNotFoundError` (codes: NoSuchUser, NoSuchBucket, NoSuchKey, NoSuchSubUser) | No |
+| 409 | `RGWConflictError` (codes: UserAlreadyExists, BucketAlreadyExists, KeyExists, EmailExists) | No |
+| 429 | `RGWRateLimitError` (codes: TooManyRequests, SlowDown) | Yes |
+| 5xx | `RGWServiceError` (codes: InternalError, ServiceUnavailable) | Yes |
+| Network | `RGWError` (code: NetworkError) | Yes |
+| Timeout | `RGWError` (code: Timeout) | Yes |

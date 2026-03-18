@@ -32,11 +32,12 @@ Note: If behavior differs between docs and real RGW responses, prefer observed b
 2. Type/lint/format gate passes: `npm run check`
 3. Contract tests pass for each targeted Ceph version
 4. Error mapping assertions pass:
-   - 400 -> `RGWValidationError`
-   - 403 -> `RGWAuthError`
-   - 404 -> `RGWNotFoundError`
-   - 409 -> `RGWConflictError`
-   - 5xx -> `RGWError`
+   - 400 -> `RGWValidationError` (codes: InvalidArgument, InvalidBucketName, MalformedPolicy)
+   - 403 -> `RGWAuthError` (codes: AccessDenied, InvalidAccessKeyId, SignatureDoesNotMatch)
+   - 404 -> `RGWNotFoundError` (codes: NoSuchUser, NoSuchBucket, NoSuchKey, NoSuchSubUser)
+   - 409 -> `RGWConflictError` (codes: UserAlreadyExists, BucketAlreadyExists, KeyExists, EmailExists)
+   - 429 -> `RGWRateLimitError` (codes: TooManyRequests, SlowDown) — retryable
+   - 5xx -> `RGWServiceError` (codes: InternalError, ServiceUnavailable) — retryable
 5. No undocumented API-shape drift in public return types
 6. Destructive operations require explicit opt-in and warning assertions
 
@@ -137,7 +138,8 @@ Use this exact structure in PR comments or release notes:
 - 403 -> RGWAuthError: PASS|FAIL
 - 404 -> RGWNotFoundError: PASS|FAIL
 - 409 -> RGWConflictError: PASS|FAIL
-- 5xx -> RGWError: PASS|FAIL
+- 429 -> RGWRateLimitError: PASS|FAIL
+- 5xx -> RGWServiceError: PASS|FAIL
 
 ## Release Decision
 - APPROVED|BLOCKED

@@ -1,6 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { toCamelCase, BaseClient } from '../../src/client.js';
-import { RadosGWAdminClient, RGWValidationError, RGWError } from '../../src/index.js';
+import {
+  RadosGWAdminClient,
+  RGWValidationError,
+  RGWError,
+  RGWNotFoundError,
+  RGWRateLimitError,
+  RGWServiceError,
+  RGWAuthError,
+  RGWConflictError,
+} from '../../src/index.js';
 import type { BeforeRequestHook, AfterResponseHook } from '../../src/index.js';
 
 describe('toCamelCase', () => {
@@ -204,7 +213,9 @@ describe('BaseClient retry logic', () => {
     });
 
     const client = new BaseClient(config);
-    await expect(client.request({ method: 'GET', path: '/user' })).rejects.toThrow('not found');
+    await expect(client.request({ method: 'GET', path: '/user' })).rejects.toThrow(
+      RGWNotFoundError,
+    );
     expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -915,5 +926,248 @@ describe('BaseClient retry jitter', () => {
     const result = await client.request<{ ok: boolean }>({ method: 'GET', path: '/user' });
     expect(result).toEqual({ ok: true });
     expect(mathRandomSpy).toHaveBeenCalled();
+  });
+});
+
+describe('BaseClient error mapping', () => {
+  let fetchSpy: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('maps 404 with RGW Code to RGWNotFoundError with correct code', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: false,
+      status: 404,
+      text: () => Promise.resolve('{"Code":"NoSuchUser","Message":"No user found"}'),
+    });
+
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+    });
+
+    try {
+      await client.request({ method: 'GET', path: '/user' });
+      expect.unreachable('should throw');
+    } catch (err) {
+      expect(err).toBeInstanceOf(RGWNotFoundError);
+      expect((err as RGWNotFoundError).code).toBe('NoSuchUser');
+      expect((err as RGWNotFoundError).message).toBe('No user found');
+      expect((err as RGWNotFoundError).statusCode).toBe(404);
+    }
+  });
+
+  it('maps 403 with RGW Code to RGWAuthError with correct code', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: false,
+      status: 403,
+      text: () =>
+        Promise.resolve('{"Code":"InvalidAccessKeyId","Message":"The access key does not exist"}'),
+    });
+
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+    });
+
+    try {
+      await client.request({ method: 'GET', path: '/user' });
+      expect.unreachable('should throw');
+    } catch (err) {
+      expect(err).toBeInstanceOf(RGWAuthError);
+      expect((err as RGWAuthError).code).toBe('InvalidAccessKeyId');
+      expect((err as RGWAuthError).message).toBe('The access key does not exist');
+    }
+  });
+
+  it('maps 409 with RGW Code to RGWConflictError with correct code', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: false,
+      status: 409,
+      text: () => Promise.resolve('{"Code":"UserAlreadyExists","Message":"User already exists"}'),
+    });
+
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+    });
+
+    try {
+      await client.request({ method: 'GET', path: '/user' });
+      expect.unreachable('should throw');
+    } catch (err) {
+      expect(err).toBeInstanceOf(RGWConflictError);
+      expect((err as RGWConflictError).code).toBe('UserAlreadyExists');
+    }
+  });
+
+  it('maps 429 to RGWRateLimitError', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: false,
+      status: 429,
+      text: () => Promise.resolve('{"Code":"SlowDown","Message":"Rate limit exceeded"}'),
+    });
+
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+    });
+
+    try {
+      await client.request({ method: 'GET', path: '/user' });
+      expect.unreachable('should throw');
+    } catch (err) {
+      expect(err).toBeInstanceOf(RGWRateLimitError);
+      expect((err as RGWRateLimitError).statusCode).toBe(429);
+      expect((err as RGWRateLimitError).code).toBe('SlowDown');
+      expect((err as RGWRateLimitError).message).toBe('Rate limit exceeded');
+    }
+  });
+
+  it('maps 500 to RGWServiceError', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      text: () => Promise.resolve('{"Code":"InternalError","Message":"Internal server error"}'),
+    });
+
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+    });
+
+    try {
+      await client.request({ method: 'GET', path: '/user' });
+      expect.unreachable('should throw');
+    } catch (err) {
+      expect(err).toBeInstanceOf(RGWServiceError);
+      expect((err as RGWServiceError).statusCode).toBe(500);
+      expect((err as RGWServiceError).code).toBe('InternalError');
+    }
+  });
+
+  it('maps 503 to RGWServiceError', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: false,
+      status: 503,
+      text: () => Promise.resolve('Service Unavailable'),
+    });
+
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+    });
+
+    try {
+      await client.request({ method: 'GET', path: '/user' });
+      expect.unreachable('should throw');
+    } catch (err) {
+      expect(err).toBeInstanceOf(RGWServiceError);
+      expect((err as RGWServiceError).statusCode).toBe(503);
+    }
+  });
+
+  it('falls back to Code when Message is absent', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: false,
+      status: 404,
+      text: () => Promise.resolve('{"Code":"NoSuchBucket"}'),
+    });
+
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+    });
+
+    try {
+      await client.request({ method: 'GET', path: '/bucket' });
+      expect.unreachable('should throw');
+    } catch (err) {
+      expect(err).toBeInstanceOf(RGWNotFoundError);
+      expect((err as RGWNotFoundError).code).toBe('NoSuchBucket');
+      expect((err as RGWNotFoundError).message).toBe('NoSuchBucket');
+    }
+  });
+
+  it('handles non-JSON error body gracefully', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      text: () => Promise.resolve('Bad Gateway'),
+    });
+
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+    });
+
+    try {
+      await client.request({ method: 'GET', path: '/user' });
+      expect.unreachable('should throw');
+    } catch (err) {
+      expect(err).toBeInstanceOf(RGWServiceError);
+      expect((err as RGWServiceError).message).toBe('Bad Gateway');
+    }
+  });
+
+  it('retries on 429 errors', async () => {
+    fetchSpy
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 429,
+        text: () => Promise.resolve('{"Code":"SlowDown"}'),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: () => Promise.resolve('{"ok":true}'),
+      });
+
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+      maxRetries: 1,
+      retryDelay: 1,
+    });
+
+    const result = await client.request<{ ok: boolean }>({ method: 'GET', path: '/user' });
+    expect(result).toEqual({ ok: true });
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not retry on 429 when maxRetries is 0', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: false,
+      status: 429,
+      text: () => Promise.resolve('{"Code":"SlowDown"}'),
+    });
+
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+      maxRetries: 0,
+    });
+
+    await expect(client.request({ method: 'GET', path: '/user' })).rejects.toThrow(
+      RGWRateLimitError,
+    );
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 });

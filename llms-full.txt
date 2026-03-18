@@ -115,11 +115,16 @@ Hook errors are swallowed — they never break RGW operations.
 - Hooks run on every request across all modules, including retries.
 
 ## Error Classes and Mapping
-- 400 -> `RGWValidationError`
-- 403 -> `RGWAuthError`
-- 404 -> `RGWNotFoundError`
-- 409 -> `RGWConflictError`
-- 5xx -> `RGWError`
+- 400 -> `RGWValidationError` (codes: InvalidArgument, InvalidBucketName, MalformedPolicy, ValidationError)
+- 403 -> `RGWAuthError` (codes: AccessDenied, InvalidAccessKeyId, SignatureDoesNotMatch)
+- 404 -> `RGWNotFoundError` (codes: NoSuchUser, NoSuchBucket, NoSuchKey, NoSuchSubUser)
+- 409 -> `RGWConflictError` (codes: UserAlreadyExists, BucketAlreadyExists, KeyExists, EmailExists)
+- 429 -> `RGWRateLimitError` (codes: TooManyRequests, SlowDown) — retryable
+- 5xx -> `RGWServiceError` (codes: InternalError, ServiceUnavailable) — retryable
+- Network -> `RGWError` (code: NetworkError) — retryable
+- Timeout -> `RGWError` (code: Timeout) — retryable
+
+All errors expose `err.code` with the actual RGW error code from the response body.
 
 ## Destructive Operations
 - `users.delete({ purgeData: true })`
