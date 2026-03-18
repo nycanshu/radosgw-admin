@@ -9,7 +9,7 @@
  *   npm run test:integration
  */
 
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -43,7 +43,7 @@ for (const test of tests) {
   process.stdout.write(`Running ${label}... `);
 
   try {
-    execSync(`npx tsx ${testPath}`, {
+    execFileSync('npx', ['tsx', testPath], {
       stdio: ['pipe', 'pipe', 'pipe'],
       env: { ...process.env },
       timeout: 120_000,
