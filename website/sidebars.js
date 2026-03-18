@@ -32,6 +32,8 @@ const sidebars = {
         'guides/odf',
       ],
     },
+    'guides/hooks',
+    'compatibility',
     'error-handling',
     'recipes',
     {

@@ -64,6 +64,11 @@ const features = [
     desc: 'Set per-user and per-bucket quotas, rate limits, and global policies — all programmatically.',
   },
   {
+    icon: '🔗',
+    title: 'Request Hooks',
+    desc: 'Add logging, Prometheus metrics, or audit trails via onBeforeRequest and onAfterResponse callbacks — without touching SDK internals.',
+  },
+  {
     icon: '🛡️',
     title: 'Typed Errors',
     desc: 'Catch RGWNotFoundError, RGWAuthError, RGWConflictError — not generic HTTP status codes.',
@@ -72,11 +77,6 @@ const features = [
     icon: '⚙️',
     title: 'Rook · ODF · Bare Metal',
     desc: 'Works with Rook-Ceph, OpenShift Data Foundation, and bare-metal Ceph clusters (Pacific through Squid).',
-  },
-  {
-    icon: '⚡',
-    title: 'Full TypeScript',
-    desc: 'Strict types everywhere — no any. Autocomplete every method, param, and response field.',
   },
 ];
 
@@ -95,7 +95,7 @@ const stats = [
   { value: '8',    label: 'Modules' },
   { value: '45+',  label: 'Methods' },
   { value: '0',    label: 'Dependencies' },
-  { value: '280+', label: 'Tests' },
+  { value: '299+', label: 'Tests' },
 ];
 
 const faqItems = [
@@ -122,6 +122,10 @@ const faqItems = [
   {
     q: 'What Node.js version is required?',
     a: 'Node.js 18 or later. The SDK uses native fetch and node:crypto which are stable from Node.js 18 onwards. It also works with Bun.',
+  },
+  {
+    q: 'Which package managers are supported?',
+    a: 'All of them — npm, yarn, pnpm, and bun. Install with: npm install radosgw-admin, yarn add radosgw-admin, pnpm add radosgw-admin, or bun add radosgw-admin.',
   },
 ];
 

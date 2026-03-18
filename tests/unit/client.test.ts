@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { toCamelCase, BaseClient } from '../../src/client.js';
 import { RadosGWAdminClient, RGWValidationError, RGWError } from '../../src/index.js';
+import type { BeforeRequestHook, AfterResponseHook } from '../../src/index.js';
 
 describe('toCamelCase', () => {
   it('converts snake_case keys to camelCase', () => {
@@ -421,5 +422,498 @@ describe('BaseClient insecure TLS', () => {
     await client.request({ method: 'GET', path: '/user' });
 
     expect(process.env.NODE_TLS_REJECT_UNAUTHORIZED).toBe('1');
+  });
+});
+
+describe('BaseClient User-Agent header', () => {
+  let fetchSpy: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('sends default User-Agent header', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve('{}'),
+    });
+
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+    });
+    await client.request({ method: 'GET', path: '/user' });
+
+    const callHeaders = fetchSpy.mock.calls[0][1].headers as Record<string, string>;
+    expect(callHeaders['User-Agent']).toMatch(/^radosgw-admin\/.*node\//);
+  });
+
+  it('sends custom User-Agent when configured', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve('{}'),
+    });
+
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+      userAgent: 'my-app/1.0',
+    });
+    await client.request({ method: 'GET', path: '/user' });
+
+    const callHeaders = fetchSpy.mock.calls[0][1].headers as Record<string, string>;
+    expect(callHeaders['User-Agent']).toBe('my-app/1.0');
+  });
+});
+
+describe('BaseClient request/response hooks', () => {
+  let fetchSpy: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('calls onBeforeRequest hook with correct context', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve('{"ok":true}'),
+    });
+
+    const beforeHook: BeforeRequestHook = vi.fn();
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+      onBeforeRequest: [beforeHook],
+    });
+    await client.request({ method: 'GET', path: '/user' });
+
+    expect(beforeHook).toHaveBeenCalledTimes(1);
+    expect(beforeHook).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'GET',
+        path: '/user',
+        attempt: 0,
+      }),
+    );
+  });
+
+  it('calls onAfterResponse hook with status and duration', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve('{"ok":true}'),
+    });
+
+    const afterHook: AfterResponseHook = vi.fn();
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+      onAfterResponse: [afterHook],
+    });
+    await client.request({ method: 'GET', path: '/user' });
+
+    expect(afterHook).toHaveBeenCalledTimes(1);
+    expect(afterHook).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'GET',
+        path: '/user',
+        status: 200,
+        durationMs: expect.any(Number),
+      }),
+    );
+  });
+
+  it('calls onAfterResponse with error on HTTP failure', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: false,
+      status: 404,
+      text: () => Promise.resolve('{"Code":"NoSuchUser"}'),
+    });
+
+    const afterHook: AfterResponseHook = vi.fn();
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+      onAfterResponse: [afterHook],
+    });
+
+    await expect(client.request({ method: 'GET', path: '/user' })).rejects.toThrow();
+
+    expect(afterHook).toHaveBeenCalledTimes(1);
+    expect(afterHook).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 404,
+        error: expect.any(Error),
+      }),
+    );
+  });
+
+  it('calls onAfterResponse with error on network failure', async () => {
+    fetchSpy.mockRejectedValueOnce(new Error('connect ECONNREFUSED'));
+
+    const afterHook: AfterResponseHook = vi.fn();
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+      onAfterResponse: [afterHook],
+    });
+
+    await expect(client.request({ method: 'GET', path: '/user' })).rejects.toThrow();
+
+    expect(afterHook).toHaveBeenCalledTimes(1);
+    expect(afterHook).toHaveBeenCalledWith(
+      expect.objectContaining({
+        error: expect.any(Error),
+      }),
+    );
+  });
+
+  it('does not break request when hook throws', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve('{"ok":true}'),
+    });
+
+    const brokenHook: BeforeRequestHook = () => {
+      throw new Error('hook exploded');
+    };
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+      onBeforeRequest: [brokenHook],
+    });
+
+    const result = await client.request<{ ok: boolean }>({ method: 'GET', path: '/user' });
+    expect(result).toEqual({ ok: true });
+  });
+
+  it('does not break request when afterResponse hook throws', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve('{"ok":true}'),
+    });
+
+    const brokenAfterHook: AfterResponseHook = async () => {
+      throw new Error('after hook exploded');
+    };
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+      onAfterResponse: [brokenAfterHook],
+    });
+
+    const result = await client.request<{ ok: boolean }>({ method: 'GET', path: '/user' });
+    expect(result).toEqual({ ok: true });
+  });
+
+  it('hook context includes url and startTime', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve('{}'),
+    });
+
+    const beforeHook: BeforeRequestHook = vi.fn();
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+      onBeforeRequest: [beforeHook],
+    });
+    await client.request({ method: 'GET', path: '/user' });
+
+    expect(beforeHook).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: expect.stringContaining('/admin/user'),
+        startTime: expect.any(Number),
+      }),
+    );
+  });
+
+  it('hooks fire on each retry attempt', async () => {
+    fetchSpy
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        text: () => Promise.resolve('error'),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: () => Promise.resolve('{"ok":true}'),
+      });
+
+    const beforeHook: BeforeRequestHook = vi.fn();
+    const afterHook: AfterResponseHook = vi.fn();
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+      maxRetries: 1,
+      retryDelay: 1,
+      onBeforeRequest: [beforeHook],
+      onAfterResponse: [afterHook],
+    });
+    await client.request({ method: 'GET', path: '/user' });
+
+    // before hook: attempt 0 + attempt 1
+    expect(beforeHook).toHaveBeenCalledTimes(2);
+    expect(beforeHook).toHaveBeenNthCalledWith(1, expect.objectContaining({ attempt: 0 }));
+    expect(beforeHook).toHaveBeenNthCalledWith(2, expect.objectContaining({ attempt: 1 }));
+
+    // after hook: 500 error on attempt 0 + 200 success on attempt 1
+    expect(afterHook).toHaveBeenCalledTimes(2);
+    expect(afterHook).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ status: 500, error: expect.any(Error) }),
+    );
+    expect(afterHook).toHaveBeenNthCalledWith(2, expect.objectContaining({ status: 200 }));
+  });
+
+  it('runs multiple hooks in order', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve('{}'),
+    });
+
+    const order: number[] = [];
+    const hook1: BeforeRequestHook = () => {
+      order.push(1);
+    };
+    const hook2: BeforeRequestHook = () => {
+      order.push(2);
+    };
+
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+      onBeforeRequest: [hook1, hook2],
+    });
+    await client.request({ method: 'GET', path: '/user' });
+
+    expect(order).toEqual([1, 2]);
+  });
+});
+
+describe('BaseClient AbortSignal support', () => {
+  let fetchSpy: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('aborts request when external signal is triggered', async () => {
+    const abortError = new Error('The operation was aborted');
+    abortError.name = 'AbortError';
+    fetchSpy.mockRejectedValueOnce(abortError);
+
+    const controller = new AbortController();
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+    });
+
+    controller.abort();
+    await expect(
+      client.request({ method: 'GET', path: '/user', signal: controller.signal }),
+    ).rejects.toThrow(RGWError);
+  });
+
+  it('aborts request when signal is triggered during fetch', async () => {
+    const controller = new AbortController();
+
+    // Simulate fetch that takes time, then gets aborted
+    fetchSpy.mockImplementationOnce(() => {
+      controller.abort();
+      const abortError = new Error('The operation was aborted');
+      abortError.name = 'AbortError';
+      return Promise.reject(abortError);
+    });
+
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+    });
+
+    await expect(
+      client.request({ method: 'GET', path: '/user', signal: controller.signal }),
+    ).rejects.toThrow(RGWError);
+  });
+
+  it('passes combined signal to fetch (not the external one directly)', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve('{"ok":true}'),
+    });
+
+    const controller = new AbortController();
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+    });
+
+    await client.request({ method: 'GET', path: '/user', signal: controller.signal });
+
+    // The signal passed to fetch should NOT be the external signal directly
+    // (it's an internal AbortController that combines timeout + external)
+    const fetchSignal = fetchSpy.mock.calls[0][1].signal as AbortSignal;
+    expect(fetchSignal).not.toBe(controller.signal);
+    expect(fetchSignal.aborted).toBe(false);
+  });
+
+  it('works normally when no external signal is provided', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve('{"ok":true}'),
+    });
+
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+    });
+
+    const result = await client.request<{ ok: boolean }>({ method: 'GET', path: '/user' });
+    expect(result).toEqual({ ok: true });
+  });
+});
+
+describe('RadosGWAdminClient healthCheck', () => {
+  let fetchSpy: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('returns true when RGW responds successfully', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve('{"info":{"storage_backends":[]},"fsid":"test-fsid"}'),
+    });
+
+    const client = new RadosGWAdminClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+    });
+
+    expect(await client.healthCheck()).toBe(true);
+  });
+
+  it('returns false when RGW is unreachable', async () => {
+    fetchSpy.mockRejectedValueOnce(new Error('connect ECONNREFUSED'));
+
+    const client = new RadosGWAdminClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+    });
+
+    expect(await client.healthCheck()).toBe(false);
+  });
+
+  it('returns false when RGW returns an error', async () => {
+    fetchSpy.mockResolvedValueOnce({
+      ok: false,
+      status: 403,
+      text: () => Promise.resolve('Access denied'),
+    });
+
+    const client = new RadosGWAdminClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+    });
+
+    expect(await client.healthCheck()).toBe(false);
+  });
+});
+
+describe('BaseClient retry jitter', () => {
+  let fetchSpy: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('adds jitter to retry backoff (not always the same delay)', async () => {
+    // Track delay calls to verify jitter adds randomness
+    const mathRandomSpy = vi.spyOn(Math, 'random');
+    mathRandomSpy.mockReturnValueOnce(0.5).mockReturnValueOnce(0.8);
+
+    fetchSpy
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        text: () => Promise.resolve('error'),
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        text: () => Promise.resolve('error'),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        text: () => Promise.resolve('{"ok":true}'),
+      });
+
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+      maxRetries: 2,
+      retryDelay: 10,
+    });
+
+    const result = await client.request<{ ok: boolean }>({ method: 'GET', path: '/user' });
+    expect(result).toEqual({ ok: true });
+    expect(mathRandomSpy).toHaveBeenCalled();
   });
 });

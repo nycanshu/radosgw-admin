@@ -33,8 +33,14 @@
 - `region?: string` (default: `us-east-1`)
 - `debug?: boolean` (default: `false`)
 - `maxRetries?: number` (default: `0`)
-- `retryDelay?: number` (default: `200`)
+- `retryDelay?: number` (default: `200`; uses exponential backoff with full jitter)
 - `insecure?: boolean` (default: `false`; disables TLS verification)
+- `userAgent?: string` (default: `radosgw-admin/<version> node/<nodeVersion>`)
+- `onBeforeRequest?: BeforeRequestHook[]` — callbacks invoked before each HTTP request
+- `onAfterResponse?: AfterResponseHook[]` — callbacks invoked after each HTTP response or error
+
+### Top-Level Methods
+- `healthCheck(): Promise<boolean>` — verifies RGW connectivity by calling `info.get()`, returns true/false
 
 ## Public Modules and Methods
 
@@ -93,11 +99,20 @@
 ### info
 - `get(): Promise<RGWClusterInfo>`
 
+### Request Options (low-level)
+- `signal?: AbortSignal` — external signal for request cancellation, combined with internal timeout
+
+### Hook Context
+Hook callbacks receive: `method`, `path`, `url`, `query`, `attempt` (retry number), `startTime`.
+After-response hooks also receive: `status`, `durationMs`, `error`.
+Hook errors are swallowed — they never break RGW operations.
+
 ## Behavioral Contracts
 - Incoming payload keys are transformed to camelCase.
 - Outgoing query keys are transformed to kebab-case.
 - Empty-body success responses resolve as `undefined` for `Promise<void>` methods.
-- Retries apply to retryable failures (network/timeouts/5xx) based on config.
+- Retries use exponential backoff with full jitter (`base + random * base`).
+- Hooks run on every request across all modules, including retries.
 
 ## Error Classes and Mapping
 - 400 -> `RGWValidationError`

@@ -97,6 +97,23 @@ Keep commits atomic — one logical change per commit.
 
 PRs are squash-merged into `main`.
 
+## Versioning & Deprecation
+
+This project follows [Semantic Versioning](https://semver.org/):
+
+- **Patch** (`0.1.x`) — bug fixes, no API changes
+- **Minor** (`0.x.0`) — new features, backwards-compatible
+- **Major** (`x.0.0`) — breaking changes
+
+**Deprecation policy:**
+
+1. Deprecated methods/options are marked with `@deprecated` in JSDoc and emit a `console.warn` on first use.
+2. Deprecated features are listed in the CHANGELOG under a `### Deprecated` section.
+3. Deprecated features are removed no sooner than the **next major version**.
+4. Migration guidance is provided in the CHANGELOG and/or docs when deprecating.
+
+During the `0.x` pre-1.0 phase, minor versions may include breaking changes with clear CHANGELOG documentation. After `1.0.0`, the full deprecation cycle applies.
+
 ## Reporting Issues
 
 - **Bugs:** Use the [bug report template](https://github.com/nycanshu/radosgw-admin/issues/new?template=bug_report.md). Include RGW version, Node.js version, and a minimal reproduction.

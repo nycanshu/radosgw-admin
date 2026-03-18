@@ -7,7 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_No package changes yet. Next release will be v0.2.0._
+_Nothing unreleased._
+
+## [0.2.0] - 2026-03-18
+
+### Added
+
+- **Request/response hooks** — `onBeforeRequest` and `onAfterResponse` callbacks in client config for logging, metrics, and telemetry. Hooks never break requests (errors are swallowed).
+- **Health check** — `rgw.healthCheck()` returns `true`/`false` for one-liner connectivity verification.
+- **Custom User-Agent** — sends `radosgw-admin/<version> node/<nodeVersion>` by default, configurable via `userAgent` option. Helps RGW operators identify SDK traffic in access logs.
+- **AbortSignal support** — pass `signal` in request options for external request cancellation. Node 18 compatible.
+- **Rook-Ceph integration guide** — standalone docs page with credential extraction, port-forward, in-cluster examples.
+- **ODF integration guide** — standalone docs page for OpenShift Data Foundation deployments.
+- **`llms.txt` on docs site** — AI crawlers can now discover the SDK at the docs URL.
+- **Hook types exported** — `BeforeRequestHook`, `AfterResponseHook`, `HookContext` available for consumers.
+
+### Changed
+
+- **Retry backoff now uses full jitter** — `base + random(0, base)` instead of fixed exponential delay. Prevents thundering herd in multi-client production setups. Non-breaking behavioral change.
+- **Homepage** now points to documentation site instead of GitHub README.
+- **SDK version injected at build time** via tsup `define` for User-Agent header.
 
 ## [0.1.0] - 2026-03-12
 

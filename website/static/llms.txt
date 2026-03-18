@@ -42,6 +42,13 @@ await rgw.buckets.transferOwnership({ bucket: 'my-bucket', uid: 'alice' });
 - `usage`: get/trim usage logs
 - `info`: get cluster info (FSID, backends)
 
+## Client Features
+- `healthCheck()`: verify RGW connectivity (returns true/false)
+- Request hooks: `onBeforeRequest` / `onAfterResponse` callbacks for logging, metrics, telemetry
+- Custom `userAgent` header (default: `radosgw-admin/<version> node/<nodeVersion>`)
+- `AbortSignal` support for request cancellation
+- Retry with exponential backoff + full jitter (configurable `maxRetries`, `retryDelay`)
+
 ## Compatibility
 - Node.js >= 18, Bun
 - Ceph Pacific, Reef, Squid and later
