@@ -24,7 +24,7 @@ export interface ClientConfig {
   retryDelay?: number;
   /** AWS region for SigV4 signing. Default: "us-east-1" */
   region?: string;
-  /** Custom User-Agent header. Default: "radosgw-admin/<version> node/<nodeVersion>" */
+  /** Custom User-Agent header. Default: `radosgw-admin/VERSION node/NODE_VERSION` */
   userAgent?: string;
   /** Hooks called before each HTTP request. Use for logging, metrics, or request modification. */
   onBeforeRequest?: BeforeRequestHook[];
