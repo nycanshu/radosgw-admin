@@ -6,7 +6,17 @@ import {
   RGWConflictError,
   RGWValidationError,
 } from './errors.js';
-import type { ClientConfig, RequestOptions } from './types/common.types.js';
+import type {
+  ClientConfig,
+  RequestOptions,
+  BeforeRequestHook,
+  AfterResponseHook,
+  HookContext,
+} from './types/common.types.js';
+
+/** SDK version injected at build time by tsup, fallback for dev/test. */
+declare const __SDK_VERSION__: string | undefined;
+const SDK_VERSION = typeof __SDK_VERSION__ !== 'undefined' ? __SDK_VERSION__ : '0.0.0-dev';
 
 const DEFAULT_ADMIN_PATH = '/admin';
 const DEFAULT_TIMEOUT = 10000;
@@ -109,6 +119,9 @@ export class BaseClient {
   private readonly maxRetries: number;
   private readonly retryDelay: number;
   private readonly insecure: boolean;
+  private readonly userAgent: string;
+  private readonly beforeRequestHooks: BeforeRequestHook[];
+  private readonly afterResponseHooks: AfterResponseHook[];
 
   constructor(config: ClientConfig) {
     validateConfig(config);
@@ -128,6 +141,10 @@ export class BaseClient {
     this.maxRetries = config.maxRetries ?? 0;
     this.retryDelay = config.retryDelay ?? 200;
     this.insecure = config.insecure ?? false;
+    this.userAgent =
+      config.userAgent ?? `radosgw-admin/${SDK_VERSION} node/${process.versions.node}`;
+    this.beforeRequestHooks = config.onBeforeRequest ?? [];
+    this.afterResponseHooks = config.onAfterResponse ?? [];
 
     if (this.insecure) {
       this.log('WARNING: TLS certificate verification is disabled');
@@ -208,13 +225,14 @@ export class BaseClient {
 
     for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
       if (attempt > 0) {
-        const backoff = this.retryDelay * Math.pow(2, attempt - 1);
-        this.log(`retry ${attempt}/${this.maxRetries} after ${backoff}ms`);
+        const base = this.retryDelay * Math.pow(2, attempt - 1);
+        const backoff = base + Math.random() * base; // full jitter
+        this.log(`retry ${attempt}/${this.maxRetries} after ${Math.round(backoff)}ms`);
         await this.delay(backoff);
       }
 
       try {
-        return await this.executeRequest<T>(options);
+        return await this.executeRequest<T>(options, attempt);
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
         this.log('error', { error: lastError.message });
@@ -302,14 +320,90 @@ export class BaseClient {
   }
 
   /**
+   * Runs all before-request hooks, swallowing errors so hooks never break requests.
+   */
+  private async runBeforeHooks(ctx: HookContext): Promise<void> {
+    for (const hook of this.beforeRequestHooks) {
+      try {
+        await hook(ctx);
+      } catch (err) {
+        this.log('onBeforeRequest hook error', {
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }
+  }
+
+  /**
+   * Runs all after-response hooks, swallowing errors so hooks never break requests.
+   */
+  private async runAfterHooks(
+    ctx: HookContext & { status?: number; durationMs: number; error?: Error },
+  ): Promise<void> {
+    for (const hook of this.afterResponseHooks) {
+      try {
+        await hook(ctx);
+      } catch (err) {
+        this.log('onAfterResponse hook error', {
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
+    }
+  }
+
+  /**
+   * Combines the internal timeout signal with an optional external signal.
+   * Returns the combined signal and a cleanup function.
+   */
+  private createCombinedSignal(externalSignal?: AbortSignal): {
+    signal: AbortSignal;
+    cleanup: () => void;
+  } {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+    let onExternalAbort: (() => void) | undefined;
+    if (externalSignal) {
+      if (externalSignal.aborted) {
+        controller.abort();
+      } else {
+        onExternalAbort = () => controller.abort();
+        externalSignal.addEventListener('abort', onExternalAbort);
+      }
+    }
+
+    const cleanup = (): void => {
+      clearTimeout(timeoutId);
+      if (externalSignal && onExternalAbort) {
+        externalSignal.removeEventListener('abort', onExternalAbort);
+      }
+    };
+
+    return { signal: controller.signal, cleanup };
+  }
+
+  /**
    * Executes a single signed HTTP request to the RGW Admin API.
    */
-  private async executeRequest<T>(options: RequestOptions): Promise<T> {
-    const { method, path, query, body } = options;
+  private async executeRequest<T>(options: RequestOptions, attempt = 0): Promise<T> {
+    const { method, path, query, body, signal: externalSignal } = options;
     const url = this.buildUrl(path, query);
+    const startTime = Date.now();
+
+    const hookCtx: HookContext = {
+      method,
+      path,
+      url: url.toString(),
+      ...(query !== undefined && { query }),
+      attempt,
+      startTime,
+    };
+
+    await this.runBeforeHooks(hookCtx);
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'User-Agent': this.userAgent,
     };
 
     const signedHeaders = signRequest({
@@ -321,15 +415,14 @@ export class BaseClient {
       region: this.region,
     });
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+    const { signal, cleanup } = this.createCombinedSignal(externalSignal);
     const prevTls = this.insecure ? this.disableTlsVerification() : undefined;
 
     try {
       const fetchOptions: RequestInit = {
         method,
         headers: { ...headers, ...signedHeaders },
-        signal: controller.signal,
+        signal,
       };
       if (body) {
         fetchOptions.body = JSON.stringify(body);
@@ -343,10 +436,23 @@ export class BaseClient {
       const text = await response.text();
 
       if (!response.ok) {
-        throw mapHttpError(response.status, text, this.parseErrorCode(text));
+        const error = mapHttpError(response.status, text, this.parseErrorCode(text));
+        await this.runAfterHooks({
+          ...hookCtx,
+          status: response.status,
+          durationMs: Date.now() - startTime,
+          error,
+        });
+        throw error;
       }
 
       this.log('response', { status: response.status, body: text.slice(0, 500) });
+
+      await this.runAfterHooks({
+        ...hookCtx,
+        status: response.status,
+        durationMs: Date.now() - startTime,
+      });
 
       if (!text) {
         return undefined as T;
@@ -355,9 +461,18 @@ export class BaseClient {
       const parsed: unknown = JSON.parse(text);
       return toCamelCase(parsed) as T;
     } catch (error) {
-      throw this.wrapFetchError(error);
+      const wrapped = this.wrapFetchError(error);
+      // Only run after hooks if not already run (i.e. for network/abort errors)
+      if (!(error instanceof RGWError)) {
+        await this.runAfterHooks({
+          ...hookCtx,
+          durationMs: Date.now() - startTime,
+          error: wrapped,
+        });
+      }
+      throw wrapped;
     } finally {
-      clearTimeout(timeoutId);
+      cleanup();
       if (this.insecure) {
         this.restoreTlsVerification(prevTls);
       }

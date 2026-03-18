@@ -68,6 +68,25 @@ export class RadosGWAdminClient {
     this.usage = new UsageModule(this._client);
     this.info = new InfoModule(this._client);
   }
+
+  /**
+   * Verifies connectivity to the RGW Admin API by calling the info endpoint.
+   *
+   * @returns `true` if the gateway responds successfully, `false` otherwise.
+   * @example
+   * ```typescript
+   * const ok = await rgw.healthCheck();
+   * if (!ok) throw new Error('Cannot reach RGW');
+   * ```
+   */
+  async healthCheck(): Promise<boolean> {
+    try {
+      await this.info.get();
+      return true;
+    } catch {
+      return false;
+    }
+  }
 }
 
 // Re-export types
@@ -133,4 +152,10 @@ export {
 // Re-export internals for advanced use cases (extending the client, custom signing)
 export { BaseClient } from './client.js';
 export { signRequest } from './signer.js';
-export type { RequestOptions, HttpMethod } from './types/common.types.js';
+export type {
+  RequestOptions,
+  HttpMethod,
+  HookContext,
+  BeforeRequestHook,
+  AfterResponseHook,
+} from './types/common.types.js';

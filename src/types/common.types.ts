@@ -24,6 +24,12 @@ export interface ClientConfig {
   retryDelay?: number;
   /** AWS region for SigV4 signing. Default: "us-east-1" */
   region?: string;
+  /** Custom User-Agent header. Default: "radosgw-admin/<version> node/<nodeVersion>" */
+  userAgent?: string;
+  /** Hooks called before each HTTP request. Use for logging, metrics, or request modification. */
+  onBeforeRequest?: BeforeRequestHook[];
+  /** Hooks called after each HTTP response (or error). Use for logging, metrics, or telemetry. */
+  onAfterResponse?: AfterResponseHook[];
 }
 
 /** HTTP methods used by the RGW Admin API */
@@ -35,4 +41,37 @@ export interface RequestOptions {
   path: string;
   query?: Record<string, string | number | boolean | undefined>;
   body?: Record<string, unknown>;
+  /** External AbortSignal to cancel the request. Combined with the internal timeout signal. */
+  signal?: AbortSignal;
 }
+
+/** Context passed to request lifecycle hooks. */
+export interface HookContext {
+  /** HTTP method (GET, POST, PUT, DELETE) */
+  method: HttpMethod;
+  /** RGW Admin API path (e.g. "/user") */
+  path: string;
+  /** Full request URL */
+  url: string;
+  /** Query parameters */
+  query?: Record<string, string | number | boolean | undefined>;
+  /** 0-based retry attempt number */
+  attempt: number;
+  /** Timestamp when the request started (Date.now()) */
+  startTime: number;
+}
+
+/** Hook called before each HTTP request. */
+export type BeforeRequestHook = (ctx: HookContext) => void | Promise<void>;
+
+/** Hook called after each HTTP response or error. */
+export type AfterResponseHook = (
+  ctx: HookContext & {
+    /** HTTP status code (undefined if network error) */
+    status?: number;
+    /** Request duration in milliseconds */
+    durationMs: number;
+    /** Error if the request failed */
+    error?: Error;
+  },
+) => void | Promise<void>;
