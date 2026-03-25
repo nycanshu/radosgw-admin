@@ -146,7 +146,7 @@ html {
 }
 
 .navbar__inner {
-  max-width: 920px;
+  max-width: 1120px;
   margin: 0 auto;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.85);
@@ -199,6 +199,45 @@ html {
 /* Hide the sidebar toggle visual clutter on desktop */
 .navbar__toggle {
   margin-right: 0.5rem;
+}
+
+/* ── Search bar ───────────────────────────────────────────────────────────── */
+.navbar__search {
+  order: -1 !important;
+}
+
+.navbar__search-input {
+  font-size: 0.8rem !important;
+  border-radius: 8px !important;
+  width: 160px !important;
+  padding: 0.35rem 2rem 0.35rem 2rem !important;
+  background-color: rgba(0,0,0,0.03) !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  transition: width 0.2s ease, border-color 0.2s ease !important;
+}
+
+.navbar__search-input:focus {
+  width: 220px !important;
+  border-color: rgba(124,91,240,0.3) !important;
+  background-color: #fff !important;
+  outline: none !important;
+}
+
+[data-theme='dark'] .navbar__search-input {
+  background-color: rgba(255,255,255,0.05) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  color: #e2e8f0 !important;
+}
+
+[data-theme='dark'] .navbar__search-input:focus {
+  background-color: var(--dark-surface) !important;
+  border-color: rgba(167,139,250,0.3) !important;
+}
+
+/* Fix hint text overlap */
+[class*="searchHintContainer"] {
+  right: 0.4rem !important;
+  font-size: 0.7rem !important;
 }
 
 /* ── Sidebar ───────────────────────────────────────────────────────────────── */

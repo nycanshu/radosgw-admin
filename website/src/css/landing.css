@@ -10,7 +10,7 @@
   align-items: flex-end;
   justify-content: center;
   min-height: 100vh;
-  padding: 0 0 2rem;
+  padding: 0 0 1.5rem;
   text-align: center;
   background: linear-gradient(to bottom, #f5efe6 0%, #ffffff 80%);
 }
@@ -83,7 +83,7 @@
 .hero-content {
   text-align: center;
   width: 100%;
-  padding: 0 2rem;
+  padding: 0 4rem;
 }
 
 @keyframes heroFadeIn {
@@ -162,7 +162,7 @@
   line-height: 1.1;
   letter-spacing: -0.035em;
   color: #0f172a;
-  margin: 0 0 1.5rem;
+  margin: 0 0 1rem;
   text-shadow: 0 2px 24px rgba(255,255,255,0.9), 0 0 60px rgba(255,255,255,0.5);
 }
 
@@ -196,7 +196,7 @@
   font-size: 1.15rem;
   line-height: 1.7;
   color: #64748b;
-  margin: 0 auto 2rem;
+  margin: 0 auto 1.25rem;
   max-width: 500px;
 }
 
@@ -208,8 +208,8 @@
 .hero-stats {
   display: flex;
   justify-content: center;
-  gap: 0.75rem;
-  margin-bottom: 2rem;
+  gap: 0.6rem;
+  margin-bottom: 1.25rem;
   flex-wrap: wrap;
 }
 
@@ -244,12 +244,31 @@
 
 [data-theme='dark'] .stat-pill-label { color: #94a3b8; }
 
+/* ── GitHub/npm Badges ────────────────────────────────────────────────── */
+.hero-badges {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.hero-badges a {
+  display: inline-flex;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.hero-badges a:hover {
+  opacity: 1;
+}
+
 /* ── Install Command ──────────────────────────────────────────────────── */
 .hero-install {
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.25rem;
   padding: 0.7rem 1rem 0.7rem 1.25rem;
   background: #f1f5f9;
   border: 1px solid #cbd5e1;
@@ -838,4 +857,106 @@
   .hero-stats { gap: 0.3rem; }
   .stat-pill { font-size: 0.65rem; padding: 0.25rem 0.5rem; }
   .works-with-pill { font-size: 0.7rem; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   404 Page
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.not-found-mascot {
+  width: 180px;
+  height: auto;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.not-found-mascot-light { display: block; }
+.not-found-mascot-dark  { display: none; }
+[data-theme='dark'] .not-found-mascot-light { display: none; }
+[data-theme='dark'] .not-found-mascot-dark  { display: block; }
+
+.not-found-code {
+  font-size: 5rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, #a78bfa 0%, #7c5bf0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 0.5rem;
+  line-height: 1;
+}
+
+.not-found-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.5rem;
+}
+
+[data-theme='dark'] .not-found-title { color: #f1f5f9; }
+
+.not-found-desc {
+  font-size: 1rem;
+  color: #64748b;
+  margin: 0 0 2rem;
+  max-width: 400px;
+}
+
+[data-theme='dark'] .not-found-desc { color: #94a3b8; }
+
+.not-found-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.not-found-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.7rem 1.75rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.not-found-btn-primary {
+  background: linear-gradient(135deg, #7c5bf0, #6d4de6);
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(124,91,240,0.3);
+}
+
+.not-found-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124,91,240,0.4);
+  text-decoration: none;
+  color: #fff;
+}
+
+.not-found-btn-secondary {
+  background: transparent;
+  color: #334155 !important;
+  border: 1px solid #e2e8f0;
+}
+
+[data-theme='dark'] .not-found-btn-secondary { color: #e2e8f0 !important; border-color: var(--dark-border); }
+
+.not-found-btn-secondary:hover {
+  border-color: #7c5bf0;
+  color: #7c5bf0 !important;
+  transform: translateY(-2px);
+  text-decoration: none;
 }

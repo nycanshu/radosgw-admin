@@ -47,6 +47,15 @@ const config = {
       }),
     ],
   ],
+  themes: [
+    ['@easyops-cn/docusaurus-search-local', {
+      hashed: true,
+      indexDocs: true,
+      indexPages: false,
+      language: ['en'],
+      highlightSearchTermsOnTargetPage: true,
+    }],
+  ],
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
@@ -96,6 +105,10 @@ const config = {
             to: '/docs/api',
             label: 'API',
             position: 'left',
+          },
+          {
+            type: 'search',
+            position: 'right',
           },
           {
             href: 'https://github.com/nycanshu/radosgw-admin',
