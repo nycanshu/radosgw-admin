@@ -16,7 +16,7 @@ const config = {
   baseUrl,
   organizationName: orgName,
   projectName,
-  favicon: 'img/favicon.svg',
+  favicon: 'img/radosgw-admin-light-logo-removebg-preview.png',
   trailingSlash: false,
   onBrokenLinks: 'throw',
   markdown: {
