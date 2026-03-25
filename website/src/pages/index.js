@@ -292,7 +292,7 @@ function TechPill({ tech, delay }) {
   const src = useBaseUrl(tech.img);
   return (
     <AnimatedSection className="works-with-pill" delay={delay}>
-      <img src={src} alt={tech.name} className="works-with-img" />
+      <img src={src} alt={tech.name} className="works-with-img" loading="lazy" />
       {tech.name}
     </AnimatedSection>
   );

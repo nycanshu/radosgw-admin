@@ -340,6 +340,21 @@ code {
   color: var(--ifm-font-color-base);
 }
 
+/* Copy button — purple themed */
+[class*="copyButton"] {
+  border-radius: 6px !important;
+  transition: all 0.15s ease !important;
+}
+
+[class*="copyButton"]:hover {
+  background: rgba(124, 91, 240, 0.1) !important;
+}
+
+[class*="copyButtonCopied"] {
+  background: rgba(124, 91, 240, 0.15) !important;
+  color: #7c5bf0 !important;
+}
+
 /* Code block title bar */
 .codeBlockTitle_node_modules-\@docusaurus-theme-classic-lib-theme-CodeBlock-Content-styles-module {
   background: var(--ifm-background-surface-color);
@@ -660,4 +675,19 @@ div[class*='announcementBar'] a {
   .footer {
     padding: 2rem 0 1.25rem;
   }
+}
+
+/* ── Back to top button ───────────────────────────────────────────────────── */
+[class*="backToTopButton"] {
+  background: #7c5bf0 !important;
+  color: #fff !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 14px rgba(124, 91, 240, 0.3) !important;
+  transition: all 0.2s ease !important;
+}
+
+[class*="backToTopButton"]:hover {
+  background: #6d4de6 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(124, 91, 240, 0.4) !important;
 }

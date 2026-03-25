@@ -65,6 +65,11 @@ const config = {
         { property: 'og:site_name', content: 'radosgw-admin' },
       ],
 
+      tableOfContents: {
+        minHeadingLevel: 2,
+        maxHeadingLevel: 4,
+      },
+
       colorMode: {
         defaultMode: 'dark',
         respectPrefersColorScheme: true,
