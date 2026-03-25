@@ -64,9 +64,7 @@ const config = {
       announcementBar: {
         id: 'star_repo',
         content:
-          '⭐ If you find radosgw-admin useful, <a href="https://github.com/nycanshu/radosgw-admin" target="_blank">star it on GitHub</a>',
-        backgroundColor: 'transparent',
-        textColor: '#e2e8f0',
+          'If you find radosgw-admin useful, <a href="https://github.com/nycanshu/radosgw-admin" target="_blank">give it a star on GitHub</a>',
         isCloseable: true,
       },
 

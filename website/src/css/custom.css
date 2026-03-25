@@ -347,8 +347,8 @@ code {
 
 /* ── Footer ────────────────────────────────────────────────────────────────── */
 .footer {
-  padding: 2.5rem 0 1.5rem;
-  border-top: 1px solid var(--ifm-toc-border-color);
+  padding: 3rem 0 2rem;
+  border-top: 2px solid rgba(124,91,240,0.15);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -471,16 +471,22 @@ code {
 
 /* ── Announcement bar ──────────────────────────────────────────────────────── */
 div[class*='announcementBar'] {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   font-weight: 500;
-  padding: 0.6rem 1rem;
-  background: var(--ifm-navbar-background-color) !important;
-  border-bottom: 1px solid var(--ifm-toc-border-color);
-  color: var(--ifm-font-color-base);
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, rgba(124,91,240,0.06) 0%, rgba(167,139,250,0.06) 100%) !important;
+  border-bottom: 1px solid rgba(124,91,240,0.1);
+  color: #475569;
+}
+
+[data-theme='dark'] div[class*='announcementBar'] {
+  background: linear-gradient(135deg, rgba(124,91,240,0.1) 0%, rgba(167,139,250,0.08) 100%) !important;
+  border-bottom-color: rgba(124,91,240,0.15);
+  color: #c8d6f0;
 }
 
 div[class*='announcementBar'] a {
-  color: var(--ifm-color-primary);
+  color: #7c5bf0;
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 2px;
