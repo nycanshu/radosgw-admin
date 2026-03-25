@@ -16,7 +16,7 @@ const config = {
   baseUrl,
   organizationName: orgName,
   projectName,
-  favicon: 'img/favicon.svg',
+  favicon: 'img/radosgw-admin-light-logo-removebg-preview.png',
   trailingSlash: false,
   onBrokenLinks: 'throw',
   markdown: {
@@ -47,6 +47,15 @@ const config = {
       }),
     ],
   ],
+  themes: [
+    ['@easyops-cn/docusaurus-search-local', {
+      hashed: true,
+      indexDocs: true,
+      indexPages: false,
+      language: ['en'],
+      highlightSearchTermsOnTargetPage: true,
+    }],
+  ],
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
@@ -56,6 +65,11 @@ const config = {
         { property: 'og:site_name', content: 'radosgw-admin' },
       ],
 
+      tableOfContents: {
+        minHeadingLevel: 2,
+        maxHeadingLevel: 4,
+      },
+
       colorMode: {
         defaultMode: 'dark',
         respectPrefersColorScheme: true,
@@ -64,9 +78,7 @@ const config = {
       announcementBar: {
         id: 'star_repo',
         content:
-          '⭐ If you find radosgw-admin useful, <a href="https://github.com/nycanshu/radosgw-admin" target="_blank">star it on GitHub</a>',
-        backgroundColor: 'transparent',
-        textColor: '#e2e8f0',
+          'If you find radosgw-admin useful, <a href="https://github.com/nycanshu/radosgw-admin" target="_blank">give it a star on GitHub</a>',
         isCloseable: true,
       },
 
@@ -98,6 +110,10 @@ const config = {
             to: '/docs/api',
             label: 'API',
             position: 'left',
+          },
+          {
+            type: 'search',
+            position: 'right',
           },
           {
             href: 'https://github.com/nycanshu/radosgw-admin',

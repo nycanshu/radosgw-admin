@@ -6,7 +6,6 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 
 /* ── Hooks ──────────────────────────────────────────────────────────────── */
 
-/** Fires `callback` once when `ref` element enters the viewport */
 function useInView(ref, options = {}) {
   const [inView, setInView] = useState(false);
   useEffect(() => {
@@ -24,7 +23,6 @@ function useInView(ref, options = {}) {
   return inView;
 }
 
-/** Counts from 0 → target when `active` becomes true */
 function useCounter(target, active, duration = 1200) {
   const [display, setDisplay] = useState('0');
   useEffect(() => {
@@ -47,36 +45,85 @@ function useCounter(target, active, duration = 1200) {
 
 /* ── Data ───────────────────────────────────────────────────────────────── */
 
-const features = [
+const stats = [
+  { value: '8',    label: 'Modules' },
+  { value: '45+',  label: 'Methods' },
+  { value: '0',    label: 'Deps' },
+  { value: '299+', label: 'Tests' },
+];
+
+const techStack = [
+  { name: 'Ceph Pacific+',  img: '/img/logos/ceph.svg' },
+  { name: 'Rook',           img: '/img/logos/rook.svg' },
+  { name: 'Kubernetes',     img: '/img/logos/kubernetes.svg' },
+  { name: 'OpenShift / ODF', img: '/img/logos/openshift.svg' },
+  { name: 'Node.js 18+',   img: '/img/logos/nodejs.svg' },
+  { name: 'Bun',            img: '/img/logos/bun.svg' },
+  { name: 'TypeScript',     img: '/img/logos/typescript.svg' },
+];
+
+const featureBlocks = [
   {
-    icon: '⬡',
     title: 'Zero Dependencies',
-    desc: 'No runtime deps. AWS SigV4 signing uses only node:crypto. Minimal attack surface, minimal bundle.',
+    desc: 'No runtime deps. AWS SigV4 signing is implemented using only the built-in node:crypto module. Minimal attack surface, minimal bundle size.',
+    code: `import { RadosGWAdminClient } from 'radosgw-admin';
+
+const rgw = new RadosGWAdminClient({
+  host: 'https://rgw.example.com',
+  accessKey: process.env.RGW_ACCESS_KEY,
+  secretKey: process.env.RGW_SECRET_KEY,
+});
+
+// Create a user in one call
+const user = await rgw.users.create({
+  uid: 'alice',
+  displayName: 'Alice',
+});`,
+    highlights: [
+      { color: '#a78bfa', text: 'Built-in node:crypto for signing' },
+      { color: '#6d4de6', text: 'ESM + CommonJS dual output' },
+    ],
   },
   {
-    icon: '👥',
-    title: 'User & Bucket Admin',
-    desc: 'Create users, transfer bucket ownership, revoke access keys — every Admin Ops endpoint covered across 8 modules.',
+    title: 'Typed Errors That Help',
+    desc: 'Catch specific error classes with real Ceph error codes. No more parsing error strings or guessing what HTTP 404 means.',
+    code: `import { RGWNotFoundError, RGWRateLimitError }
+  from 'radosgw-admin';
+
+try {
+  await rgw.users.get({ uid: 'alice' });
+} catch (err) {
+  if (err instanceof RGWNotFoundError) {
+    console.log(err.code);   // 'NoSuchUser'
+    console.log(err.status); // 404
+  }
+  if (err instanceof RGWRateLimitError) {
+    // Automatically retried with backoff
+  }
+}`,
+    highlights: [
+      { color: '#a78bfa', text: '6 specific error classes' },
+      { color: '#6d4de6', text: 'Automatic retry on 429 & 5xx' },
+    ],
   },
   {
-    icon: '🔒',
-    title: 'Quotas & Rate Limits',
-    desc: 'Set per-user and per-bucket quotas, rate limits, and global policies — all programmatically.',
+    title: 'Observe Everything',
+    desc: 'Add logging, Prometheus metrics, or audit trails via request hooks. No monkey-patching, no middleware \u2014 just callbacks.',
+    code: `const rgw = new RadosGWAdminClient({
+  host: 'https://rgw.example.com',
+  accessKey: '...',
+  secretKey: '...',
+  onBeforeRequest: (ctx) => {
+    console.log(\`\${ctx.method} \${ctx.path}\`);
   },
-  {
-    icon: '🔗',
-    title: 'Request Hooks',
-    desc: 'Add logging, Prometheus metrics, or audit trails via onBeforeRequest and onAfterResponse callbacks — without touching SDK internals.',
+  onAfterResponse: (ctx) => {
+    histogram.observe(ctx.duration);
   },
-  {
-    icon: '🛡️',
-    title: 'Typed Errors',
-    desc: 'Catch RGWNotFoundError, RGWRateLimitError, RGWServiceError — with actual RGW error codes like NoSuchUser, SlowDown.',
-  },
-  {
-    icon: '⚙️',
-    title: 'Rook · ODF · Bare Metal',
-    desc: 'Works with Rook-Ceph, OpenShift Data Foundation, and bare-metal Ceph clusters (Pacific through Squid).',
+});`,
+    highlights: [
+      { color: '#a78bfa', text: 'onBeforeRequest / onAfterResponse' },
+      { color: '#6d4de6', text: 'Hook errors never break requests' },
+    ],
   },
 ];
 
@@ -91,17 +138,10 @@ const modules = [
   { name: 'info',      ops: 'get (cluster FSID & backends)' },
 ];
 
-const stats = [
-  { value: '8',    label: 'Modules' },
-  { value: '45+',  label: 'Methods' },
-  { value: '0',    label: 'Dependencies' },
-  { value: '299+', label: 'Tests' },
-];
-
 const faqItems = [
   {
     q: 'What is the Ceph RADOS Gateway Admin Ops API?',
-    a: 'The Ceph RADOS Gateway (RGW) Admin Ops API is a REST interface built into Ceph that lets administrators manage users, access keys, buckets, quotas, and rate limits programmatically. It is separate from the S3-compatible data API — it is specifically for cluster administration.',
+    a: 'The Ceph RADOS Gateway (RGW) Admin Ops API is a REST interface built into Ceph that lets administrators manage users, access keys, buckets, quotas, and rate limits programmatically. It is separate from the S3-compatible data API \u2014 it is specifically for cluster administration.',
   },
   {
     q: 'How do I manage Ceph RGW users from Node.js?',
@@ -125,85 +165,11 @@ const faqItems = [
   },
   {
     q: 'Which package managers are supported?',
-    a: 'All of them — npm, yarn, pnpm, and bun. Install with: npm install radosgw-admin, yarn add radosgw-admin, pnpm add radosgw-admin, or bun add radosgw-admin.',
+    a: 'All of them \u2014 npm, yarn, pnpm, and bun. Install with: npm install radosgw-admin, yarn add radosgw-admin, pnpm add radosgw-admin, or bun add radosgw-admin.',
   },
 ];
 
-const quickExample = `import { RadosGWAdminClient } from 'radosgw-admin';
-
-const rgw = new RadosGWAdminClient({
-  host: 'https://ceph-rgw.example.com',
-  accessKey: process.env.RGW_ACCESS_KEY,
-  secretKey: process.env.RGW_SECRET_KEY,
-});
-
-// Create a user
-const user = await rgw.users.create({
-  uid: 'alice',
-  displayName: 'Alice',
-});
-
-// Set a 10 GB quota
-await rgw.quota.setUserQuota({
-  uid: 'alice',
-  maxSize: '10G',
-  maxObjects: 50000,
-  enabled: true,
-});
-
-// List all buckets
-const buckets = await rgw.buckets.list();`;
-
 /* ── Components ─────────────────────────────────────────────────────────── */
-
-function CopyInstall() {
-  const [copied, setCopied] = useState(false);
-  const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText('npm install radosgw-admin');
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }, []);
-
-  const clipboardIcon = (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-    </svg>
-  );
-
-  const checkIcon = (
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-
-  return (
-    <button
-      className={`hero-install ${copied ? 'hero-install--copied' : ''}`}
-      onClick={handleCopy}
-      type="button"
-      aria-label="Copy install command"
-    >
-      <span className="hero-install-prompt">$</span>
-      <span className="hero-install-text">npm install radosgw-admin</span>
-      <span className="hero-install-icon">
-        {copied ? checkIcon : clipboardIcon}
-      </span>
-    </button>
-  );
-}
-
-function StatCard({ value, label }) {
-  const ref = useRef(null);
-  const inView = useInView(ref);
-  const display = useCounter(value, inView);
-  return (
-    <div ref={ref} className="stat-card">
-      <div className="stat-value">{display}</div>
-      <div className="stat-label">{label}</div>
-    </div>
-  );
-}
 
 function AnimatedSection({ className, children, delay = 0 }) {
   const ref = useRef(null);
@@ -219,6 +185,143 @@ function AnimatedSection({ className, children, delay = 0 }) {
   );
 }
 
+function CopyInstall() {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText('npm install radosgw-admin');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }, []);
+
+  return (
+    <button
+      className={`hero-install ${copied ? 'hero-install--copied' : ''}`}
+      onClick={handleCopy}
+      type="button"
+      aria-label="Copy install command"
+    >
+      <span className="hero-install-prompt">$</span>
+      <span className="hero-install-text">npm install radosgw-admin</span>
+      <span className="hero-install-icon">
+        {copied ? (
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        ) : (
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+        )}
+      </span>
+    </button>
+  );
+}
+
+function StatPill({ value, label }) {
+  const ref = useRef(null);
+  const inView = useInView(ref);
+  const display = useCounter(value, inView);
+  return (
+    <div ref={ref} className="stat-pill">
+      <span className="stat-pill-value">{display}</span>
+      <span className="stat-pill-label">{label}</span>
+    </div>
+  );
+}
+
+function FeatureBlock({ feature, index }) {
+  const isReversed = index % 2 === 1;
+  return (
+    <AnimatedSection className={`feature-block ${isReversed ? 'feature-block--reversed' : ''}`}>
+      <div className="feature-block-text">
+        <h3 className="feature-block-title">{feature.title}</h3>
+        <p className="feature-block-desc">{feature.desc}</p>
+        <div className="feature-block-highlights">
+          {feature.highlights.map((h) => (
+            <div key={h.text} className="feature-block-highlight">
+              <span className="feature-block-dot" style={{ background: h.color }} />
+              {h.text}
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="feature-block-code">
+        <CodeBlock language="typescript">
+          {feature.code}
+        </CodeBlock>
+      </div>
+    </AnimatedSection>
+  );
+}
+
+function FAQItem({ item, isOpen, onToggle }) {
+  return (
+    <div className={`faq-item ${isOpen ? 'faq-item--open' : ''}`}>
+      <button className="faq-trigger" onClick={onToggle} type="button">
+        <span>{item.q}</span>
+        <svg className="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+      <div className="faq-answer-wrap">
+        <p className="faq-answer">{item.a}</p>
+      </div>
+    </div>
+  );
+}
+
+function FAQAccordion() {
+  const [openIndex, setOpenIndex] = useState(-1);
+  return (
+    <div className="faq-list">
+      {faqItems.map((item, i) => (
+        <AnimatedSection key={item.q} className="" delay={i * 60}>
+          <FAQItem
+            item={item}
+            isOpen={openIndex === i}
+            onToggle={() => setOpenIndex(openIndex === i ? -1 : i)}
+          />
+        </AnimatedSection>
+      ))}
+    </div>
+  );
+}
+
+function TechPill({ tech, delay }) {
+  const src = useBaseUrl(tech.img);
+  return (
+    <AnimatedSection className="works-with-pill" delay={delay}>
+      <img src={src} alt={tech.name} className="works-with-img" loading="lazy" />
+      {tech.name}
+    </AnimatedSection>
+  );
+}
+
+function Squiggle() {
+  return (
+    <svg
+      className="hero-squiggle"
+      viewBox="0 0 230 14"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M2 9 Q30 2 58 9 Q86 16 114 9 Q142 2 170 9 Q198 16 228 9"
+        stroke="url(#squiggle-grad)"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+      />
+      <defs>
+        <linearGradient id="squiggle-grad" x1="0" y1="0" x2="230" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#a78bfa" />
+          <stop offset="100%" stopColor="#7c5bf0" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
 /* ── Page ───────────────────────────────────────────────────────────────── */
 
 export default function Home() {
@@ -226,7 +329,7 @@ export default function Home() {
     '@context': 'https://schema.org',
     '@type': 'SoftwareSourceCode',
     name: 'radosgw-admin',
-    description: 'Node.js SDK for the Ceph RADOS Gateway Admin Ops API. Manage users, buckets, quotas, rate limits and access keys — 8 modules, 45+ methods, zero dependencies.',
+    description: 'Node.js SDK for the Ceph RADOS Gateway Admin Ops API. Manage users, buckets, quotas, rate limits and access keys \u2014 8 modules, 45+ methods, zero dependencies.',
     codeRepository: 'https://github.com/nycanshu/radosgw-admin',
     programmingLanguage: ['TypeScript', 'JavaScript'],
     runtimePlatform: 'Node.js',
@@ -273,21 +376,47 @@ export default function Home() {
         <div className="hero-orb hero-orb--1" />
         <div className="hero-orb hero-orb--2" />
         <div className="hero-orb hero-orb--3" />
+
+        <div className="hero-badge">
+          <span className="hero-badge-dot" />
+          Open Source &middot; Apache-2.0
+        </div>
+
+        <div className="hero-illustration-wrap">
+          <img
+            src={useBaseUrl('/img/light-hero.jpg')}
+            alt="radosgw-admin — Ceph RGW admin operations illustrated"
+            className="hero-illustration hero-illustration-light"
+          />
+          <img
+            src={useBaseUrl('/img/dark-hero.jpg')}
+            alt="radosgw-admin — Ceph RGW admin operations illustrated"
+            className="hero-illustration hero-illustration-dark"
+          />
+        </div>
+
         <div className="hero-inner">
           <div className="hero-content">
-            <div className="hero-badge">
-              <span className="hero-badge-dot" />
-              Open Source &middot; Apache-2.0
-            </div>
             <h1 className="hero-title">
-              A Node.js SDK for<br />
-              <span className="hero-gradient-text">Ceph RGW Admin Ops</span>
+              Ceph Admin Ops.<br />
+              <span className="hero-emphasis">
+                Effortlessly.
+                <Squiggle />
+              </span>
             </h1>
             <p className="hero-subtitle">
-              The Node.js SDK for the Ceph RADOS Gateway Admin Ops API.
-              Manage users, buckets, quotas, rate limits and more — from Rook-Ceph to bare metal. Modern TypeScript support included.
+              The Node.js SDK that covers every RADOS Gateway Admin endpoint.
+              Zero dependencies. Full TypeScript.
             </p>
+
+            <div className="hero-stats">
+              {stats.map(s => (
+                <StatPill key={s.label} value={s.value} label={s.label} />
+              ))}
+            </div>
+
             <CopyInstall />
+
             <div className="hero-actions">
               <a href={useBaseUrl('/docs/getting-started')} className="hero-btn hero-btn-primary">
                 Get Started
@@ -305,19 +434,20 @@ export default function Home() {
               </a>
             </div>
           </div>
-          <div className="hero-mascot-wrap">
-            <img src={useBaseUrl('/img/radosgw-admin-light-logo-removebg-preview.png')} alt="radosgw-admin mascot" className="hero-mascot hero-mascot-light" />
-            <img src={useBaseUrl('/img/radosgw-admin-dark-log-removebg-preview.png')} alt="radosgw-admin mascot" className="hero-mascot hero-mascot-dark" />
-          </div>
         </div>
       </header>
 
-      {/* ─── STATS ─────────────────────────────────────────────────────── */}
-      <section className="stats-section">
-        <div className="stats-grid">
-          {stats.map((s) => (
-            <StatCard key={s.label} value={s.value} label={s.label} />
-          ))}
+      {/* ─── WORKS WITH ────────────────────────────────────────────────── */}
+      <section className="works-with-section">
+        <div className="section-container">
+          <AnimatedSection className="">
+            <p className="works-with-label">Works with your stack</p>
+          </AnimatedSection>
+          <div className="works-with-row">
+            {techStack.map((tech, i) => (
+              <TechPill key={tech.name} tech={tech} delay={i * 50} />
+            ))}
+          </div>
         </div>
       </section>
 
@@ -330,47 +460,9 @@ export default function Home() {
               Everything you need to manage Ceph RGW at scale, nothing you don't.
             </p>
           </AnimatedSection>
-          <div className="features-grid">
-            {features.map((f, i) => (
-              <AnimatedSection key={f.title} className="feature-card" delay={i * 80}>
-                <div className="feature-icon">{f.icon}</div>
-                <h3 className="feature-title">{f.title}</h3>
-                <p className="feature-desc">{f.desc}</p>
-              </AnimatedSection>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ─── CODE EXAMPLE ──────────────────────────────────────────────── */}
-      <section className="code-section">
-        <div className="section-container code-layout">
-          <AnimatedSection className="code-text">
-            <h2 className="section-title">Simple, intuitive API</h2>
-            <p className="section-subtitle">
-              Every module follows the same pattern. Autocomplete guides you through
-              every method and parameter.
-            </p>
-            <div className="code-highlights">
-              <div className="code-highlight-item">
-                <span className="code-highlight-dot" style={{ background: '#2dd4bf' }} />
-                Typed inputs and outputs
-              </div>
-              <div className="code-highlight-item">
-                <span className="code-highlight-dot" style={{ background: '#818cf8' }} />
-                Human-readable sizes ("10G", "500M")
-              </div>
-              <div className="code-highlight-item">
-                <span className="code-highlight-dot" style={{ background: '#f472b6' }} />
-                Validation before network calls
-              </div>
-            </div>
-          </AnimatedSection>
-          <AnimatedSection className="code-block-wrapper" delay={150}>
-            <CodeBlock language="typescript" title="example.ts">
-              {quickExample}
-            </CodeBlock>
-          </AnimatedSection>
+          {featureBlocks.map((f, i) => (
+            <FeatureBlock key={f.title} feature={f} index={i} />
+          ))}
         </div>
       </section>
 
@@ -399,42 +491,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── COMPATIBILITY ─────────────────────────────────────────────── */}
-      <section className="compat-section">
-        <div className="section-container">
-          <AnimatedSection className="">
-            <h2 className="section-title">Works everywhere</h2>
-          </AnimatedSection>
-          <div className="compat-grid">
-            {[
-              { label: 'Runtime',  items: 'Node.js 18+ · Bun' },
-              { label: 'Format',   items: 'ESM · CommonJS' },
-              { label: 'Ceph',     items: 'Pacific+ · Squid · Reef' },
-              { label: 'Platform', items: 'Rook · ODF · Bare metal' },
-            ].map((c, i) => (
-              <AnimatedSection key={c.label} className="compat-card" delay={i * 80}>
-                <div className="compat-label">{c.label}</div>
-                <div className="compat-items">{c.items}</div>
-              </AnimatedSection>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ─── FAQ ───────────────────────────────────────────────────────── */}
       <section className="faq-section">
         <div className="section-container">
           <AnimatedSection className="">
-            <h2 className="section-title">Frequently Asked Questions</h2>
+            <h2 className="section-title">Frequently asked questions</h2>
           </AnimatedSection>
-          <div className="faq-list">
-            {faqItems.map((item, i) => (
-              <AnimatedSection key={item.q} className="faq-item" delay={i * 60}>
-                <h3 className="faq-question">{item.q}</h3>
-                <p className="faq-answer">{item.a}</p>
-              </AnimatedSection>
-            ))}
-          </div>
+          <FAQAccordion />
         </div>
       </section>
 
@@ -447,7 +510,7 @@ export default function Home() {
             <p className="cta-subtitle">
               Install in seconds. Ship your first RGW integration in minutes.
             </p>
-            <div className="hero-actions">
+            <div className="hero-actions" style={{ justifyContent: 'center' }}>
               <a href={useBaseUrl('/docs/getting-started')} className="hero-btn hero-btn-primary">
                 Read the Docs
               </a>

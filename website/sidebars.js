@@ -36,6 +36,7 @@ const sidebars = {
     'compatibility',
     'error-handling',
     'recipes',
+    'changelog',
     {
       type: 'category',
       label: 'API Reference',
