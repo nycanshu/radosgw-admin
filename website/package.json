@@ -14,6 +14,9 @@
     "@docusaurus/plugin-pwa": "^3.9.2",
     "@docusaurus/preset-classic": "^3.9.2",
     "@easyops-cn/docusaurus-search-local": "^0.55.1",
+    "@fontsource/instrument-serif": "^5.2.8",
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/jetbrains-mono": "^5.2.8",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

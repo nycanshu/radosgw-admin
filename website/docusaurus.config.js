@@ -11,17 +11,7 @@ const baseUrl = customDomain ? '/' : `/${projectName}/`;
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'radosgw-admin',
-  headTags: [
-    { tagName: 'link', attributes: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
-    { tagName: 'link', attributes: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: 'anonymous' } },
-    {
-      tagName: 'link',
-      attributes: {
-        rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap',
-      },
-    },
-  ],
+  headTags: [],
   plugins: [
     [
       '@docusaurus/plugin-pwa',
@@ -41,7 +31,7 @@ const config = {
   baseUrl,
   organizationName: orgName,
   projectName,
-  favicon: 'img/mascot/light-nobg.webp',
+  favicon: 'img/mascot/nav-light.webp',
   trailingSlash: false,
   onBrokenLinks: 'throw',
   markdown: {
@@ -111,8 +101,8 @@ const config = {
         title: 'radosgw-admin',
         logo: {
           alt: 'radosgw-admin mascot',
-          src: 'img/mascot/light-nobg.webp',
-          srcDark: 'img/mascot/dark-nobg.webp',
+          src: 'img/mascot/nav-light.webp',
+          srcDark: 'img/mascot/nav-dark.webp',
           height: 36,
           width: 36,
           style: { objectFit: 'contain' },
