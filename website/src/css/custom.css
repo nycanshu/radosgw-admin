@@ -681,6 +681,30 @@ div[class*='announcementBar'] a {
   .footer__copyright {
     text-align: center;
   }
+
+  /* ── Compact search bar ──────────────────────────────────── */
+  .navbar__search {
+    order: unset !important;
+  }
+
+  .navbar__search-input {
+    width: 90px !important;
+    padding: 0.35rem 0.6rem 0.35rem 2rem !important;
+  }
+
+  .navbar__search-input:focus {
+    width: 130px !important;
+  }
+
+  [class*="searchHintContainer"] {
+    display: none !important;
+  }
+
+  /* Hide GitHub and npm from top bar — shown in hamburger sidebar */
+  .navbar__items .header-github-link,
+  .navbar__items .header-npm-link {
+    display: none !important;
+  }
 }
 
 /* ── Tablet footer: 4 columns in one row with breathing room ──────────────── */
@@ -693,33 +717,6 @@ div[class*='announcementBar'] a {
   .footer__links {
     grid-template-columns: repeat(4, auto);
     gap: 1.5rem 3rem;
-  }
-
-  /* ── Mobile: compact search bar ──────────────────────────── */
-  /* Remove order override so search sits naturally after the logo/hamburger */
-  .navbar__search {
-    order: unset !important;
-  }
-
-  /* Narrower default width, still expands on focus */
-  .navbar__search-input {
-    width: 90px !important;
-    padding: 0.35rem 0.6rem 0.35rem 2rem !important;
-  }
-
-  .navbar__search-input:focus {
-    width: 130px !important;
-  }
-
-  /* Hide the keyboard shortcut hint (⌘K / Ctrl+K) — no room on mobile */
-  [class*="searchHintContainer"] {
-    display: none !important;
-  }
-
-  /* Hide GitHub and npm from top navbar bar — shown in hamburger sidebar */
-  .navbar__items .header-github-link,
-  .navbar__items .header-npm-link {
-    display: none !important;
   }
 }
 
@@ -735,6 +732,21 @@ div[class*='announcementBar'] a {
 
   .footer {
     padding: 2rem 0 1.25rem;
+  }
+
+  /* iPhone SE and small phones: search shrinks to icon only */
+  .navbar__search-input {
+    width: 60px !important;
+    padding: 0.35rem 0.4rem 0.35rem 2rem !important;
+  }
+
+  .navbar__search-input:focus {
+    width: 150px !important;
+  }
+
+  /* Hide placeholder text — icon is enough at rest */
+  .navbar__search-input::placeholder {
+    color: transparent !important;
   }
 }
 
