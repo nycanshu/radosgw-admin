@@ -292,8 +292,8 @@ function FAQAccordion() {
 function HeroIllustration() {
   const { colorMode } = useColorMode();
   const isDark = colorMode === 'dark';
-  const webpSrc = useBaseUrl(isDark ? '/img/dark-hero.webp' : '/img/light-hero.webp');
-  const jpgSrc = useBaseUrl(isDark ? '/img/dark-hero.jpg' : '/img/light-hero.jpg');
+  const webpSrc = useBaseUrl(isDark ? '/img/hero/dark.webp' : '/img/hero/light.webp');
+  const jpgSrc = useBaseUrl(isDark ? '/img/hero/dark.jpg' : '/img/hero/light.jpg');
   return (
     <div className="hero-illustration-wrap">
       <picture>
@@ -378,7 +378,12 @@ export default function Home() {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="radosgw-admin — Node.js SDK for Ceph RADOS Gateway Admin Ops" />
         <meta name="twitter:description" content="Node.js SDK for the Ceph RADOS Gateway Admin Ops API. Zero dependencies, full TypeScript, works with Rook-Ceph and ODF." />
+        <meta name="twitter:image" content="https://nycanshu.github.io/radosgw-admin/img/og-image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
         <link rel="canonical" href="https://nycanshu.github.io/radosgw-admin/" />
+        <link rel="preload" as="image" type="image/webp" href="https://nycanshu.github.io/radosgw-admin/img/hero/light.webp" media="(prefers-color-scheme: light)" />
+        <link rel="preload" as="image" type="image/webp" href="https://nycanshu.github.io/radosgw-admin/img/hero/dark.webp" media="(prefers-color-scheme: dark)" />
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
         <script type="application/ld+json">{JSON.stringify({
           '@context': 'https://schema.org',
