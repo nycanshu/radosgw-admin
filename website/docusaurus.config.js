@@ -14,9 +14,6 @@ const config = {
   headTags: [
     { tagName: 'link', attributes: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
     { tagName: 'link', attributes: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: 'anonymous' } },
-    { tagName: 'link', attributes: { rel: 'manifest', href: '/radosgw-admin/manifest.json' } },
-    { tagName: 'link', attributes: { rel: 'apple-touch-icon', href: '/radosgw-admin/img/icons/apple-touch.png' } },
-    { tagName: 'meta', attributes: { name: 'theme-color', content: '#7c5bf0' } },
     {
       tagName: 'link',
       attributes: {
@@ -24,6 +21,20 @@ const config = {
         href: 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap',
       },
     },
+  ],
+  plugins: [
+    [
+      '@docusaurus/plugin-pwa',
+      {
+        debug: false,
+        offlineModeActivationStrategies: ['appInstalled', 'standalone', 'queryString'],
+        pwaHead: [
+          { tagName: 'link', rel: 'manifest', href: '/radosgw-admin/manifest.json' },
+          { tagName: 'meta', name: 'theme-color', content: '#7c5bf0' },
+          { tagName: 'link', rel: 'apple-touch-icon', href: '/radosgw-admin/img/icons/apple-touch.png' },
+        ],
+      },
+    ],
   ],
   tagline: 'Node.js SDK for the Ceph RADOS Gateway Admin Ops API',
   url,
@@ -109,16 +120,30 @@ const config = {
         hideOnScroll: false,
         items: [
           {
-            type: 'doc',
-            docId: 'getting-started',
+            type: 'dropdown',
             label: 'Docs',
             position: 'left',
+            items: [
+              { type: 'doc', docId: 'getting-started', label: 'Getting Started' },
+              { type: 'doc', docId: 'configuration', label: 'Configuration' },
+              { type: 'doc', docId: 'error-handling', label: 'Error Handling' },
+              { type: 'doc', docId: 'recipes', label: 'Recipes' },
+            ],
           },
           {
-            type: 'doc',
-            docId: 'modules',
+            type: 'dropdown',
             label: 'Modules',
             position: 'left',
+            items: [
+              { type: 'doc', docId: 'guides/users', label: 'Users' },
+              { type: 'doc', docId: 'guides/keys', label: 'Keys' },
+              { type: 'doc', docId: 'guides/subusers', label: 'Subusers' },
+              { type: 'doc', docId: 'guides/buckets', label: 'Buckets' },
+              { type: 'doc', docId: 'guides/quota', label: 'Quota' },
+              { type: 'doc', docId: 'guides/ratelimit', label: 'Rate Limits' },
+              { type: 'doc', docId: 'guides/usage', label: 'Usage' },
+              { type: 'doc', docId: 'guides/info', label: 'Info' },
+            ],
           },
           {
             to: '/docs/api',

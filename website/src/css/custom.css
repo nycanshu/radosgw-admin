@@ -661,7 +661,38 @@ div[class*='announcementBar'] a {
 
   .footer .container,
   .footer__inner {
-    padding: 0 1.25rem;
+    padding: 0 2rem;
+  }
+
+  /* 2-column grid for phones — columns fit content, centred */
+  .footer__links {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 2.5rem 4rem;
+    justify-content: center;
+    justify-items: start;
+    width: 100%;
+  }
+
+  .footer__col {
+    min-width: 120px;
+  }
+
+  .footer__copyright {
+    text-align: center;
+  }
+}
+
+/* ── Tablet footer: 4 columns in one row with breathing room ──────────────── */
+@media (min-width: 600px) and (max-width: 996px) {
+  .footer .container,
+  .footer__inner {
+    padding: 0 3rem;
+  }
+
+  .footer__links {
+    grid-template-columns: repeat(4, auto);
+    gap: 1.5rem 3rem;
   }
 
   /* ── Mobile: compact search bar ──────────────────────────── */
@@ -685,9 +716,9 @@ div[class*='announcementBar'] a {
     display: none !important;
   }
 
-  /* Hide GitHub and npm links on mobile — they're in the sidebar */
-  .header-github-link,
-  .header-npm-link {
+  /* Hide GitHub and npm from top navbar bar — shown in hamburger sidebar */
+  .navbar__items .header-github-link,
+  .navbar__items .header-npm-link {
     display: none !important;
   }
 }
