@@ -9,7 +9,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  min-height: 100vh;
+  min-height: 100svh;
   padding: 0 0 1.5rem;
   text-align: center;
   background: linear-gradient(to bottom, #f5efe6 0%, #ffffff 80%);
@@ -109,10 +109,6 @@
   -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 30%, black 25%, transparent 62%);
 }
 
-.hero-illustration-light { display: block; }
-.hero-illustration-dark  { display: none; }
-[data-theme='dark'] .hero-illustration-light { display: none; }
-[data-theme='dark'] .hero-illustration-dark  { display: block; }
 
 /* ── Badge — pinned to top of hero ────────────────────────────────────── */
 .hero-badge {
@@ -172,7 +168,7 @@
 }
 
 .hero-emphasis {
-  display: inline-block;
+  display: block;
   position: relative;
   font-family: var(--font-serif);
   font-style: italic;
@@ -288,6 +284,7 @@
 }
 
 .hero-install:active { transform: scale(0.98); }
+.hero-install:focus-visible { outline: 2px solid var(--ifm-color-primary); outline-offset: 3px; }
 
 .hero-install-prompt {
   color: #a78bfa;
@@ -369,6 +366,11 @@
 }
 
 [data-theme='dark'] .hero-btn-secondary:hover { color: #a78bfa !important; border-color: #7c5bf0; }
+
+.hero-btn:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 3px;
+}
 
 /* ── Works With Section ───────────────────────────────────────────────── */
 .works-with-section {
@@ -607,6 +609,7 @@
 
 [data-theme='dark'] .module-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
 .module-card:hover::before { opacity: 1; }
+.module-card:focus-visible { outline: 2px solid var(--ifm-color-primary); outline-offset: 2px; }
 
 .module-name {
   font-family: var(--ifm-font-family-monospace);
@@ -665,6 +668,7 @@
 [data-theme='dark'] .faq-trigger { color: #f1f5f9; }
 .faq-trigger:hover { color: #7c5bf0; }
 [data-theme='dark'] .faq-trigger:hover { color: #a78bfa; }
+.faq-trigger:focus-visible { outline: 2px solid var(--ifm-color-primary); outline-offset: 2px; border-radius: 4px; }
 
 .faq-chevron {
   flex-shrink: 0;
@@ -762,6 +766,7 @@
   filter: blur(60px);
   opacity: 0;
   animation: orbFloat 8s ease-in-out infinite;
+  will-change: transform;
 }
 
 .hero-orb--1 {
@@ -800,10 +805,54 @@
   66%       { transform: translateY(10px) scale(0.97); }
 }
 
+/* ── Portrait tablets 997–1100px (iPad Pro, etc.) — same in-flow layout ── */
+@media (min-width: 997px) and (max-width: 1100px) {
+  .hero-section {
+    flex-direction: column;
+    align-items: stretch;
+    min-height: auto;
+    padding: 0 0 3rem;
+  }
+  .hero-illustration-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1392 / 459;
+    flex-shrink: 0;
+  }
+  .hero-inner {
+    margin-top: -3rem;
+    width: 100%;
+    align-self: center;
+  }
+}
+
 /* ── Responsive — tablet ──────────────────────────────────────────────── */
 @media (max-width: 996px) {
+  /* Bring hero into normal flow — no more vw magic numbers */
+  .hero-section {
+    flex-direction: column;
+    align-items: stretch;
+    min-height: auto;
+    padding: 0 0 3rem;
+  }
+
+  /* Illustration in-flow: aspect-ratio reserves the exact right space */
+  .hero-illustration-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1392 / 459;
+    flex-shrink: 0;
+  }
+
+  /* Pull content up to overlap with the faded bottom of the illustration */
+  .hero-inner {
+    margin-top: -3rem;
+    width: 100%;
+    align-self: center; /* prevents stretch from left-aligning the 720px container */
+  }
+
   .hero-title { font-size: 2.8rem; }
-  .hero-content { padding: 2rem 1.5rem 0; }
+  .hero-content { padding: 0 1.5rem 0; }
   .hero-illustration {
     mask-image: radial-gradient(ellipse 90% 65% at 50% 28%, black 18%, transparent 55%);
     -webkit-mask-image: radial-gradient(ellipse 90% 65% at 50% 28%, black 18%, transparent 55%);
@@ -820,19 +869,20 @@
 
 /* ── Responsive — mobile ─────────────────────────────────────────────── */
 @media (max-width: 520px) {
-  .hero-section { min-height: 85vh; padding: 0 0 1.5rem; }
+  .hero-section { padding: 0 0 2.5rem; }
+  .hero-inner { margin-top: -2rem; }
   .hero-title { font-size: 2rem; }
   .hero-subtitle { font-size: 0.95rem; max-width: 90%; }
-  .hero-content { padding: 1.5rem 1.25rem 0; }
+  .hero-content { padding: 0 1.25rem 0; }
   .hero-badge { top: 1rem; font-size: 0.7rem; padding: 0.3rem 0.75rem; }
   .hero-illustration {
     mask-image: radial-gradient(ellipse 95% 60% at 50% 25%, black 15%, transparent 50%);
     -webkit-mask-image: radial-gradient(ellipse 95% 60% at 50% 25%, black 15%, transparent 50%);
   }
   .hero-stats { gap: 0.4rem; }
-  .stat-pill { font-size: 0.72rem; padding: 0.3rem 0.65rem; }
-  .hero-install { font-size: 0.8rem; padding: 0.6rem 0.85rem 0.6rem 1rem; }
-  .hero-btn { padding: 0.65rem 1.5rem; font-size: 0.88rem; }
+  .stat-pill { font-size: 0.72rem; padding: 0.5rem 0.75rem; }
+  .hero-install { font-size: 0.8rem; padding: 0.6rem 0.85rem 0.6rem 1rem; min-height: 44px; }
+  .hero-btn { padding: 0.65rem 1.5rem; font-size: 0.88rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
   .section-title { font-size: 1.5rem; }
   .section-subtitle { font-size: 0.95rem; }
   .section-container { padding: 0 1.25rem; }
@@ -857,6 +907,43 @@
   .hero-stats { gap: 0.3rem; }
   .stat-pill { font-size: 0.65rem; padding: 0.25rem 0.5rem; }
   .works-with-pill { font-size: 0.7rem; }
+}
+
+/* ── content-visibility — skip rendering of off-screen sections ──────── */
+.works-with-section,
+.features-section,
+.modules-section,
+.faq-section,
+.cta-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 400px;
+}
+
+/* ── Reduced motion — stop all decorative animations ────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .hero-glow,
+  .hero-orb,
+  .hero-orb--1,
+  .hero-orb--2,
+  .hero-orb--3 {
+    animation: none;
+  }
+
+  .hero-inner,
+  .scroll-reveal {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .hero-install,
+  .hero-btn,
+  .module-card,
+  .faq-item,
+  .works-with-pill {
+    transition: none;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

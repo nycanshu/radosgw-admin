@@ -11,12 +11,26 @@ const baseUrl = customDomain ? '/' : `/${projectName}/`;
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'radosgw-admin',
+  headTags: [
+    { tagName: 'link', attributes: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
+    { tagName: 'link', attributes: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: 'anonymous' } },
+    { tagName: 'link', attributes: { rel: 'manifest', href: '/radosgw-admin/manifest.json' } },
+    { tagName: 'link', attributes: { rel: 'apple-touch-icon', href: '/radosgw-admin/img/icons/apple-touch.png' } },
+    { tagName: 'meta', attributes: { name: 'theme-color', content: '#7c5bf0' } },
+    {
+      tagName: 'link',
+      attributes: {
+        rel: 'stylesheet',
+        href: 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap',
+      },
+    },
+  ],
   tagline: 'Node.js SDK for the Ceph RADOS Gateway Admin Ops API',
   url,
   baseUrl,
   organizationName: orgName,
   projectName,
-  favicon: 'img/radosgw-admin-light-logo-removebg-preview.png',
+  favicon: 'img/mascot/light-nobg.webp',
   trailingSlash: false,
   onBrokenLinks: 'throw',
   markdown: {
@@ -86,8 +100,8 @@ const config = {
         title: 'radosgw-admin',
         logo: {
           alt: 'radosgw-admin mascot',
-          src: 'img/radosgw-admin-light-logo-removebg-preview.png',
-          srcDark: 'img/radosgw-admin-dark-log-removebg-preview.png',
+          src: 'img/mascot/light-nobg.webp',
+          srcDark: 'img/mascot/dark-nobg.webp',
           height: 36,
           width: 36,
           style: { objectFit: 'contain' },

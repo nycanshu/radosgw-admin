@@ -3,6 +3,7 @@ import Layout from '@theme/Layout';
 import Head from '@docusaurus/Head';
 import CodeBlock from '@theme/CodeBlock';
 import useBaseUrl from '@docusaurus/useBaseUrl';
+import { useColorMode } from '@docusaurus/theme-common';
 
 /* ── Hooks ──────────────────────────────────────────────────────────────── */
 
@@ -258,7 +259,7 @@ function FeatureBlock({ feature, index }) {
 function FAQItem({ item, isOpen, onToggle }) {
   return (
     <div className={`faq-item ${isOpen ? 'faq-item--open' : ''}`}>
-      <button className="faq-trigger" onClick={onToggle} type="button">
+      <button className="faq-trigger" onClick={onToggle} type="button" aria-expanded={isOpen}>
         <span>{item.q}</span>
         <svg className="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <polyline points="6 9 12 15 18 9" />
@@ -288,11 +289,33 @@ function FAQAccordion() {
   );
 }
 
+function HeroIllustration() {
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === 'dark';
+  const webpSrc = useBaseUrl(isDark ? '/img/hero/dark.webp' : '/img/hero/light.webp');
+  const jpgSrc = useBaseUrl(isDark ? '/img/hero/dark.jpg' : '/img/hero/light.jpg');
+  return (
+    <div className="hero-illustration-wrap">
+      <picture>
+        <source srcSet={webpSrc} type="image/webp" />
+        <img
+          src={jpgSrc}
+          alt="radosgw-admin — Ceph RGW admin operations illustrated"
+          className="hero-illustration"
+          width="1392"
+          height="459"
+          fetchPriority="high"
+        />
+      </picture>
+    </div>
+  );
+}
+
 function TechPill({ tech, delay }) {
   const src = useBaseUrl(tech.img);
   return (
     <AnimatedSection className="works-with-pill" delay={delay}>
-      <img src={src} alt={tech.name} className="works-with-img" loading="lazy" />
+      <img src={src} alt={tech.name} className="works-with-img" loading="lazy" height="18" />
       {tech.name}
     </AnimatedSection>
   );
@@ -355,7 +378,12 @@ export default function Home() {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="radosgw-admin — Node.js SDK for Ceph RADOS Gateway Admin Ops" />
         <meta name="twitter:description" content="Node.js SDK for the Ceph RADOS Gateway Admin Ops API. Zero dependencies, full TypeScript, works with Rook-Ceph and ODF." />
+        <meta name="twitter:image" content="https://nycanshu.github.io/radosgw-admin/img/og-image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
         <link rel="canonical" href="https://nycanshu.github.io/radosgw-admin/" />
+        <link rel="preload" as="image" type="image/webp" href="https://nycanshu.github.io/radosgw-admin/img/hero/light.webp" media="(prefers-color-scheme: light)" />
+        <link rel="preload" as="image" type="image/webp" href="https://nycanshu.github.io/radosgw-admin/img/hero/dark.webp" media="(prefers-color-scheme: dark)" />
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
         <script type="application/ld+json">{JSON.stringify({
           '@context': 'https://schema.org',
@@ -382,23 +410,12 @@ export default function Home() {
           Open Source &middot; Apache-2.0
         </div>
 
-        <div className="hero-illustration-wrap">
-          <img
-            src={useBaseUrl('/img/light-hero.jpg')}
-            alt="radosgw-admin — Ceph RGW admin operations illustrated"
-            className="hero-illustration hero-illustration-light"
-          />
-          <img
-            src={useBaseUrl('/img/dark-hero.jpg')}
-            alt="radosgw-admin — Ceph RGW admin operations illustrated"
-            className="hero-illustration hero-illustration-dark"
-          />
-        </div>
+        <HeroIllustration />
 
         <div className="hero-inner">
           <div className="hero-content">
             <h1 className="hero-title">
-              Ceph Admin Ops.<br />
+              Ceph Admin Ops.{' '}
               <span className="hero-emphasis">
                 Effortlessly.
                 <Squiggle />
@@ -426,6 +443,7 @@ export default function Home() {
                 className="hero-btn hero-btn-secondary"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="View on GitHub (opens in new tab)"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: '6px' }}>
                   <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2z" />
@@ -519,6 +537,7 @@ export default function Home() {
                 className="hero-btn hero-btn-secondary"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="View on npm (opens in new tab)"
               >
                 View on npm
               </a>
