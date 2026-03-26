@@ -27,7 +27,7 @@ const config = {
       '@docusaurus/plugin-pwa',
       {
         debug: false,
-        offlineModeActivationStrategies: ['appInstalled', 'standalone', 'queryString'],
+        offlineModeActivationStrategies: ['appInstalled', 'standalone', 'queryString', 'always'],
         pwaHead: [
           { tagName: 'link', rel: 'manifest', href: '/radosgw-admin/manifest.json' },
           { tagName: 'meta', name: 'theme-color', content: '#7c5bf0' },
