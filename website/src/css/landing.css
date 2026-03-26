@@ -109,10 +109,6 @@
   -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 30%, black 25%, transparent 62%);
 }
 
-.hero-illustration-light { display: block; }
-.hero-illustration-dark  { display: none; }
-[data-theme='dark'] .hero-illustration-light { display: none; }
-[data-theme='dark'] .hero-illustration-dark  { display: block; }
 
 /* ── Badge — pinned to top of hero ────────────────────────────────────── */
 .hero-badge {
@@ -857,6 +853,43 @@
   .hero-stats { gap: 0.3rem; }
   .stat-pill { font-size: 0.65rem; padding: 0.25rem 0.5rem; }
   .works-with-pill { font-size: 0.7rem; }
+}
+
+/* ── content-visibility — skip rendering of off-screen sections ──────── */
+.works-with-section,
+.features-section,
+.modules-section,
+.faq-section,
+.cta-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 400px;
+}
+
+/* ── Reduced motion — stop all decorative animations ────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .hero-glow,
+  .hero-orb,
+  .hero-orb--1,
+  .hero-orb--2,
+  .hero-orb--3 {
+    animation: none;
+  }
+
+  .hero-inner,
+  .scroll-reveal {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .hero-install,
+  .hero-btn,
+  .module-card,
+  .faq-item,
+  .works-with-pill {
+    transition: none;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

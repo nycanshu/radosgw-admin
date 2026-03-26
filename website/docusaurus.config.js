@@ -11,6 +11,17 @@ const baseUrl = customDomain ? '/' : `/${projectName}/`;
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'radosgw-admin',
+  headTags: [
+    { tagName: 'link', attributes: { rel: 'preconnect', href: 'https://fonts.googleapis.com' } },
+    { tagName: 'link', attributes: { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: 'anonymous' } },
+    {
+      tagName: 'link',
+      attributes: {
+        rel: 'stylesheet',
+        href: 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap',
+      },
+    },
+  ],
   tagline: 'Node.js SDK for the Ceph RADOS Gateway Admin Ops API',
   url,
   baseUrl,

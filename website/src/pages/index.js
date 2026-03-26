@@ -3,6 +3,7 @@ import Layout from '@theme/Layout';
 import Head from '@docusaurus/Head';
 import CodeBlock from '@theme/CodeBlock';
 import useBaseUrl from '@docusaurus/useBaseUrl';
+import { useColorMode } from '@docusaurus/theme-common';
 
 /* ── Hooks ──────────────────────────────────────────────────────────────── */
 
@@ -288,11 +289,33 @@ function FAQAccordion() {
   );
 }
 
+function HeroIllustration() {
+  const { colorMode } = useColorMode();
+  const isDark = colorMode === 'dark';
+  const webpSrc = useBaseUrl(isDark ? '/img/dark-hero.webp' : '/img/light-hero.webp');
+  const jpgSrc = useBaseUrl(isDark ? '/img/dark-hero.jpg' : '/img/light-hero.jpg');
+  return (
+    <div className="hero-illustration-wrap">
+      <picture>
+        <source srcSet={webpSrc} type="image/webp" />
+        <img
+          src={jpgSrc}
+          alt="radosgw-admin — Ceph RGW admin operations illustrated"
+          className="hero-illustration"
+          width="1392"
+          height="459"
+          fetchPriority="high"
+        />
+      </picture>
+    </div>
+  );
+}
+
 function TechPill({ tech, delay }) {
   const src = useBaseUrl(tech.img);
   return (
     <AnimatedSection className="works-with-pill" delay={delay}>
-      <img src={src} alt={tech.name} className="works-with-img" loading="lazy" />
+      <img src={src} alt={tech.name} className="works-with-img" loading="lazy" width="32" height="32" />
       {tech.name}
     </AnimatedSection>
   );
@@ -382,18 +405,7 @@ export default function Home() {
           Open Source &middot; Apache-2.0
         </div>
 
-        <div className="hero-illustration-wrap">
-          <img
-            src={useBaseUrl('/img/light-hero.jpg')}
-            alt="radosgw-admin — Ceph RGW admin operations illustrated"
-            className="hero-illustration hero-illustration-light"
-          />
-          <img
-            src={useBaseUrl('/img/dark-hero.jpg')}
-            alt="radosgw-admin — Ceph RGW admin operations illustrated"
-            className="hero-illustration hero-illustration-dark"
-          />
-        </div>
+        <HeroIllustration />
 
         <div className="hero-inner">
           <div className="hero-content">
