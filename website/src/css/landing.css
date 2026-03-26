@@ -9,7 +9,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  min-height: 100vh;
+  min-height: 100svh;
   padding: 0 0 1.5rem;
   text-align: center;
   background: linear-gradient(to bottom, #f5efe6 0%, #ffffff 80%);
@@ -805,10 +805,54 @@
   66%       { transform: translateY(10px) scale(0.97); }
 }
 
+/* ── Portrait tablets 997–1100px (iPad Pro, etc.) — same in-flow layout ── */
+@media (min-width: 997px) and (max-width: 1100px) {
+  .hero-section {
+    flex-direction: column;
+    align-items: stretch;
+    min-height: auto;
+    padding: 0 0 3rem;
+  }
+  .hero-illustration-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1392 / 459;
+    flex-shrink: 0;
+  }
+  .hero-inner {
+    margin-top: -3rem;
+    width: 100%;
+    align-self: center;
+  }
+}
+
 /* ── Responsive — tablet ──────────────────────────────────────────────── */
 @media (max-width: 996px) {
+  /* Bring hero into normal flow — no more vw magic numbers */
+  .hero-section {
+    flex-direction: column;
+    align-items: stretch;
+    min-height: auto;
+    padding: 0 0 3rem;
+  }
+
+  /* Illustration in-flow: aspect-ratio reserves the exact right space */
+  .hero-illustration-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1392 / 459;
+    flex-shrink: 0;
+  }
+
+  /* Pull content up to overlap with the faded bottom of the illustration */
+  .hero-inner {
+    margin-top: -3rem;
+    width: 100%;
+    align-self: center; /* prevents stretch from left-aligning the 720px container */
+  }
+
   .hero-title { font-size: 2.8rem; }
-  .hero-content { padding: 2rem 1.5rem 0; }
+  .hero-content { padding: 0 1.5rem 0; }
   .hero-illustration {
     mask-image: radial-gradient(ellipse 90% 65% at 50% 28%, black 18%, transparent 55%);
     -webkit-mask-image: radial-gradient(ellipse 90% 65% at 50% 28%, black 18%, transparent 55%);
@@ -825,10 +869,11 @@
 
 /* ── Responsive — mobile ─────────────────────────────────────────────── */
 @media (max-width: 520px) {
-  .hero-section { min-height: 85vh; padding: 0 0 1.5rem; }
+  .hero-section { padding: 0 0 2.5rem; }
+  .hero-inner { margin-top: -2rem; }
   .hero-title { font-size: 2rem; }
   .hero-subtitle { font-size: 0.95rem; max-width: 90%; }
-  .hero-content { padding: 1.5rem 1.25rem 0; }
+  .hero-content { padding: 0 1.25rem 0; }
   .hero-badge { top: 1rem; font-size: 0.7rem; padding: 0.3rem 0.75rem; }
   .hero-illustration {
     mask-image: radial-gradient(ellipse 95% 60% at 50% 25%, black 15%, transparent 50%);

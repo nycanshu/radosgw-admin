@@ -663,6 +663,33 @@ div[class*='announcementBar'] a {
   .footer__inner {
     padding: 0 1.25rem;
   }
+
+  /* ── Mobile: compact search bar ──────────────────────────── */
+  /* Remove order override so search sits naturally after the logo/hamburger */
+  .navbar__search {
+    order: unset !important;
+  }
+
+  /* Narrower default width, still expands on focus */
+  .navbar__search-input {
+    width: 90px !important;
+    padding: 0.35rem 0.6rem 0.35rem 2rem !important;
+  }
+
+  .navbar__search-input:focus {
+    width: 130px !important;
+  }
+
+  /* Hide the keyboard shortcut hint (⌘K / Ctrl+K) — no room on mobile */
+  [class*="searchHintContainer"] {
+    display: none !important;
+  }
+
+  /* Hide GitHub and npm links on mobile — they're in the sidebar */
+  .header-github-link,
+  .header-npm-link {
+    display: none !important;
+  }
 }
 
 @media (max-width: 520px) {
