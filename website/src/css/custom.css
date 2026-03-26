@@ -1,13 +1,13 @@
-/* ── Self-hosted fonts — eliminates Google Fonts render-blocking request ────── */
-@import '@fontsource/inter/400.css';
-@import '@fontsource/inter/500.css';
-@import '@fontsource/inter/600.css';
-@import '@fontsource/inter/700.css';
-@import '@fontsource/inter/800.css';
-@import '@fontsource/instrument-serif/400.css';
-@import '@fontsource/instrument-serif/400-italic.css';
-@import '@fontsource/jetbrains-mono/400.css';
-@import '@fontsource/jetbrains-mono/500.css';
+/* ── Self-hosted fonts (latin subset only) ──────────────────────────────────── */
+@import '@fontsource/inter/latin-400.css';
+@import '@fontsource/inter/latin-500.css';
+@import '@fontsource/inter/latin-600.css';
+@import '@fontsource/inter/latin-700.css';
+@import '@fontsource/inter/latin-800.css';
+@import '@fontsource/instrument-serif/latin-400.css';
+@import '@fontsource/instrument-serif/latin-400-italic.css';
+@import '@fontsource/jetbrains-mono/latin-400.css';
+@import '@fontsource/jetbrains-mono/latin-500.css';
 
 /* ── Light mode tokens ─────────────────────────────────────────────────────── */
 :root {
@@ -390,6 +390,42 @@ code {
 .table-of-contents__link:hover,
 .table-of-contents__link--active {
   color: var(--ifm-color-primary);
+}
+
+/* ── Navbar Dropdown ───────────────────────────────────────────────────────── */
+.dropdown__menu {
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+
+.dropdown__link:hover,
+.dropdown__link--active {
+  background: rgba(124, 91, 240, 0.08);
+  color: #7c5bf0;
+}
+
+[data-theme='dark'] .dropdown__menu {
+  background: var(--dark-surface);
+  border: 1px solid var(--dark-border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme='dark'] .dropdown__link {
+  color: #c8d6f0;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.dropdown__link {
+  font-size: 0.875rem;
+}
+
+[data-theme='dark'] .dropdown__link:hover,
+[data-theme='dark'] .dropdown__link--active {
+  background: rgba(124, 91, 240, 0.12);
+  color: #a78bfa;
 }
 
 /* ── Pagination ────────────────────────────────────────────────────────────── */
