@@ -128,9 +128,7 @@ html {
 
 /* ── Navbar — floating pill on desktop, solid on mobile ────────────────────── */
 .navbar {
-  background: rgba(255, 255, 255, 0.6) !important;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: transparent !important;
   box-shadow: none !important;
   border-bottom: 1px solid rgba(0, 0, 0, 0.04);
   padding: 0.5rem 1.5rem;
@@ -183,6 +181,12 @@ html {
   background: rgba(167, 139, 250, 0.1);
 }
 
+.navbar__link:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
 .navbar__link--active {
   color: var(--ifm-color-primary);
 }
@@ -215,9 +219,10 @@ html {
 
 .navbar__search-input:focus {
   width: 220px !important;
-  border-color: rgba(124,91,240,0.3) !important;
+  border-color: rgba(124,91,240,0.4) !important;
   background-color: #fff !important;
   outline: none !important;
+  box-shadow: 0 0 0 3px rgba(124,91,240,0.25) !important;
 }
 
 [data-theme='dark'] .navbar__search-input {
@@ -228,7 +233,8 @@ html {
 
 [data-theme='dark'] .navbar__search-input:focus {
   background-color: var(--dark-surface) !important;
-  border-color: rgba(167,139,250,0.3) !important;
+  border-color: rgba(167,139,250,0.4) !important;
+  box-shadow: 0 0 0 3px rgba(167,139,250,0.25) !important;
 }
 
 /* Fix hint text overlap */
