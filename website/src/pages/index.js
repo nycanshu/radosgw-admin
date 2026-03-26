@@ -292,12 +292,17 @@ function FAQAccordion() {
 function HeroIllustration() {
   const { colorMode } = useColorMode();
   const isDark = colorMode === 'dark';
-  const webpSrc = useBaseUrl(isDark ? '/img/hero/dark.webp' : '/img/hero/light.webp');
-  const jpgSrc = useBaseUrl(isDark ? '/img/hero/dark.jpg' : '/img/hero/light.jpg');
+  const webpSrc    = useBaseUrl(isDark ? '/img/hero/dark.webp'     : '/img/hero/light.webp');
+  const webpSrc800 = useBaseUrl(isDark ? '/img/hero/dark-800.webp' : '/img/hero/light-800.webp');
+  const jpgSrc     = useBaseUrl(isDark ? '/img/hero/dark.jpg'      : '/img/hero/light.jpg');
   return (
     <div className="hero-illustration-wrap">
       <picture>
-        <source srcSet={webpSrc} type="image/webp" />
+        <source
+          srcSet={`${webpSrc800} 800w, ${webpSrc} 1392w`}
+          sizes="(max-width: 996px) 100vw, 1392px"
+          type="image/webp"
+        />
         <img
           src={jpgSrc}
           alt="radosgw-admin — Ceph RGW admin operations illustrated"
@@ -315,7 +320,7 @@ function TechPill({ tech, delay }) {
   const src = useBaseUrl(tech.img);
   return (
     <AnimatedSection className="works-with-pill" delay={delay}>
-      <img src={src} alt={tech.name} className="works-with-img" loading="lazy" height="18" />
+      <img src={src} alt={tech.name} className="works-with-img" loading="lazy" height="18" width="18" />
       {tech.name}
     </AnimatedSection>
   );
@@ -382,8 +387,6 @@ export default function Home() {
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <link rel="canonical" href="https://nycanshu.github.io/radosgw-admin/" />
-        <link rel="preload" as="image" type="image/webp" href="https://nycanshu.github.io/radosgw-admin/img/hero/light.webp" media="(prefers-color-scheme: light)" />
-        <link rel="preload" as="image" type="image/webp" href="https://nycanshu.github.io/radosgw-admin/img/hero/dark.webp" media="(prefers-color-scheme: dark)" />
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
         <script type="application/ld+json">{JSON.stringify({
           '@context': 'https://schema.org',
@@ -454,6 +457,9 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      {/* ─── MAIN CONTENT ──────────────────────────────────────────────── */}
+      <main>
 
       {/* ─── WORKS WITH ────────────────────────────────────────────────── */}
       <section className="works-with-section">
@@ -545,6 +551,8 @@ export default function Home() {
           </AnimatedSection>
         </div>
       </section>
+
+      </main>
     </Layout>
   );
 }
