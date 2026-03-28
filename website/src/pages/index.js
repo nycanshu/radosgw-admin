@@ -4,6 +4,7 @@ import Head from '@docusaurus/Head';
 import CodeBlock from '@theme/CodeBlock';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import { useColorMode } from '@docusaurus/theme-common';
+import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
 
 /* ── Hooks ──────────────────────────────────────────────────────────────── */
 
@@ -373,6 +374,8 @@ function Squiggle() {
 /* ── Page ───────────────────────────────────────────────────────────────── */
 
 export default function Home() {
+  const { siteConfig } = useDocusaurusContext();
+  const siteUrl = siteConfig.url;
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareSourceCode',
@@ -399,14 +402,14 @@ export default function Home() {
         <meta property="og:type" content="website" />
         <meta property="og:title" content="radosgw-admin — Node.js SDK for Ceph RADOS Gateway Admin Ops" />
         <meta property="og:description" content="Manage Ceph RGW users, buckets, quotas, rate limits and access keys from Node.js. 8 modules, 40+ methods, full TypeScript." />
-        <meta property="og:image" content="https://nycanshu.github.io/radosgw-admin/img/og-image.png" />
+        <meta property="og:image" content={`${siteUrl}/img/og-image.png`} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="radosgw-admin — Node.js SDK for Ceph RADOS Gateway Admin Ops" />
         <meta name="twitter:description" content="Node.js SDK for the Ceph RADOS Gateway Admin Ops API. Full TypeScript, works with Rook-Ceph and ODF." />
-        <meta name="twitter:image" content="https://nycanshu.github.io/radosgw-admin/img/og-image.png" />
+        <meta name="twitter:image" content={`${siteUrl}/img/og-image.png`} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <link rel="canonical" href="https://nycanshu.github.io/radosgw-admin/" />
+        <link rel="canonical" href={`${siteUrl}/`} />
         <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
         <script type="application/ld+json">{JSON.stringify({
           '@context': 'https://schema.org',

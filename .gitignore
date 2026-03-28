@@ -24,6 +24,7 @@ coverage
 radosgw-admin-*.md
 myplan/
 docs/api
+website/docs/api
 website/.docusaurus
 website/build
 website/node_modules
