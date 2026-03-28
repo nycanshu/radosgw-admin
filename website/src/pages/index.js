@@ -398,6 +398,7 @@ export default function Home() {
       description="Node.js SDK for the Ceph RADOS Gateway Admin Ops API. Manage users, buckets, quotas, rate limits programmatically. TypeScript, ESM + CJS, Rook-Ceph ready."
     >
       <Head>
+        <meta name="google-site-verification" content="CnMgDWfzvGI34vdWEMOY5wcKwXRF5ShK84yaOqMMcbc" />
         <meta name="keywords" content="ceph, radosgw, rados gateway, rgw admin, rgw admin ops, ceph admin api, s3, object storage, rook ceph, openshift data foundation, node.js, typescript, sdk, bucket management, user management, quota, rate limit" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="radosgw-admin — Node.js SDK for Ceph RADOS Gateway Admin Ops" />
