@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://nycanshu.github.io/radosgw-admin/sitemap.xml
+Sitemap: https://radosgw-admin.nycanshu.dev/sitemap.xml
