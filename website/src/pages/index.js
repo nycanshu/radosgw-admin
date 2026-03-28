@@ -48,9 +48,9 @@ function useCounter(target, active, duration = 1200) {
 
 const stats = [
   { value: '8',    label: 'Modules' },
-  { value: '45+',  label: 'Methods' },
-  { value: '0',    label: 'Deps' },
-  { value: '299+', label: 'Tests' },
+  { value: '55+',  label: 'Methods' },
+  { value: '0',    label: 'Transitive Deps' },
+  { value: '324+', label: 'Tests' },
 ];
 
 const techStack = [
@@ -65,8 +65,8 @@ const techStack = [
 
 const featureBlocks = [
   {
-    title: 'Zero Dependencies',
-    desc: 'No runtime deps. AWS SigV4 signing is implemented using only the built-in node:crypto module. Minimal attack surface, minimal bundle size.',
+    title: 'No Dependency Hell',
+    desc: "SigV4 signing uses only the built-in node:crypto module. The single runtime dep is undici — Node.js's own HTTP client, maintained by the Node.js core team, with zero transitive deps. Install radosgw-admin, get one extra package.",
     code: `import { RadosGWAdminClient } from 'radosgw-admin';
 
 const rgw = new RadosGWAdminClient({
@@ -82,7 +82,8 @@ const user = await rgw.users.create({
 });`,
     highlights: [
       { color: '#a78bfa', text: 'Built-in node:crypto for signing' },
-      { color: '#6d4de6', text: 'ESM + CommonJS dual output' },
+      { color: '#6d4de6', text: '0 transitive dependencies' },
+      { color: '#8b5cf6', text: 'No aws-sdk, no axios, no node-fetch' },
     ],
   },
   {
@@ -105,6 +106,7 @@ try {
     highlights: [
       { color: '#a78bfa', text: '6 specific error classes' },
       { color: '#6d4de6', text: 'Automatic retry on 429 & 5xx' },
+      { color: '#8b5cf6', text: 'Typed code field on every error' },
     ],
   },
   {
@@ -124,17 +126,18 @@ try {
     highlights: [
       { color: '#a78bfa', text: 'onBeforeRequest / onAfterResponse' },
       { color: '#6d4de6', text: 'Hook errors never break requests' },
+      { color: '#8b5cf6', text: 'Works across all 8 modules' },
     ],
   },
 ];
 
 const modules = [
-  { name: 'users',     ops: 'create, get, modify, delete, list, suspend, enable' },
+  { name: 'users',     ops: 'create, get, modify, delete, list, suspend, enable, getByAccessKey, getStats' },
   { name: 'keys',      ops: 'generate, revoke' },
   { name: 'subusers',  ops: 'create, modify, remove' },
-  { name: 'buckets',   ops: 'list, getInfo, delete, transferOwnership, verifyIndex' },
-  { name: 'quota',     ops: 'getUserQuota, setUserQuota, getBucketQuota, setBucketQuota' },
-  { name: 'rateLimit', ops: 'getUserLimit, setUserLimit, getBucketLimit, getGlobal' },
+  { name: 'buckets',   ops: 'list, listByUser, getInfo, delete, transferOwnership, removeOwnership, verifyIndex' },
+  { name: 'quota',     ops: 'getUserQuota, setUserQuota, enableUserQuota, disableUserQuota, getBucketQuota, setBucketQuota, enableBucketQuota, disableBucketQuota' },
+  { name: 'rateLimit', ops: 'getUserLimit, setUserLimit, disableUserLimit, getBucketLimit, setBucketLimit, disableBucketLimit, getGlobal, setGlobal' },
   { name: 'usage',     ops: 'get, trim' },
   { name: 'info',      ops: 'get (cluster FSID & backends)' },
 ];
@@ -157,8 +160,8 @@ const faqItems = [
     a: 'Yes. OpenShift Data Foundation uses Ceph RGW internally. radosgw-admin connects to the ODF RGW endpoint the same way as any other Ceph cluster.',
   },
   {
-    q: 'Does it have any runtime dependencies?',
-    a: 'No. radosgw-admin has zero runtime dependencies. AWS SigV4 request signing is implemented using only the built-in node:crypto module.',
+    q: 'Does it have any third-party dependencies?',
+    a: 'Just one: undici — the HTTP client library maintained by the Node.js core team and used internally by Node.js itself for its built-in fetch. It has zero transitive dependencies. SigV4 signing still uses only the built-in node:crypto module.',
   },
   {
     q: 'What Node.js version is required?',
@@ -252,6 +255,23 @@ function FeatureBlock({ feature, index }) {
           {feature.code}
         </CodeBlock>
       </div>
+    </AnimatedSection>
+  );
+}
+
+function ModuleRow({ mod, index }) {
+  const href = useBaseUrl(`/docs/guides/${mod.name === 'rateLimit' ? 'ratelimit' : mod.name}`);
+  const methods = mod.ops.split(', ');
+  return (
+    <AnimatedSection className="" delay={index * 50}>
+      <a href={href} className="module-row">
+        <div className="module-row-name">rgw.{mod.name}</div>
+        <div className="module-row-methods">
+          {methods.map((m) => (
+            <span key={m} className="module-method-chip">{m}</span>
+          ))}
+        </div>
+      </a>
     </AnimatedSection>
   );
 }
@@ -357,7 +377,7 @@ export default function Home() {
     '@context': 'https://schema.org',
     '@type': 'SoftwareSourceCode',
     name: 'radosgw-admin',
-    description: 'Node.js SDK for the Ceph RADOS Gateway Admin Ops API. Manage users, buckets, quotas, rate limits and access keys \u2014 8 modules, 45+ methods, zero dependencies.',
+    description: 'Node.js SDK for the Ceph RADOS Gateway Admin Ops API. Manage users, buckets, quotas, rate limits and access keys \u2014 8 modules, 45+ methods, full TypeScript.',
     codeRepository: 'https://github.com/nycanshu/radosgw-admin',
     programmingLanguage: ['TypeScript', 'JavaScript'],
     runtimePlatform: 'Node.js',
@@ -372,17 +392,17 @@ export default function Home() {
   return (
     <Layout
       title="radosgw-admin — Node.js SDK for Ceph RADOS Gateway Admin Ops"
-      description="Node.js SDK for the Ceph RADOS Gateway Admin Ops API. Manage users, buckets, quotas, rate limits programmatically. Zero dependencies, TypeScript, ESM + CJS."
+      description="Node.js SDK for the Ceph RADOS Gateway Admin Ops API. Manage users, buckets, quotas, rate limits programmatically. TypeScript, ESM + CJS, Rook-Ceph ready."
     >
       <Head>
         <meta name="keywords" content="ceph, radosgw, rados gateway, rgw admin, rgw admin ops, ceph admin api, s3, object storage, rook ceph, openshift data foundation, node.js, typescript, sdk, bucket management, user management, quota, rate limit" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="radosgw-admin — Node.js SDK for Ceph RADOS Gateway Admin Ops" />
-        <meta property="og:description" content="Manage Ceph RGW users, buckets, quotas, rate limits and access keys from Node.js. 8 modules, 45+ methods, zero dependencies." />
+        <meta property="og:description" content="Manage Ceph RGW users, buckets, quotas, rate limits and access keys from Node.js. 8 modules, 45+ methods, full TypeScript." />
         <meta property="og:image" content="https://nycanshu.github.io/radosgw-admin/img/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="radosgw-admin — Node.js SDK for Ceph RADOS Gateway Admin Ops" />
-        <meta name="twitter:description" content="Node.js SDK for the Ceph RADOS Gateway Admin Ops API. Zero dependencies, full TypeScript, works with Rook-Ceph and ODF." />
+        <meta name="twitter:description" content="Node.js SDK for the Ceph RADOS Gateway Admin Ops API. Full TypeScript, works with Rook-Ceph and ODF." />
         <meta name="twitter:image" content="https://nycanshu.github.io/radosgw-admin/img/og-image.png" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
@@ -426,7 +446,7 @@ export default function Home() {
             </h1>
             <p className="hero-subtitle">
               The Node.js SDK that covers every RADOS Gateway Admin endpoint.
-              Zero dependencies. Full TypeScript.
+              No transitive deps. Full TypeScript.
             </p>
 
             <div className="hero-stats">
@@ -499,17 +519,9 @@ export default function Home() {
               8 modules covering every RGW Admin Ops endpoint.
             </p>
           </AnimatedSection>
-          <div className="modules-grid">
+          <div className="modules-list">
             {modules.map((m, i) => (
-              <AnimatedSection key={m.name} className="" delay={i * 60}>
-                <a
-                  href={useBaseUrl(`/docs/guides/${m.name === 'rateLimit' ? 'ratelimit' : m.name}`)}
-                  className="module-card"
-                >
-                  <div className="module-name">rgw.{m.name}</div>
-                  <div className="module-ops">{m.ops}</div>
-                </a>
-              </AnimatedSection>
+              <ModuleRow key={m.name} mod={m} index={i} />
             ))}
           </div>
         </div>

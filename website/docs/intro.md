@@ -19,7 +19,7 @@ There was no actively maintained Node.js SDK for the Ceph RGW Admin Ops API. Mea
 | Feature | radosgw-admin |
 |---|---|
 | API coverage | 8 modules, 45+ methods across all Admin Ops endpoints |
-| Auth | AWS SigV4 signing via `node:crypto` (zero deps) |
+| Auth | AWS SigV4 signing via `node:crypto` (no third-party deps) |
 | Error handling | Typed error class hierarchy — `RGWNotFoundError`, `RGWAuthError`, etc. |
 | TypeScript | Full strict types, no `any` |
 | Module format | ESM + CJS dual build |

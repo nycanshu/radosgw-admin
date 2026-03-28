@@ -1,4 +1,5 @@
 import { signRequest } from './signer.js';
+import { Agent } from 'undici';
 import {
   RGWError,
   RGWNotFoundError,
@@ -143,6 +144,7 @@ export class BaseClient {
   private readonly maxRetries: number;
   private readonly retryDelay: number;
   private readonly insecure: boolean;
+  readonly #dispatcher: Agent | undefined;
   private readonly userAgent: string;
   private readonly beforeRequestHooks: BeforeRequestHook[];
   private readonly afterResponseHooks: AfterResponseHook[];
@@ -165,6 +167,9 @@ export class BaseClient {
     this.maxRetries = config.maxRetries ?? 0;
     this.retryDelay = config.retryDelay ?? 200;
     this.insecure = config.insecure ?? false;
+    this.#dispatcher = config.insecure
+      ? new Agent({ connect: { rejectUnauthorized: false } })
+      : undefined;
     this.userAgent =
       config.userAgent ?? `radosgw-admin/${SDK_VERSION} node/${process.versions.node}`;
     this.beforeRequestHooks = config.onBeforeRequest ?? [];
@@ -296,27 +301,6 @@ export class BaseClient {
   }
 
   /**
-   * Temporarily disables TLS certificate verification for insecure mode.
-   * Returns the previous value so it can be restored.
-   */
-  private disableTlsVerification(): string | undefined {
-    const prev = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-    return prev;
-  }
-
-  /**
-   * Restores the TLS verification setting to its previous value.
-   */
-  private restoreTlsVerification(prev: string | undefined): void {
-    if (prev === undefined) {
-      delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
-    } else {
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = prev;
-    }
-  }
-
-  /**
    * Wraps a non-RGW error into the appropriate RGW error type.
    */
   private wrapFetchError(error: unknown): RGWError {
@@ -428,23 +412,23 @@ export class BaseClient {
     });
 
     const { signal, cleanup } = this.createCombinedSignal(externalSignal);
-    const prevTls = this.insecure ? this.disableTlsVerification() : undefined;
 
     try {
-      const fetchOptions: RequestInit = {
+      const fetchOptions: Record<string, unknown> = {
         method,
         headers: { ...headers, ...signedHeaders },
         signal,
+        ...(this.#dispatcher ? { dispatcher: this.#dispatcher } : {}),
       };
       if (body) {
-        fetchOptions.body = JSON.stringify(body);
+        fetchOptions['body'] = JSON.stringify(body);
       }
 
       // Redact secret-key from debug logs — it appears as a query param when callers
       // provision users with pre-specified credentials (per RGW Admin Ops wire format).
       const safeUrl = url.toString().replaceAll(/([?&]secret-key=)[^&]*/gi, '$1[REDACTED]');
       this.log('request', { method, url: safeUrl });
-      const response = await fetch(url.toString(), fetchOptions);
+      const response = await fetch(url.toString(), fetchOptions as RequestInit);
       const text = await response.text();
 
       if (!response.ok) {
@@ -485,9 +469,6 @@ export class BaseClient {
       throw wrapped;
     } finally {
       cleanup();
-      if (this.insecure) {
-        this.restoreTlsVerification(prevTls);
-      }
     }
   }
 }

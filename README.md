@@ -18,7 +18,7 @@ The only existing npm package for RGW Admin Ops (`rgw-admin-client`) was last pu
 **What you get:**
 
 - Full [RGW Admin Ops API](https://docs.ceph.com/en/latest/radosgw/adminops/) coverage — users, keys, subusers, buckets, quotas, rate limits
-- Zero runtime dependencies — AWS SigV4 signing uses only `node:crypto`
+- No third-party dependencies — SigV4 signing uses only `node:crypto`; TLS scoping uses `undici` (Node.js's own built-in HTTP client, zero transitive deps)
 - Request hooks — add logging, Prometheus metrics, or audit trails via `onBeforeRequest`/`onAfterResponse`
 - Health check — `rgw.healthCheck()` for one-liner connectivity verification
 - Structured error hierarchy — catch specific failures, not generic HTTP errors
@@ -540,10 +540,10 @@ Yes. ODF uses Ceph under the hood. Point the client at the RGW route or service 
 </details>
 
 <details>
-<summary><strong>Why zero dependencies?</strong></summary>
+<summary><strong>Why no third-party dependencies?</strong></summary>
 
-AWS SigV4 signing is implemented using only `node:crypto` (built-in). No `aws-sdk`, no `axios`, no `node-fetch`. This means:
-- Smaller `node_modules` footprint
+SigV4 signing is implemented using only `node:crypto` (built-in). TLS scoping (for `insecure: true`) uses `undici` — the HTTP client library that Node.js itself uses internally for `fetch`. `undici` has zero transitive dependencies and is maintained by the Node.js team. No `aws-sdk`, no `axios`, no `node-fetch`. This means:
+- Minimal `node_modules` footprint
 - No supply chain risk from transitive dependencies
 - No version conflicts with other packages in your project
 

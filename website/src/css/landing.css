@@ -491,8 +491,14 @@
   display: grid;
   grid-template-columns: 1fr 1.3fr;
   gap: 3rem;
-  align-items: center;
+  align-items: stretch;
   margin-bottom: 4rem;
+}
+
+.feature-block-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .feature-block:last-child { margin-bottom: 0; }
@@ -566,30 +572,32 @@
   border-color: var(--dark-border);
 }
 
-.modules-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-}
-
-.module-card {
+.modules-list {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  height: 90px;
-  padding: 1.25rem 1.5rem;
-  border-radius: 10px;
   border: 1px solid #e2e8f0;
-  background: #fff;
-  text-decoration: none !important;
-  transition: all 0.2s ease;
-  position: relative;
+  border-radius: 12px;
   overflow: hidden;
 }
 
-[data-theme='dark'] .module-card { background: var(--dark-surface); border-color: var(--dark-border); }
+[data-theme='dark'] .modules-list {
+  border-color: var(--dark-border);
+}
 
-.module-card::before {
+.module-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding: 0.9rem 1.5rem;
+  text-decoration: none !important;
+  border-bottom: 1px solid #e2e8f0;
+  transition: background 0.15s ease;
+  position: relative;
+}
+
+.module-row:last-child { border-bottom: none; }
+
+.module-row::before {
   content: '';
   position: absolute;
   left: 0;
@@ -598,36 +606,67 @@
   width: 3px;
   background: linear-gradient(180deg, #a78bfa, #7c5bf0);
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.15s ease;
 }
 
-.module-card:hover {
-  transform: translateY(-2px);
+.module-row:hover {
+  background: rgba(124, 91, 240, 0.04);
   text-decoration: none;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
 }
 
-[data-theme='dark'] .module-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
-.module-card:hover::before { opacity: 1; }
-.module-card:focus-visible { outline: 2px solid var(--ifm-color-primary); outline-offset: 2px; }
+.module-row:hover::before { opacity: 1; }
 
-.module-name {
+[data-theme='dark'] .module-row { border-bottom-color: var(--dark-border); }
+[data-theme='dark'] .module-row:hover { background: rgba(167, 139, 250, 0.06); }
+
+.module-row:focus-visible { outline: 2px solid var(--ifm-color-primary); outline-offset: -2px; }
+
+.module-row-name {
+  flex-shrink: 0;
+  width: 160px;
   font-family: var(--ifm-font-family-monospace);
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: #7c5bf0;
-  margin-bottom: 0.4rem;
+  padding-top: 3px;
 }
 
-[data-theme='dark'] .module-name { color: #a78bfa; }
+[data-theme='dark'] .module-row-name { color: #a78bfa; }
 
-.module-ops {
-  font-size: 0.8rem;
-  color: #64748b;
-  line-height: 1.5;
+.module-row-methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  flex: 1;
 }
 
-[data-theme='dark'] .module-ops { color: #94a3b8; }
+.module-method-chip {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.75rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 5px;
+  background: rgba(124, 91, 240, 0.07);
+  color: #374151;
+  border: 1px solid rgba(124, 91, 240, 0.15);
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+[data-theme='dark'] .module-method-chip {
+  background: rgba(167, 139, 250, 0.1);
+  color: #cbd5e1;
+  border-color: rgba(167, 139, 250, 0.2);
+}
+
+.module-row:hover .module-method-chip {
+  background: rgba(124, 91, 240, 0.12);
+  border-color: rgba(124, 91, 240, 0.22);
+}
+
+[data-theme='dark'] .module-row:hover .module-method-chip {
+  background: rgba(167, 139, 250, 0.15);
+  border-color: rgba(167, 139, 250, 0.28);
+}
 
 /* ── FAQ — accordion ──────────────────────────────────────────────────── */
 .faq-section {
@@ -863,7 +902,8 @@
   .feature-block-title { text-align: center; }
   .feature-block-desc { text-align: center; }
   .feature-block-highlights { align-items: center; }
-  .modules-grid { grid-template-columns: repeat(2, 1fr); }
+  .module-row { flex-direction: column; gap: 0.6rem; }
+  .module-row-name { width: auto; }
   .section-container { padding: 0 1.5rem; }
 }
 
@@ -892,8 +932,7 @@
   .works-with-pill { font-size: 0.75rem; padding: 0.4rem 0.75rem; gap: 0.35rem; }
   .works-with-img { height: 14px; max-width: 30px; }
   .modules-section { padding: 3.5rem 1.25rem; }
-  .modules-grid { grid-template-columns: 1fr; }
-  .module-card { height: auto; min-height: 70px; }
+  .module-method-chip { font-size: 0.7rem; padding: 0.18rem 0.45rem; }
   .faq-section { padding: 3.5rem 1.25rem; }
   .faq-trigger { font-size: 0.9rem; padding: 1rem 0; }
   .cta-section { padding: 4rem 1.25rem; }
@@ -939,7 +978,7 @@
 
   .hero-install,
   .hero-btn,
-  .module-card,
+  .module-row,
   .faq-item,
   .works-with-pill {
     transition: none;

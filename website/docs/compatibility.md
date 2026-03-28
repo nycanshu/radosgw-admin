@@ -90,9 +90,12 @@ export NODE_EXTRA_CA_CERTS=/path/to/ca-cert.pem
 
 ## Dependencies
 
-**Zero runtime dependencies.** The SDK uses only built-in Node.js modules:
+**No third-party dependencies.** The SDK uses built-in Node.js modules for all core operations, plus one dependency maintained by the Node.js team itself:
 
-- `node:crypto` — AWS SigV4 request signing
-- `globalThis.fetch` — HTTP requests (built-in since Node 18)
+| Package | Purpose | Transitive deps |
+|---|---|---|
+| `node:crypto` (built-in) | AWS SigV4 request signing | — |
+| `globalThis.fetch` (built-in) | HTTP requests (Node 18+) | — |
+| [`undici`](https://github.com/nodejs/undici) | Per-request TLS dispatcher for `insecure: true` mode | 0 |
 
-No `aws-sdk`, no `axios`, no `node-fetch`. This means no transitive dependency risk and no version conflicts.
+`undici` is the HTTP library Node.js uses internally to power its built-in `fetch`. It is maintained by the Node.js core team and has zero transitive dependencies. No `aws-sdk`, no `axios`, no `node-fetch`. This means no supply chain risk and no version conflicts.
