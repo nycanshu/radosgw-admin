@@ -53,6 +53,10 @@ const config = {
           sidebarPath: require.resolve('./sidebars.js'),
         },
         blog: false,
+        gtag: {
+          trackingID: 'G-YLT2252FWN',
+          anonymizeIP: true,
+        },
         theme: {
           customCss: [
             require.resolve('./src/css/custom.css'),
