@@ -48,7 +48,7 @@ function useCounter(target, active, duration = 1200) {
 
 const stats = [
   { value: '8',    label: 'Modules' },
-  { value: '55+',  label: 'Methods' },
+  { value: '40+',  label: 'Methods' },
   { value: '0',    label: 'Transitive Deps' },
   { value: '324+', label: 'Tests' },
 ];
@@ -377,7 +377,7 @@ export default function Home() {
     '@context': 'https://schema.org',
     '@type': 'SoftwareSourceCode',
     name: 'radosgw-admin',
-    description: 'Node.js SDK for the Ceph RADOS Gateway Admin Ops API. Manage users, buckets, quotas, rate limits and access keys \u2014 8 modules, 45+ methods, full TypeScript.',
+    description: 'Node.js SDK for the Ceph RADOS Gateway Admin Ops API. Manage users, buckets, quotas, rate limits and access keys \u2014 8 modules, 40+ methods, full TypeScript.',
     codeRepository: 'https://github.com/nycanshu/radosgw-admin',
     programmingLanguage: ['TypeScript', 'JavaScript'],
     runtimePlatform: 'Node.js',
@@ -398,7 +398,7 @@ export default function Home() {
         <meta name="keywords" content="ceph, radosgw, rados gateway, rgw admin, rgw admin ops, ceph admin api, s3, object storage, rook ceph, openshift data foundation, node.js, typescript, sdk, bucket management, user management, quota, rate limit" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="radosgw-admin — Node.js SDK for Ceph RADOS Gateway Admin Ops" />
-        <meta property="og:description" content="Manage Ceph RGW users, buckets, quotas, rate limits and access keys from Node.js. 8 modules, 45+ methods, full TypeScript." />
+        <meta property="og:description" content="Manage Ceph RGW users, buckets, quotas, rate limits and access keys from Node.js. 8 modules, 40+ methods, full TypeScript." />
         <meta property="og:image" content="https://nycanshu.github.io/radosgw-admin/img/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="radosgw-admin — Node.js SDK for Ceph RADOS Gateway Admin Ops" />

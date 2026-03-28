@@ -118,7 +118,7 @@ rgw.keys.generate(input); // Generate or assign S3/Swift keys
 rgw.keys.revoke(input);   // Revoke (delete) a key pair
 ```
 
-### Subusers. 
+### Subusers
 
 ```typescript
 rgw.subusers.create(input); // Create a subuser for an existing user

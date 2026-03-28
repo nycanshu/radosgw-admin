@@ -93,7 +93,7 @@ async function run() {
     defaultLimit = await client.rateLimit.getUserLimit(TEST_UID);
   } catch (err) {
     const msg = (err as Error).message;
-    if (msg.includes('InvalidArgument')) {
+    if (msg.includes('InvalidArgument') || (err as { code?: string }).code === 'InvalidArgument') {
       console.log('   Rate limiting not enabled on this cluster (rgw_ratelimit_enabled=false)');
       console.log('   Skipping all rate limit tests.\n');
       console.log('Cleaning up...');

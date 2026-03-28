@@ -18,7 +18,7 @@ There was no actively maintained Node.js SDK for the Ceph RGW Admin Ops API. Mea
 
 | Feature | radosgw-admin |
 |---|---|
-| API coverage | 8 modules, 45+ methods across all Admin Ops endpoints |
+| API coverage | 8 modules, 40+ methods across all Admin Ops endpoints |
 | Auth | AWS SigV4 signing via `node:crypto` (no third-party deps) |
 | Error handling | Typed error class hierarchy — `RGWNotFoundError`, `RGWAuthError`, etc. |
 | TypeScript | Full strict types, no `any` |
@@ -68,9 +68,9 @@ await rgw.users.delete({ uid: 'alice' });
 | `rgw.users` | create, get, modify, delete, list, suspend, enable, getStats, getByAccessKey |
 | `rgw.keys` | generate, revoke |
 | `rgw.subusers` | create, modify, remove |
-| `rgw.buckets` | get, list, delete, transferOwnership, removeOwnership, verifyIndex |
+| `rgw.buckets` | list, listByUser, getInfo, delete, transferOwnership, removeOwnership, verifyIndex |
 | `rgw.quota` | getUserQuota, setUserQuota, getBucketQuota, setBucketQuota, enable/disable |
-| `rgw.rateLimit` | getUser, setUser, getBucket, setBucket, getGlobal, setGlobal |
+| `rgw.rateLimit` | getUserLimit, setUserLimit, disableUserLimit, getBucketLimit, setBucketLimit, disableBucketLimit, getGlobal, setGlobal |
 | `rgw.usage` | get, trim |
 | `rgw.info` | get |
 
