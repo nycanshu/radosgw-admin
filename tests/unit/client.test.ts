@@ -363,19 +363,22 @@ describe('BaseClient insecure TLS', () => {
   let fetchSpy: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    fetchSpy = vi.fn();
+    fetchSpy = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve('{}'),
+    });
     vi.stubGlobal('fetch', fetchSpy);
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
-    delete process.env.NODE_TLS_REJECT_UNAUTHORIZED;
   });
 
-  it('sets NODE_TLS_REJECT_UNAUTHORIZED=0 during request when insecure', async () => {
-    let tlsValueDuringFetch: string | undefined;
-    fetchSpy.mockImplementationOnce(() => {
-      tlsValueDuringFetch = process.env.NODE_TLS_REJECT_UNAUTHORIZED;
+  it('never touches NODE_TLS_REJECT_UNAUTHORIZED when insecure: true', async () => {
+    const touched: boolean[] = [];
+    fetchSpy.mockImplementation(() => {
+      touched.push(process.env.NODE_TLS_REJECT_UNAUTHORIZED !== undefined);
       return Promise.resolve({
         ok: true,
         status: 200,
@@ -388,21 +391,27 @@ describe('BaseClient insecure TLS', () => {
       accessKey: 'testkey',
       secretKey: 'testsecret',
       insecure: true,
-      debug: true,
     });
     await client.request({ method: 'GET', path: '/user' });
 
-    expect(tlsValueDuringFetch).toBe('0');
     expect(process.env.NODE_TLS_REJECT_UNAUTHORIZED).toBeUndefined();
+    expect(touched).toEqual([false]);
   });
 
-  it('does not modify NODE_TLS_REJECT_UNAUTHORIZED when insecure is false', async () => {
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      text: () => Promise.resolve('{}'),
+  it('passes dispatcher to fetch when insecure: true', async () => {
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+      insecure: true,
     });
+    await client.request({ method: 'GET', path: '/user' });
 
+    const [, fetchInit] = fetchSpy.mock.calls[0] as [string, Record<string, unknown>];
+    expect(fetchInit['dispatcher']).toBeDefined();
+  });
+
+  it('does not pass dispatcher to fetch when insecure: false', async () => {
     const client = new BaseClient({
       host: 'http://localhost',
       accessKey: 'testkey',
@@ -411,28 +420,41 @@ describe('BaseClient insecure TLS', () => {
     });
     await client.request({ method: 'GET', path: '/user' });
 
-    expect(process.env.NODE_TLS_REJECT_UNAUTHORIZED).toBeUndefined();
+    const [, fetchInit] = fetchSpy.mock.calls[0] as [string, Record<string, unknown>];
+    expect(fetchInit['dispatcher']).toBeUndefined();
   });
 
-  it('restores previous NODE_TLS_REJECT_UNAUTHORIZED value after request', async () => {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '1';
+  it('concurrent insecure + secure requests do not share TLS state', async () => {
+    const envSnapshots: Array<string | undefined> = [];
 
-    fetchSpy.mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      text: () => Promise.resolve('{}'),
+    fetchSpy.mockImplementation(() => {
+      envSnapshots.push(process.env.NODE_TLS_REJECT_UNAUTHORIZED);
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        text: () => Promise.resolve('{}'),
+      });
     });
 
-    const client = new BaseClient({
+    const insecureClient = new BaseClient({
       host: 'http://localhost',
       accessKey: 'testkey',
       secretKey: 'testsecret',
       insecure: true,
-      debug: true,
     });
-    await client.request({ method: 'GET', path: '/user' });
+    const secureClient = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+      insecure: false,
+    });
 
-    expect(process.env.NODE_TLS_REJECT_UNAUTHORIZED).toBe('1');
+    await Promise.all([
+      insecureClient.request({ method: 'GET', path: '/user' }),
+      secureClient.request({ method: 'GET', path: '/user' }),
+    ]);
+
+    expect(envSnapshots.every((v) => v === undefined)).toBe(true);
   });
 });
 
@@ -483,6 +505,49 @@ describe('BaseClient User-Agent header', () => {
 
     const callHeaders = fetchSpy.mock.calls[0][1].headers as Record<string, string>;
     expect(callHeaders['User-Agent']).toBe('my-app/1.0');
+  });
+});
+
+describe('BaseClient request body', () => {
+  let fetchSpy: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    fetchSpy = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve('{}'),
+    });
+    vi.stubGlobal('fetch', fetchSpy);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('serialises body as JSON when body is provided', async () => {
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+    });
+
+    await client.request({ method: 'PUT', path: '/user', body: { displayName: 'Alice' } });
+
+    const [, fetchInit] = fetchSpy.mock.calls[0] as [string, Record<string, unknown>];
+    expect(fetchInit['body']).toBe(JSON.stringify({ displayName: 'Alice' }));
+  });
+
+  it('does not set body when body is not provided', async () => {
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+    });
+
+    await client.request({ method: 'GET', path: '/user' });
+
+    const [, fetchInit] = fetchSpy.mock.calls[0] as [string, Record<string, unknown>];
+    expect(fetchInit['body']).toBeUndefined();
   });
 });
 

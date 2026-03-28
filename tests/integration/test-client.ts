@@ -168,6 +168,10 @@ async function run() {
       insecureLogs.some((l) => l.includes('TLS')),
       'should log TLS warning',
     );
+    assert(
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED === undefined,
+      'NODE_TLS_REJECT_UNAUTHORIZED should never be set',
+    );
     pass(`Listed ${users.length} users with insecure TLS`);
   } catch (err) {
     console.debug = origDebug;
@@ -418,6 +422,50 @@ async function run() {
     pass(`Hook fired on all 3 attempts: [${attempts.join(', ')}]`);
   } catch (err) {
     fail('Hooks on retries', err);
+  }
+
+  // ── 14. Concurrent insecure + secure requests (v0.2.1) ──────────────────────
+
+  console.log('\n14. Concurrent insecure + secure requests do not contaminate TLS state...');
+  try {
+    const envValues: Array<string | undefined> = [];
+
+    const originalFetch = globalThis.fetch;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (globalThis as any).fetch = async (...args: Parameters<typeof fetch>) => {
+      envValues.push(process.env.NODE_TLS_REJECT_UNAUTHORIZED);
+      return originalFetch(...args);
+    };
+
+    const insecureClient = new RadosGWAdminClient({
+      host: process.env.RGW_HOST!,
+      port: Number(process.env.RGW_PORT),
+      accessKey: process.env.RGW_ACCESS_KEY!,
+      secretKey: process.env.RGW_SECRET_KEY!,
+      insecure: true,
+      maxRetries: 0,
+    });
+
+    const secureClient = new RadosGWAdminClient({
+      host: process.env.RGW_HOST!,
+      port: Number(process.env.RGW_PORT),
+      accessKey: process.env.RGW_ACCESS_KEY!,
+      secretKey: process.env.RGW_SECRET_KEY!,
+      insecure: false,
+      maxRetries: 0,
+    });
+
+    await Promise.all([insecureClient.info.get(), secureClient.info.get()]);
+
+    globalThis.fetch = originalFetch;
+
+    assert(
+      envValues.every((v) => v === undefined),
+      `NODE_TLS_REJECT_UNAUTHORIZED was set during concurrent requests: ${JSON.stringify(envValues)}`,
+    );
+    pass('Concurrent insecure + secure requests completed, env var never touched');
+  } catch (err) {
+    fail('Concurrent TLS requests', err);
   }
 
   // ── Summary ────────────────────────────────────────────────────────────────

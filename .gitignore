@@ -27,3 +27,6 @@ docs/api
 website/.docusaurus
 website/build
 website/node_modules
+
+
+.claude

@@ -58,6 +58,10 @@ const subusers = await rgw.subusers.modify({
 
 Available access levels: `read`, `write`, `readwrite`, `full`.
 
+:::info
+Like `create()`, `modify()` returns the user's **entire** subuser list after the update, not just the modified entry.
+:::
+
 ## 3) Remove a Subuser
 
 Remove and purge keys (default):
@@ -82,7 +86,7 @@ await rgw.subusers.remove({
 ## Error Handling
 
 ```ts
-import { RGWValidationError, RGWNotFoundError } from 'radosgw-admin';
+import { RGWValidationError, RGWNotFoundError, RGWConflictError } from 'radosgw-admin';
 
 try {
   await rgw.subusers.create({
@@ -91,10 +95,12 @@ try {
     access: 'readwrite',
   });
 } catch (error) {
-  if (error instanceof RGWValidationError) {
-    // uid or subuser format is invalid
+  if (error instanceof RGWConflictError) {
+    // subuser already exists — use modify() to change access level instead
   } else if (error instanceof RGWNotFoundError) {
     // parent user does not exist
+  } else if (error instanceof RGWValidationError) {
+    // uid or subuser format is invalid (subuser must be uid:name)
   } else {
     throw error;
   }

@@ -9,7 +9,7 @@ description: Manage Ceph RGW users from Node.js — create, get, modify, suspend
 The `users` module manages the full user lifecycle in Ceph RGW:
 
 - create users
-- fetch user details
+- fetch user details (by uid or access key)
 - modify user metadata
 - suspend/enable accounts
 - list users
@@ -54,9 +54,27 @@ const user = await rgw.users.get('alice');
 console.log(user.displayName, user.keys.length, user.userQuota.enabled);
 ```
 
+**Multi-tenant lookup** — pass the tenant as a second argument instead of embedding it in the uid:
+
+```ts
+// Both resolve to the same user — prefer the explicit form
+const user = await rgw.users.get('alice', 'acme');  // → acme$alice
+```
+
 Use this for audits and policy validation.
 
-## 3) Modify User
+## 3) Get User by Access Key
+
+Look up a user when you have their S3 access key but not their uid:
+
+```ts
+const user = await rgw.users.getByAccessKey('AKIAIOSFODNN7EXAMPLE');
+console.log('Key belongs to:', user.userId);
+```
+
+Useful for mapping incoming S3 requests back to the owning user in audit logs or billing pipelines.
+
+## 4) Modify User
 
 ```ts
 const updated = await rgw.users.modify({
@@ -72,7 +90,7 @@ Common updates:
 - suspend flag
 - email
 
-## 4) Suspend and Enable
+## 5) Suspend and Enable
 
 ```ts
 await rgw.users.suspend('alice');
@@ -81,7 +99,7 @@ await rgw.users.enable('alice');
 
 Use suspension for temporary policy enforcement without deleting data.
 
-## 5) List Users
+## 6) List Users
 
 ```ts
 const uids = await rgw.users.list();
@@ -90,16 +108,16 @@ console.log('Total users:', uids.length);
 
 Useful for inventory and reconciliation jobs.
 
-## 6) Fetch User Stats
+## 7) Fetch User Stats
 
 ```ts
-const stats = await rgw.users.getStats({ uid: 'alice', sync: true });
+const stats = await rgw.users.getStats('alice', true);
 console.log(stats.stats.numObjects, stats.stats.sizeKbActual);
 ```
 
 Use this in billing and quota reporting flows.
 
-## 7) Delete User Safely
+## 8) Delete User Safely
 
 Safe delete:
 
