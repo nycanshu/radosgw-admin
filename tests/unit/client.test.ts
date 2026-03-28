@@ -508,6 +508,49 @@ describe('BaseClient User-Agent header', () => {
   });
 });
 
+describe('BaseClient request body', () => {
+  let fetchSpy: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    fetchSpy = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: () => Promise.resolve('{}'),
+    });
+    vi.stubGlobal('fetch', fetchSpy);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('serialises body as JSON when body is provided', async () => {
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+    });
+
+    await client.request({ method: 'PUT', path: '/user', body: { displayName: 'Alice' } });
+
+    const [, fetchInit] = fetchSpy.mock.calls[0] as [string, Record<string, unknown>];
+    expect(fetchInit['body']).toBe(JSON.stringify({ displayName: 'Alice' }));
+  });
+
+  it('does not set body when body is not provided', async () => {
+    const client = new BaseClient({
+      host: 'http://localhost',
+      accessKey: 'testkey',
+      secretKey: 'testsecret',
+    });
+
+    await client.request({ method: 'GET', path: '/user' });
+
+    const [, fetchInit] = fetchSpy.mock.calls[0] as [string, Record<string, unknown>];
+    expect(fetchInit['body']).toBeUndefined();
+  });
+});
+
 describe('BaseClient request/response hooks', () => {
   let fetchSpy: ReturnType<typeof vi.fn>;
 
