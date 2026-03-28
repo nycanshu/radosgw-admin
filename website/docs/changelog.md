@@ -51,7 +51,7 @@ All notable changes to radosgw-admin are documented here and on the [GitHub Rele
 ### Initial Release
 
 - 8 modules: Users, Keys, Subusers, Buckets, Quota, Rate Limits, Usage, Info
-- 45+ methods covering every RGW Admin Ops endpoint
+- 40+ methods covering every RGW Admin Ops endpoint
 - No third-party dependencies — AWS SigV4 signing uses only `node:crypto`
 - Full TypeScript support with strict types
 - ESM + CommonJS dual output

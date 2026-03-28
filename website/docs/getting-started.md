@@ -59,6 +59,17 @@ await rgw.users.create({
 });
 ```
 
+## Verify Connectivity
+
+Before running operations, confirm the client can reach RGW:
+
+```ts
+const ok = await rgw.healthCheck();
+if (!ok) throw new Error('Cannot reach RGW');
+```
+
+Returns `true` if RGW responds successfully, `false` otherwise. Never throws.
+
 ## Common Next Steps
 - Set user/bucket quotas
 - Rotate keys

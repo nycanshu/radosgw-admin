@@ -168,11 +168,18 @@ async function monthlyReport(uid: string, year: number, month: number) {
 ```ts
 import { RGWValidationError } from 'radosgw-admin';
 
+// get() — a non-existent uid returns an empty report, not an error
+const report = await rgw.usage.get({ uid: 'alice' });
+if (report.summary.length === 0) {
+  // user has no logged activity (or usage logging is disabled)
+}
+
+// trim()
 try {
   await rgw.usage.trim({ end: '2024-12-31' });
 } catch (error) {
   if (error instanceof RGWValidationError) {
-    // Missing removeAll:true, empty uid, or invalid date format
+    // trimming cluster-wide without removeAll:true, or invalid date format
   } else {
     throw error;
   }

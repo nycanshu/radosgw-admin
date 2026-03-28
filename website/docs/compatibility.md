@@ -90,7 +90,7 @@ export NODE_EXTRA_CA_CERTS=/path/to/ca-cert.pem
 
 ## Dependencies
 
-**No third-party dependencies.** The SDK uses built-in Node.js modules for all core operations, plus one dependency maintained by the Node.js team itself:
+**Minimal dependencies.** The SDK uses built-in Node.js modules for all core operations, plus one npm package maintained by the Node.js team itself:
 
 | Package | Purpose | Transitive deps |
 |---|---|---|

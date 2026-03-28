@@ -94,6 +94,7 @@ await rgw.keys.revoke({ accessKey: oldKey });
 ```ts
 import { RGWValidationError, RGWNotFoundError } from 'radosgw-admin';
 
+// generate()
 try {
   await rgw.keys.generate({ uid: 'alice' });
 } catch (error) {
@@ -101,6 +102,19 @@ try {
     // uid is empty or invalid
   } else if (error instanceof RGWNotFoundError) {
     // user does not exist
+  } else {
+    throw error;
+  }
+}
+
+// revoke()
+try {
+  await rgw.keys.revoke({ accessKey: 'OLDKEY123' });
+} catch (error) {
+  if (error instanceof RGWNotFoundError) {
+    // access key does not exist — already revoked or never existed
+  } else if (error instanceof RGWValidationError) {
+    // accessKey is empty
   } else {
     throw error;
   }

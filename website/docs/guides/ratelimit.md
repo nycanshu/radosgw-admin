@@ -95,8 +95,8 @@ Global limits apply as defaults across the cluster for a given scope.
 ```ts
 const global = await rgw.rateLimit.getGlobal();
 console.log('Anonymous read limit:', global.anonymous.maxReadOps);
-console.log('User default:', global.userRatelimit.maxReadOps);
-console.log('Bucket default:', global.bucketRatelimit.maxReadOps);
+console.log('User default:', global.user.maxReadOps);
+console.log('Bucket default:', global.bucket.maxReadOps);
 ```
 
 ### Set Global Limit

@@ -68,6 +68,14 @@ Then attached in RadosGWAdminClient constructor: `this.users = new UsersModule(t
 - Cover happy paths + all error classes
 - Target: >= 80% line coverage on `src/modules/`
 
+## Skills
+When adding or modifying any method in `src/modules/`, always follow the sync-docs skill:
+`.skills/sync-docs/SKILL.md`
+
+This enforces two things:
+1. **Completeness** — every method is reflected across all 5 surfaces: `website/docs/guides/<module>.md`, `website/docs/modules.md`, `website/docs/intro.md`, `README.md`, `website/docs/changelog.md`
+2. **Clarity** — every guide section is readable and self-contained: a developer who reads only that section can call the method correctly and safely on their first try
+
 ## Error Mapping
 | HTTP Status | Thrown As | Retryable |
 |---|---|---|

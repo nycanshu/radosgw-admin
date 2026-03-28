@@ -69,7 +69,7 @@ await rgw.users.delete({ uid: 'alice' });
 | `rgw.keys` | generate, revoke |
 | `rgw.subusers` | create, modify, remove |
 | `rgw.buckets` | list, listByUser, getInfo, delete, transferOwnership, removeOwnership, verifyIndex |
-| `rgw.quota` | getUserQuota, setUserQuota, getBucketQuota, setBucketQuota, enable/disable |
+| `rgw.quota` | getUserQuota, setUserQuota, enableUserQuota, disableUserQuota, getBucketQuota, setBucketQuota, enableBucketQuota, disableBucketQuota |
 | `rgw.rateLimit` | getUserLimit, setUserLimit, disableUserLimit, getBucketLimit, setBucketLimit, disableBucketLimit, getGlobal, setGlobal |
 | `rgw.usage` | get, trim |
 | `rgw.info` | get |

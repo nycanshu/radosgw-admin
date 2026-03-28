@@ -32,35 +32,39 @@ This folder contains shared, repo-local skills for both Codex and Claude Code.
    - Path: `.skills/docs-and-examples-verifier/SKILL.md`
    - Use when: Before release or after method rename/signature changes
 
-7. **`clean-code-ts-sdk`** — Enforce clean coding standards for SDK changes
+7. **`sync-docs`** — Sync all 5 documentation surfaces after any module change
+   - Path: `.skills/sync-docs/SKILL.md`
+   - Use when: After adding, changing, or removing any public method in `src/modules/`
+
+8. **`clean-code-ts-sdk`** — Enforce clean coding standards for SDK changes
    - Path: `.skills/clean-code-ts-sdk/SKILL.md`
    - Use when: Per-PR and before final release merge
 
 ### Release Skills
 
-8. **`changelog`** — Generate changelog entry from recent commits
+9. **`changelog`** — Generate changelog entry from recent commits
    - Path: `.skills/changelog/SKILL.md`
    - Use when: Before tagging a new release
 
-9. **`release-prep`** — Full pre-publish preparation (quality gates + changelog + packaging)
-   - Path: `.skills/release-prep/SKILL.md`
-   - Use when: Ready to publish a new version to npm
+10. **`release-prep`** — Full pre-publish preparation (quality gates + changelog + packaging)
+    - Path: `.skills/release-prep/SKILL.md`
+    - Use when: Ready to publish a new version to npm
 
-10. **`release-quality-gates`** — Hard release gates with PASS/FAIL verdicts
+11. **`release-quality-gates`** — Hard release gates with PASS/FAIL verdicts
     - Path: `.skills/release-quality-gates/SKILL.md`
     - Use when: Final validation before `npm publish`
 
 ### Security & Audit Skills
 
-11. **`production-readiness-audit-ts-sdk`** — Full pre-release engineering audit
+12. **`production-readiness-audit-ts-sdk`** — Full pre-release engineering audit
     - Path: `.skills/production-readiness-audit-ts-sdk/SKILL.md`
     - Use when: Before npm publish or after significant changes
 
-12. **`security-hardening-node-sdk`** — Credential/TLS/dependency hardening
+13. **`security-hardening-node-sdk`** — Credential/TLS/dependency hardening
     - Path: `.skills/security-hardening-node-sdk/SKILL.md`
     - Use when: Pre-release security validation
 
-13. **`ceph-rgw-contract-testing`** — Real RGW Admin Ops contract validation
+14. **`ceph-rgw-contract-testing`** — Real RGW Admin Ops contract validation
     - Path: `.skills/ceph-rgw-contract-testing/SKILL.md`
     - Use when: After changing module methods or serialization
 
@@ -69,8 +73,9 @@ This folder contains shared, repo-local skills for both Codex and Claude Code.
 ### Adding a Feature
 1. `add-module` or `add-method` → scaffold the code
 2. `test-module` → ensure tests are comprehensive
-3. `jsdoc-audit` → verify documentation
-4. `review-pr` → self-review before merge
+3. `jsdoc-audit` → verify JSDoc on new methods
+4. `sync-docs` → sync all 5 documentation surfaces
+5. `review-pr` → self-review before merge
 
 ### Preparing a Release
 1. `docs-and-examples-verifier` → docs match code
