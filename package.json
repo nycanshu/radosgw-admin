@@ -94,7 +94,7 @@
     "tsx": "^4.19.2",
     "typedoc": "^0.28.17",
     "typedoc-plugin-markdown": "^4.10.0",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.2",
     "vitest": "^4.0.18"
   },
   "lint-staged": {
@@ -104,6 +104,6 @@
     ]
   },
   "dependencies": {
-    "undici": "^7.24.6"
+    "undici": "^8.0.0"
   }
 }
