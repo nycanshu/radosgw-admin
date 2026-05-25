@@ -87,7 +87,7 @@
     "eslint": "^10.0.3",
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
-    "lint-staged": "^16.4.0",
+    "lint-staged": "^17.0.5",
     "prettier": "^3.8.1",
     "publint": "^0.3.18",
     "tsup": "^8.5.1",
