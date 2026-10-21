@@ -10,9 +10,37 @@ All notable changes to radosgw-admin are documented here and on the [GitHub Rele
 
 ---
 
+## v0.2.2
+
+**Released:** October 21, 2026
+
+:::warning Behavior change — review before upgrading
+If your code passes `userCaps` to `users.modify()`, those capabilities are now **actually granted**. Before v0.2.2, RGW silently ignored them, so the call succeeded without changing anything. Your code does not need to change — the SDK now sends the caps to RGW's dedicated caps endpoint — but the same call now has a real effect. Audit those calls, especially broad grants like `users=*` or `buckets=*`, before upgrading. See [#86](https://github.com/nycanshu/radosgw-admin/issues/86).
+:::
+
+### New Features
+
+- **users.addCaps(uid, caps)** / **users.removeCaps(uid, caps)** ([#86](https://github.com/nycanshu/radosgw-admin/issues/86)) — grant and revoke admin capabilities (for example `usage=read` for a billing exporter) without recreating the user. Both return the user's full updated caps list. See [Grant and Revoke Capabilities](./guides/users#5-grant-and-revoke-capabilities).
+
+### Bug Fixes
+
+- **`users.modify({ userCaps })` now actually changes capabilities** ([#86](https://github.com/nycanshu/radosgw-admin/issues/86)) — RGW ignores capabilities on its Modify User operation, so previously the call succeeded but the caps never changed. They are now added (merged with existing caps) through the caps endpoint. Passing `userCaps` to `modify()` is deprecated — use `addCaps()` / `removeCaps()`.
+
+- **SigV4 signature fix for special characters** ([#83](https://github.com/nycanshu/radosgw-admin/issues/83)) — any request whose parameters contained `!`, `'`, `(`, `)` or `*` (for example a display name like `Backup (prod)`) was rejected by RGW with `RGWAuthError` / `SignatureDoesNotMatch`. The request signer now percent-encodes these characters as AWS Signature V4 requires and sorts query parameters in byte order. No API changes — affected calls now simply succeed.
+
+### Deprecations
+
+- **`userCaps` option of `users.modify()`** — use `users.addCaps()` / `users.removeCaps()` instead. It keeps working (adding caps, never replacing them); v0.3.0 will add a runtime deprecation warning, and it will be removed in v1.0.
+
+### Compatibility
+
+- **Node.js requirement corrected to >= 20.18.1** — the package previously declared Node.js >= 18, but its `undici` 7 dependency (added in v0.2.1) already required Node.js 20.18.1, so Node.js 18 never worked. Nothing that worked before stops working. Node.js 20 is end-of-life upstream; v0.3.0 will move to Node.js 22+.
+
+---
+
 ## v0.2.1
 
-**Released:** March 2026
+**Released:** March 28, 2026
 
 ### Bug Fixes
 
@@ -26,7 +54,7 @@ All notable changes to radosgw-admin are documented here and on the [GitHub Rele
 
 ## v0.2.0
 
-**Released:** March 2026
+**Released:** March 18, 2026
 
 ### New Features
 
@@ -46,7 +74,7 @@ All notable changes to radosgw-admin are documented here and on the [GitHub Rele
 
 ## v0.1.0
 
-**Released:** February 2026
+**Released:** March 12, 2026
 
 ### Initial Release
 

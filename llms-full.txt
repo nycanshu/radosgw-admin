@@ -12,12 +12,12 @@
 - Build admin dashboards or CLI tools on top of the RGW Admin Ops API
 
 ## Compatibility
-- Node.js >= 18, Bun
+- Node.js >= 20.18.1, Bun
 - Ceph Pacific, Reef, Squid and later
 - Works with Rook-Ceph, OpenShift Data Foundation, and bare-metal Ceph clusters
 
 ## Runtime Requirements
-- Node.js >= 18
+- Node.js >= 20.18.1
 - Ceph RGW endpoint with Admin Ops API enabled
 
 ## Client Constructor
@@ -46,14 +46,16 @@
 
 ### users
 - `create(input: CreateUserInput): Promise<RGWUser>`
-- `get(uid: string): Promise<RGWUser>`
+- `get(uid: string, tenant?: string): Promise<RGWUser>`
 - `getByAccessKey(accessKey: string): Promise<RGWUser>`
 - `modify(input: ModifyUserInput): Promise<RGWUser>`
+- `addCaps(uid: string, caps: string): Promise<RGWCap[]>`
+- `removeCaps(uid: string, caps: string): Promise<RGWCap[]>`
 - `delete(input: DeleteUserInput): Promise<void>`
 - `list(): Promise<string[]>`
 - `suspend(uid: string): Promise<RGWUser>`
 - `enable(uid: string): Promise<RGWUser>`
-- `getStats(input: GetUserStatsInput): Promise<RGWUserStats>`
+- `getStats(uid: string, sync?: boolean): Promise<RGWUserWithStats>`
 
 ### keys
 - `generate(input: CreateKeyInput): Promise<RGWKey[]>`

@@ -1,7 +1,7 @@
 ---
 title: Users Guide
 sidebar_position: 1
-description: Manage Ceph RGW users from Node.js — create, get, modify, suspend, enable and delete users with the radosgw-admin SDK.
+description: Manage Ceph RGW users from Node.js — create, get, modify, grant caps, suspend, enable and delete users with the radosgw-admin SDK.
 ---
 
 # Users Guide
@@ -11,6 +11,7 @@ The `users` module manages the full user lifecycle in Ceph RGW:
 - create users
 - fetch user details (by uid or access key)
 - modify user metadata
+- grant and revoke admin capabilities (caps)
 - suspend/enable accounts
 - list users
 - fetch storage stats
@@ -90,7 +91,52 @@ Common updates:
 - suspend flag
 - email
 
-## 5) Suspend and Enable
+:::note Changing capabilities
+RGW's Modify User operation does not accept capabilities. Use [`addCaps()` / `removeCaps()`](#5-grant-and-revoke-capabilities) to change them. `modify({ userCaps })` still works but is **deprecated**: it sends a second request to add the caps (merging them, never replacing). Before v0.2.2, `userCaps` passed to `modify()` was silently ignored by RGW.
+:::
+
+## 5) Grant and Revoke Capabilities
+
+Capabilities ("caps") decide which **Admin Ops** APIs a user may call — for example a billing exporter needs `usage=read`, a provisioning service needs `users=*`. They do not affect S3 data access.
+
+A caps string is `"type=perm"`, or several joined with `;`. Valid perms: `*`, `read`, `write`, `read, write`.
+
+**Grant** with `addCaps()`. Permissions merge with what the user already has:
+
+```ts
+// Billing exporter: read usage and bucket stats, nothing else
+const caps = await rgw.users.addCaps('billing-exporter', 'usage=read;buckets=read');
+// → [{ type: 'buckets', perm: 'read' }, { type: 'usage', perm: 'read' }]
+
+// Adding write to an existing read grant results in '*'
+await rgw.users.addCaps('billing-exporter', 'usage=write'); // usage → '*'
+```
+
+**Revoke** with `removeCaps()`. Only the listed permission is removed:
+
+```ts
+// usage '*' minus 'write' leaves 'read'
+await rgw.users.removeCaps('billing-exporter', 'usage=write');
+
+// Removing '*' deletes the whole entry
+const remaining = await rgw.users.removeCaps('billing-exporter', 'buckets=*');
+```
+
+:::info Returns the full caps list
+Both methods return the user's **complete** capability list after the change, not just the caps you passed.
+:::
+
+To set caps when a user is first created, pass `userCaps` to [`create()`](#1-create-user) instead.
+
+Errors you will hit in practice:
+- `RGWValidationError` — malformed caps string (e.g. `'usage'` or `'usage=all'`), rejected before any request
+- `RGWNotFoundError` — the user does not exist
+
+:::warning Least privilege
+Caps grant admin power over the whole cluster. Grant the narrowest type and `read` where possible, and audit `users=*` / `buckets=*` grants — a leaked key with `users=*` can create users and mint new keys.
+:::
+
+## 6) Suspend and Enable
 
 ```ts
 await rgw.users.suspend('alice');
@@ -99,7 +145,7 @@ await rgw.users.enable('alice');
 
 Use suspension for temporary policy enforcement without deleting data.
 
-## 6) List Users
+## 7) List Users
 
 ```ts
 const uids = await rgw.users.list();
@@ -108,7 +154,7 @@ console.log('Total users:', uids.length);
 
 Useful for inventory and reconciliation jobs.
 
-## 7) Fetch User Stats
+## 8) Fetch User Stats
 
 ```ts
 const stats = await rgw.users.getStats('alice', true);
@@ -117,7 +163,7 @@ console.log(stats.stats.numObjects, stats.stats.sizeKbActual);
 
 Use this in billing and quota reporting flows.
 
-## 8) Delete User Safely
+## 9) Delete User Safely
 
 Safe delete:
 

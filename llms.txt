@@ -33,7 +33,7 @@ await rgw.buckets.transferOwnership({ bucket: 'my-bucket', uid: 'alice' });
 ```
 
 ## Modules
-- `users`: create/get/getByAccessKey/modify/delete/list/suspend/enable/getStats
+- `users`: create/get/getByAccessKey/modify/addCaps/removeCaps/delete/list/suspend/enable/getStats
 - `keys`: generate/revoke
 - `subusers`: create/modify/remove
 - `buckets`: list/getInfo/delete/transferOwnership/removeOwnership/verifyIndex
@@ -50,7 +50,7 @@ await rgw.buckets.transferOwnership({ bucket: 'my-bucket', uid: 'alice' });
 - Retry with exponential backoff + full jitter (configurable `maxRetries`, `retryDelay`)
 
 ## Compatibility
-- Node.js >= 18, Bun
+- Node.js >= 20.18.1, Bun
 - Ceph Pacific, Reef, Squid and later
 - Rook-Ceph, OpenShift Data Foundation (ODF), bare-metal Ceph
 

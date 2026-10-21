@@ -65,7 +65,7 @@ await rgw.users.delete({ uid: 'alice' });
 
 | Module | Operations |
 |---|---|
-| `rgw.users` | create, get, modify, delete, list, suspend, enable, getStats, getByAccessKey |
+| `rgw.users` | create, get, modify, addCaps, removeCaps, delete, list, suspend, enable, getStats, getByAccessKey |
 | `rgw.keys` | generate, revoke |
 | `rgw.subusers` | create, modify, remove |
 | `rgw.buckets` | list, listByUser, getInfo, delete, transferOwnership, removeOwnership, verifyIndex |

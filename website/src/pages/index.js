@@ -59,7 +59,7 @@ const techStack = [
   { name: 'Rook',           img: '/img/logos/rook.svg' },
   { name: 'Kubernetes',     img: '/img/logos/kubernetes.svg' },
   { name: 'OpenShift / ODF', img: '/img/logos/openshift.svg' },
-  { name: 'Node.js 18+',   img: '/img/logos/nodejs.svg' },
+  { name: 'Node.js 20+',   img: '/img/logos/nodejs.svg' },
   { name: 'Bun',            img: '/img/logos/bun.svg' },
   { name: 'TypeScript',     img: '/img/logos/typescript.svg' },
 ];
@@ -133,7 +133,7 @@ try {
 ];
 
 const modules = [
-  { name: 'users',     ops: 'create, get, modify, delete, list, suspend, enable, getByAccessKey, getStats' },
+  { name: 'users',     ops: 'create, get, modify, addCaps, removeCaps, delete, list, suspend, enable, getByAccessKey, getStats' },
   { name: 'keys',      ops: 'generate, revoke' },
   { name: 'subusers',  ops: 'create, modify, remove' },
   { name: 'buckets',   ops: 'list, listByUser, getInfo, delete, transferOwnership, removeOwnership, verifyIndex' },
@@ -166,7 +166,7 @@ const faqItems = [
   },
   {
     q: 'What Node.js version is required?',
-    a: 'Node.js 18 or later. The SDK uses native fetch and node:crypto which are stable from Node.js 18 onwards. It also works with Bun.',
+    a: 'Node.js 20.18.1 or later. The SDK uses native fetch and node:crypto, plus undici 7, which requires Node.js 20.18.1 or later. It also works with Bun.',
   },
   {
     q: 'Which package managers are supported?',

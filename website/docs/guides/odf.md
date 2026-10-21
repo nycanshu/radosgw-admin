@@ -14,7 +14,7 @@ Connect `radosgw-admin` to the RADOS Gateway managed by [OpenShift Data Foundati
 - An OpenShift cluster with ODF installed
 - A `CephObjectStore` resource deployed by ODF
 - `oc` CLI with cluster access
-- Node.js >= 18
+- Node.js >= 20.18.1
 
 ## Get Admin Credentials
 

@@ -4,7 +4,7 @@ sidebar_position: 4
 
 # Module Guides
 
-- [users](./guides/users): create/get/getByAccessKey/modify/delete/list/suspend/enable/getStats
+- [users](./guides/users): create/get/getByAccessKey/modify/addCaps/removeCaps/delete/list/suspend/enable/getStats
 - [keys](./guides/keys): generate/revoke
 - [subusers](./guides/subusers): create/modify/remove
 - [buckets](./guides/buckets): list/listByUser/getInfo/delete/transferOwnership/removeOwnership/verifyIndex
