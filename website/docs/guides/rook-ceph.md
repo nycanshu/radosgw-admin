@@ -14,7 +14,7 @@ Connect `radosgw-admin` to the RADOS Gateway running inside a [Rook-Ceph](https:
 - A Kubernetes cluster with Rook-Ceph deployed
 - A `CephObjectStore` resource (e.g. `my-store`) with the Admin Ops API enabled
 - `kubectl` access to the `rook-ceph` namespace
-- Node.js >= 18
+- Node.js >= 20.18.1
 
 ## Get Admin Credentials
 

@@ -38,7 +38,7 @@ pnpm add radosgw-admin
 bun add radosgw-admin
 ```
 
-Requires **Node.js >= 18** and a Ceph RGW instance with the Admin Ops API enabled.
+Requires **Node.js >= 20.18.1** and a Ceph RGW instance with the Admin Ops API enabled.
 
 ## Quick Start
 
@@ -104,6 +104,8 @@ rgw.users.create(input);             // Create a new RGW user
 rgw.users.get(uid, tenant?);         // Get full user info (keys, caps, quotas)
 rgw.users.getByAccessKey(accessKey); // Look up a user by their S3 access key
 rgw.users.modify(input);             // Update display name, email, max buckets, etc.
+rgw.users.addCaps(uid, caps);        // Grant admin capabilities (merges, e.g. 'usage=read')
+rgw.users.removeCaps(uid, caps);     // Revoke admin capabilities
 rgw.users.delete(input);             // Delete user (optionally purge all data)
 rgw.users.list();                    // List all user IDs in the cluster
 rgw.users.suspend(uid);              // Suspend a user account

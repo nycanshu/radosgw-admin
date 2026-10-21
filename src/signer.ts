@@ -52,13 +52,29 @@ function getSigningKey(secretKey: string, dateStamp: string, region: string): Bu
   return hmacSha256(kService, 'aws4_request');
 }
 
+/**
+ * SigV4 UriEncode (RFC 3986): every byte except `A-Z a-z 0-9 - _ . ~` is
+ * percent-encoded with uppercase hex. `encodeURIComponent` leaves `! ' ( ) *`
+ * unescaped, so those are encoded explicitly.
+ */
+function uriEncode(value: string): string {
+  return encodeURIComponent(value).replace(
+    /[!'()*]/g,
+    (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
+}
+
+/** Byte-order comparison; safe for already-encoded (ASCII-only) strings. */
+function compareCodeUnits(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
 function getCanonicalQueryString(url: URL): string {
-  const params = Array.from(url.searchParams.entries());
-  params.sort((a, b) => {
-    if (a[0] === b[0]) return a[1].localeCompare(b[1]);
-    return a[0].localeCompare(b[0]);
-  });
-  return params.map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`).join('&');
+  // SigV4 sorts by the *encoded* names (then values), in byte order — not locale order.
+  return Array.from(url.searchParams.entries(), ([k, v]) => [uriEncode(k), uriEncode(v)] as const)
+    .sort((a, b) => compareCodeUnits(a[0], b[0]) || compareCodeUnits(a[1], b[1]))
+    .map(([k, v]) => `${k}=${v}`)
+    .join('&');
 }
 
 /**
@@ -85,7 +101,7 @@ export function signRequest(request: SignRequest, date?: Date): SignedHeaders {
   headers['x-amz-content-sha256'] = UNSIGNED_PAYLOAD;
 
   // Build canonical headers (sorted, lowercase)
-  const sortedHeaderKeys = Object.keys(headers).sort((a, b) => a.localeCompare(b));
+  const sortedHeaderKeys = Object.keys(headers).sort(compareCodeUnits);
   const canonicalHeaders = sortedHeaderKeys.map((k) => `${k}:${headers[k]!.trim()}`).join('\n');
   const signedHeaders = sortedHeaderKeys.join(';');
 

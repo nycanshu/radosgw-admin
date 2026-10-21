@@ -19,6 +19,7 @@ const tests = [
   'test-healthcheck.ts',
   'test-info.ts',
   'test-users.ts',
+  'test-signing.ts',
   'test-keys.ts',
   'test-subusers.ts',
   'test-buckets.ts',
@@ -26,6 +27,7 @@ const tests = [
   'test-ratelimit.ts',
   'test-usage.ts',
   'test-client.ts',
+  'test-errors.ts',
 ];
 
 let passed = 0;

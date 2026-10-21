@@ -5,6 +5,7 @@ import type {
   CreateUserInput,
   ModifyUserInput,
   DeleteUserInput,
+  RGWCap,
   RGWUser,
   RGWUserWithStats,
 } from '../types/user.types.js';
@@ -188,8 +189,13 @@ export class UsersModule {
    *
    * Only the provided fields are updated — omitted fields retain their current values.
    *
+   * RGW's Modify User operation does not accept capabilities, so a provided `userCaps`
+   * is applied afterwards through {@link UsersModule.addCaps} (two requests). Caps are
+   * merged into the existing ones, never replaced. Prefer calling `addCaps()` /
+   * `removeCaps()` directly.
+   *
    * @param input - Properties to update. `uid` is required; all other fields are optional.
-   * @returns The updated user object.
+   * @returns The updated user object (with updated `caps` when `userCaps` was provided).
    * @throws {RGWValidationError} If `uid` is empty, `email` is malformed,
    *   or `userCaps` is an invalid capability string.
    * @throws {RGWNotFoundError} If the user does not exist.
@@ -213,7 +219,7 @@ export class UsersModule {
       validateUserCaps(input.userCaps);
     }
 
-    return this.client.request<RGWUser>({
+    const user = await this.client.request<RGWUser>({
       method: 'POST',
       path: '/user',
       query: {
@@ -222,9 +228,69 @@ export class UsersModule {
         email: input.email,
         maxBuckets: input.maxBuckets,
         suspended: input.suspended,
-        userCaps: input.userCaps,
         opMask: input.opMask,
       },
+    });
+
+    if (input.userCaps === undefined) return user;
+    const caps = await this.addCaps(input.uid, input.userCaps);
+    return { ...user, caps };
+  }
+
+  /**
+   * Grant admin capabilities to a user. Permissions merge with existing caps of the same
+   * type — adding `usage=write` to a user with `usage=read` results in `usage=*`.
+   *
+   * @param uid - The user ID.
+   * @param caps - Capability string: `"type=perm"` or `"type1=perm;type2=perm"`.
+   *   Valid perms: `*`, `read`, `write`, `read, write`.
+   * @returns The user's full, updated list of capabilities.
+   * @throws {RGWValidationError} If `uid` is empty or `caps` is not a valid capability string.
+   * @throws {RGWNotFoundError} If the user does not exist.
+   *
+   * @example
+   * ```typescript
+   * const caps = await client.users.addCaps('billing-exporter', 'usage=read;buckets=read');
+   * // [{ type: 'buckets', perm: 'read' }, { type: 'usage', perm: 'read' }]
+   * ```
+   */
+  async addCaps(uid: string, caps: string): Promise<RGWCap[]> {
+    validateUid(uid);
+    validateUserCaps(caps);
+
+    return this.client.request<RGWCap[]>({
+      method: 'PUT',
+      path: '/user',
+      query: { caps: '', uid, userCaps: caps },
+    });
+  }
+
+  /**
+   * Revoke admin capabilities from a user. Only the listed permissions are removed —
+   * removing `usage=write` from `usage=*` leaves `usage=read`; removing `usage=*`
+   * removes the `usage` entry entirely.
+   *
+   * @param uid - The user ID.
+   * @param caps - Capability string: `"type=perm"` or `"type1=perm;type2=perm"`.
+   *   Valid perms: `*`, `read`, `write`, `read, write`.
+   * @returns The user's remaining capabilities.
+   * @throws {RGWValidationError} If `uid` is empty or `caps` is not a valid capability string.
+   * @throws {RGWNotFoundError} If the user does not exist.
+   *
+   * @example
+   * ```typescript
+   * // Make an operator read-only on buckets
+   * const remaining = await client.users.removeCaps('ops-bot', 'buckets=write');
+   * ```
+   */
+  async removeCaps(uid: string, caps: string): Promise<RGWCap[]> {
+    validateUid(uid);
+    validateUserCaps(caps);
+
+    return this.client.request<RGWCap[]>({
+      method: 'DELETE',
+      path: '/user',
+      query: { caps: '', uid, userCaps: caps },
     });
   }
 

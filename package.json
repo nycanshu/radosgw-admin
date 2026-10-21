@@ -1,6 +1,6 @@
 {
   "name": "radosgw-admin",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Node.js SDK for the Ceph RADOS Gateway Admin Ops API — manage users, buckets, quotas and rate limits programmatically",
   "type": "module",
   "sideEffects": false,
@@ -75,7 +75,7 @@
   },
   "license": "Apache-2.0",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.18.1"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.2",
@@ -104,6 +104,6 @@
     ]
   },
   "dependencies": {
-    "undici": "^8.0.0"
+    "undici": "^7.30.1"
   }
 }

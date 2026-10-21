@@ -416,6 +416,126 @@ describe('UsersModule', () => {
         RGWValidationError,
       );
     });
+
+    it('does not send userCaps to Modify User, which RGW ignores (#86)', async () => {
+      client.request.mockResolvedValueOnce(mockUser).mockResolvedValueOnce([]);
+
+      await users.modify({ uid: 'alice', displayName: 'Alice', userCaps: 'usage=read' });
+
+      const call = client.request.mock.calls[0]![0] as { query: Record<string, unknown> };
+      expect(call.method).toBe('POST');
+      expect(call.query.userCaps).toBeUndefined();
+    });
+
+    it('applies userCaps through the add-capability endpoint (#86)', async () => {
+      client.request.mockResolvedValueOnce(mockUser).mockResolvedValueOnce([]);
+
+      await users.modify({ uid: 'alice', displayName: 'Alice', userCaps: 'usage=read' });
+
+      expect(client.request).toHaveBeenCalledTimes(2);
+      expect(client.request.mock.calls[1]![0]).toEqual({
+        method: 'PUT',
+        path: '/user',
+        query: { caps: '', uid: 'alice', userCaps: 'usage=read' },
+      });
+    });
+
+    it('returns the user with caps updated from the add-capability response (#86)', async () => {
+      const caps = [{ type: 'usage', perm: 'read' }];
+      client.request.mockResolvedValueOnce(mockUser).mockResolvedValueOnce(caps);
+
+      const result = await users.modify({ uid: 'alice', userCaps: 'usage=read' });
+
+      expect(result.userId).toBe('alice');
+      expect(result.caps).toEqual(caps);
+    });
+
+    it('makes a single request when userCaps is not provided', async () => {
+      client.request.mockResolvedValue(mockUser);
+
+      await users.modify({ uid: 'alice', displayName: 'Alice' });
+
+      expect(client.request).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not add caps when the user update fails', async () => {
+      client.request.mockRejectedValueOnce(new Error('NoSuchUser'));
+
+      await expect(users.modify({ uid: 'ghost', userCaps: 'usage=read' })).rejects.toThrow(
+        'NoSuchUser',
+      );
+      expect(client.request).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // ── addCaps ─────────────────────────────────────────────
+
+  describe('addCaps', () => {
+    it('sends PUT /user?caps with uid and userCaps', async () => {
+      client.request.mockResolvedValue([]);
+
+      await users.addCaps('alice', 'usage=read;buckets=*');
+
+      expect(client.request).toHaveBeenCalledWith({
+        method: 'PUT',
+        path: '/user',
+        query: { caps: '', uid: 'alice', userCaps: 'usage=read;buckets=*' },
+      });
+    });
+
+    it("returns the user's full updated caps list", async () => {
+      const caps = [
+        { type: 'buckets', perm: '*' },
+        { type: 'usage', perm: 'read' },
+      ];
+      client.request.mockResolvedValue(caps);
+
+      expect(await users.addCaps('alice', 'usage=read')).toEqual(caps);
+    });
+
+    it('throws RGWValidationError when uid is empty', async () => {
+      await expect(users.addCaps('', 'usage=read')).rejects.toThrow(RGWValidationError);
+      expect(client.request).not.toHaveBeenCalled();
+    });
+
+    it('throws RGWValidationError for an invalid caps string', async () => {
+      await expect(users.addCaps('alice', 'usage')).rejects.toThrow(RGWValidationError);
+      await expect(users.addCaps('alice', '')).rejects.toThrow(RGWValidationError);
+      expect(client.request).not.toHaveBeenCalled();
+    });
+  });
+
+  // ── removeCaps ──────────────────────────────────────────
+
+  describe('removeCaps', () => {
+    it('sends DELETE /user?caps with uid and userCaps', async () => {
+      client.request.mockResolvedValue([]);
+
+      await users.removeCaps('alice', 'usage=write');
+
+      expect(client.request).toHaveBeenCalledWith({
+        method: 'DELETE',
+        path: '/user',
+        query: { caps: '', uid: 'alice', userCaps: 'usage=write' },
+      });
+    });
+
+    it("returns the user's remaining caps", async () => {
+      const caps = [{ type: 'usage', perm: 'read' }];
+      client.request.mockResolvedValue(caps);
+
+      expect(await users.removeCaps('alice', 'usage=write')).toEqual(caps);
+    });
+
+    it('throws RGWValidationError when uid is empty', async () => {
+      await expect(users.removeCaps('', 'usage=read')).rejects.toThrow(RGWValidationError);
+      expect(client.request).not.toHaveBeenCalled();
+    });
+
+    it('throws RGWValidationError for an invalid caps string', async () => {
+      await expect(users.removeCaps('alice', 'usage=all')).rejects.toThrow(RGWValidationError);
+      expect(client.request).not.toHaveBeenCalled();
+    });
   });
 
   // ── delete ──────────────────────────────────────────────

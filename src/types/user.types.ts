@@ -53,7 +53,11 @@ export interface ModifyUserInput {
   maxBuckets?: number;
   /** Suspend or unsuspend the user. */
   suspended?: boolean;
-  /** User capabilities string. See {@link CreateUserInput.userCaps} for format. */
+  /**
+   * Capabilities to **add** (merged, never replaced). See {@link CreateUserInput.userCaps}
+   * for format. Applied via a second request, because RGW's Modify User ignores caps.
+   * @deprecated Use `users.addCaps()` / `users.removeCaps()` instead.
+   */
   userCaps?: string;
   /** Operation mask. See {@link CreateUserInput.opMask} for format. */
   opMask?: string;

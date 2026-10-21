@@ -332,10 +332,63 @@ async function run() {
     `persisted usage cap perm includes "read" (got "${persistedCap!.perm}")`,
   );
 
+  // ── Capability changes (#86) ──────────────────────────────────────────────
+
+  const capPerm = async (type: string) =>
+    (await client.users.get(TEST_UID_CAPS)).caps.find((c) => c.type === type)?.perm;
+
+  step(29, 'modify({ userCaps }) — caps are actually stored (round-trip GET)');
+  const capsModify = await client.users.modify({
+    uid: TEST_UID_CAPS,
+    displayName: 'Caps Test User (modified)',
+    userCaps: 'buckets=read',
+  });
+  assertEqual(
+    capsModify.displayName,
+    'Caps Test User (modified)',
+    'other fields still applied: displayName',
+  );
+  assert(
+    capsModify.caps.some((c) => c.type === 'buckets' && c.perm === 'read'),
+    'modify response caps include buckets=read',
+  );
+  assertEqual(await capPerm('buckets'), 'read', 'persisted buckets perm');
+  assertEqual(await capPerm('usage'), 'read', 'existing usage cap preserved (merge, not replace)');
+
+  step(30, 'addCaps — merges perms of the same type (usage=read + usage=write → *)');
+  const afterAdd = await client.users.addCaps(TEST_UID_CAPS, 'usage=write;metadata=read');
+  assert(Array.isArray(afterAdd), 'addCaps returns caps array');
+  assertEqual(afterAdd.find((c) => c.type === 'usage')?.perm, '*', 'addCaps response usage perm');
+  assertEqual(await capPerm('usage'), '*', 'persisted usage perm');
+  assertEqual(await capPerm('metadata'), 'read', 'persisted metadata perm');
+
+  step(31, 'removeCaps — subtracts only the listed perm (usage=* − write → read)');
+  const afterRemove = await client.users.removeCaps(TEST_UID_CAPS, 'usage=write');
+  assertEqual(
+    afterRemove.find((c) => c.type === 'usage')?.perm,
+    'read',
+    'removeCaps response usage perm',
+  );
+  assertEqual(await capPerm('usage'), 'read', 'persisted usage perm');
+
+  step(32, 'removeCaps type=* — removes the entry entirely, others untouched');
+  await client.users.removeCaps(TEST_UID_CAPS, 'metadata=*;buckets=*');
+  assertEqual(await capPerm('metadata'), undefined, 'metadata cap removed');
+  assertEqual(await capPerm('buckets'), undefined, 'buckets cap removed');
+  assertEqual(await capPerm('usage'), 'read', 'usage cap untouched');
+
+  step(33, 'addCaps on non-existent user → RGWNotFoundError (404)');
+  try {
+    await client.users.addCaps(`no-such-user-${RUN_ID}`, 'usage=read');
+    throw new Error('Expected RGWNotFoundError but request succeeded');
+  } catch (err) {
+    assert(err instanceof RGWNotFoundError, 'RGWNotFoundError thrown for unknown uid');
+  }
+
   // ── Tenant (optional) ─────────────────────────────────────────────────────
 
   if (process.env.ENABLE_TENANT_TEST === '1') {
-    step(29, 'Create tenant user (requires multi-tenancy enabled in RGW)');
+    step(34, 'Create tenant user (requires multi-tenancy enabled in RGW)');
     const tenantUser = await client.users.create({
       uid: TEST_UID_TENANT,
       displayName: 'Tenant Test User',
@@ -343,7 +396,7 @@ async function run() {
     });
     assert(typeof tenantUser.userId === 'string', 'tenantUser.userId is string');
 
-    step(30, 'Get tenant user via get(uid, tenant) — resolves to tenant$uid');
+    step(35, 'Get tenant user via get(uid, tenant) — resolves to tenant$uid');
     const fetchedTenant = await client.users.get(TEST_UID_TENANT, TEST_TENANT);
     assert(
       fetchedTenant.userId === TEST_UID_TENANT ||
@@ -351,20 +404,20 @@ async function run() {
       `tenant user userId matches (got "${fetchedTenant.userId}")`,
     );
 
-    step(31, 'Delete tenant user');
+    step(36, 'Delete tenant user');
     await client.users.delete({ uid: `${TEST_TENANT}$${TEST_UID_TENANT}`, purgeData: true });
     pass('tenant user deleted');
   } else {
-    console.log('\nSteps 29-31: SKIPPED (set ENABLE_TENANT_TEST=1 to run tenant tests)');
+    console.log('\nSteps 34-36: SKIPPED (set ENABLE_TENANT_TEST=1 to run tenant tests)');
   }
 
   // ── Delete and verification ───────────────────────────────────────────────
 
-  step(32, 'Delete main test user');
+  step(37, 'Delete main test user');
   await client.users.delete({ uid: TEST_UID, purgeData: true });
   pass(`"${TEST_UID}" deleted`);
 
-  step(33, 'GET deleted user → RGWNotFoundError (404)');
+  step(38, 'GET deleted user → RGWNotFoundError (404)');
   try {
     await client.users.get(TEST_UID);
     throw new Error('Expected RGWNotFoundError but request succeeded');
@@ -375,7 +428,7 @@ async function run() {
     );
   }
 
-  step(34, 'List users — deleted user absent');
+  step(39, 'List users — deleted user absent');
   const afterDelete = await client.users.list();
   assert(!afterDelete.includes(TEST_UID), `list() no longer includes "${TEST_UID}"`);
 

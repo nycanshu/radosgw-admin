@@ -31,12 +31,13 @@ console.log(info.info.storageBackends);
 
 | Runtime | Supported |
 |---|---|
-| Node.js 18 (LTS) | Yes |
-| Node.js 20 (LTS) | Yes |
-| Node.js 22 (Current) | Yes |
+| Node.js 18 | No (end-of-life; not supported) |
+| Node.js 20 (>= 20.18.1) | Yes (Node.js 20 itself is end-of-life; support ends in v0.3.0) |
+| Node.js 22 (LTS) | Yes |
+| Node.js 24 (LTS) | Yes |
 | Bun | Yes (ESM only) |
 
-The SDK requires **Node.js >= 18** because it uses the built-in `fetch` API and `node:crypto` for AWS SigV4 signing.
+The SDK requires **Node.js >= 20.18.1**: it uses the built-in `fetch` API and `node:crypto` for AWS SigV4 signing, and its one runtime dependency, [`undici`](https://github.com/nodejs/undici) 7, requires Node.js 20.18.1 or later.
 
 ## Module Formats
 
@@ -95,7 +96,7 @@ export NODE_EXTRA_CA_CERTS=/path/to/ca-cert.pem
 | Package | Purpose | Transitive deps |
 |---|---|---|
 | `node:crypto` (built-in) | AWS SigV4 request signing | — |
-| `globalThis.fetch` (built-in) | HTTP requests (Node 18+) | — |
+| `globalThis.fetch` (built-in) | HTTP requests (Node 20.18.1+) | — |
 | [`undici`](https://github.com/nodejs/undici) | Per-request TLS dispatcher for `insecure: true` mode | 0 |
 
 `undici` is the HTTP library Node.js uses internally to power its built-in `fetch`. It is maintained by the Node.js core team and has zero transitive dependencies. No `aws-sdk`, no `axios`, no `node-fetch`. This means no supply chain risk and no version conflicts.
